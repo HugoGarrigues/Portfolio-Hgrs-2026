@@ -11,6 +11,7 @@ import { Dock } from '@/components/desktop/Dock'
 import { BootScreen } from '@/components/desktop/BootScreen'
 import { APPS } from '@/lib/apps'
 import { AboutApp } from '@/components/apps/AboutApp'
+import { FinderApp } from '@/components/apps/FinderApp'
 import { ProjectsApp } from '@/components/apps/ProjectsApp'
 import { TerminalApp } from '@/components/apps/TerminalApp'
 
@@ -21,6 +22,7 @@ const WallpaperScene = dynamic(() => import('@/components/wallpaper/WallpaperSce
 function AppContent({ appId }: { appId: AppId }) {
   switch (appId) {
     case 'about':    return <AboutApp />
+    case 'finder':   return <FinderApp />
     case 'terminal': return <TerminalApp />
     case 'projects': return <ProjectsApp />
     default:
