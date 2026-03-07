@@ -1,3 +1,5 @@
+'use client'
+
 import dynamic from 'next/dynamic'
 
 // Desktop uses R3F + Framer Motion — browser-only

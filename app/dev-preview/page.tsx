@@ -1,9 +1,7 @@
-import type { Metadata } from 'next'
+'use client'
+
 import dynamic from 'next/dynamic'
 
-export const metadata: Metadata = { title: 'Dev Preview' }
-
-// Desktop uses R3F + Framer Motion — browser-only
 const Desktop = dynamic(
   () => import('@/components/desktop/Desktop').then((m) => ({ default: m.Desktop })),
   { ssr: false },
