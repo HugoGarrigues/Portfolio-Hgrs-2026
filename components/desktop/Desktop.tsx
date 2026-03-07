@@ -1,13 +1,15 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useState } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { WindowManagerProvider, useWindowManager } from '@/contexts/WindowManagerContext'
 import type { AppId } from '@/contexts/WindowManagerContext'
 import { Window } from '@/components/desktop/Window'
 import { MenuBar } from '@/components/desktop/MenuBar'
 import { Dock } from '@/components/desktop/Dock'
+import { BootScreen } from '@/components/desktop/BootScreen'
 import { APPS } from '@/lib/apps'
-import { TerminalApp } from '@/components/apps/TerminalApp'
 
 const WallpaperScene = dynamic(() => import('@/components/wallpaper/WallpaperScene'), {
   ssr: false,
@@ -17,18 +19,19 @@ function DesktopContent() {
   const { windows, openWindow, closeWindow, focusWindow, minimizeWindow, maximizeWindow } =
     useWindowManager()
 
-  const activeApp = windows.find((w) => !w.minimized && w.zIndex === Math.max(...windows.map((x) => x.zIndex)))
-  const activeAppConfig = APPS.find((a) => a.id === activeApp?.app)
-
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-black select-none">
+    <div className="relative w-screen h-screen overflow-hidden bg-black select-none" data-desktop-container>
       {/* Wallpaper */}
       <WallpaperScene />
 
+      {/* Overlay tint — matches gucduck's bg-black/10 */}
+      <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+
       {/* Menu bar */}
-      <MenuBar activeApp={activeAppConfig?.label} />
+      <MenuBar onOpenAbout={() => openWindow('about')} />
 
       {/* Windows */}
+      <AnimatePresence>
       {windows.map((win) => {
         const config = APPS.find((a) => a.id === win.app)
         return (
@@ -45,13 +48,11 @@ function DesktopContent() {
             onMaximize={maximizeWindow}
             onFocus={focusWindow}
           >
-            {win.app === 'terminal' && <TerminalApp />}
-            {win.app !== 'terminal' && (
-              <div className="p-4 text-white/60 text-sm">{config?.label ?? win.app}</div>
-            )}
+            <div className="p-4 text-white/60 text-sm">{config?.label ?? win.app}</div>
           </Window>
         )
       })}
+      </AnimatePresence>
 
       {/* Dock */}
       <Dock
@@ -65,8 +66,11 @@ function DesktopContent() {
 }
 
 export function Desktop() {
+  const [booted, setBooted] = useState(false)
+
   return (
     <WindowManagerProvider>
+      {!booted && <BootScreen onComplete={() => setBooted(true)} />}
       <DesktopContent />
     </WindowManagerProvider>
   )
