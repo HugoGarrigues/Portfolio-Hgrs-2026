@@ -3,13 +3,13 @@ import React, { createContext, useContext, useReducer, type ReactNode } from 're
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 export type AppId =
+  | 'finder'
   | 'projects'
+  | 'instagram'
+  | 'photos'
+  | 'music'
   | 'terminal'
-  | 'work'
   | 'about'
-  | 'contact'
-  | 'links'
-  | 'resume'
 
 export type WindowState = {
   id: string
@@ -36,11 +36,13 @@ type Action =
 // ─── Defaults ──────────────────────────────────────────────────────────────────
 
 const DEFAULT_SIZE = { width: 760, height: 520 }
-const DEFAULT_POSITION = { x: 80, y: 60 }
 
 const DEFAULT_SIZES: Partial<Record<AppId, { width: number; height: number }>> = {
-  terminal: { width: 680, height: 420 },
-  resume: { width: 800, height: 620 },
+  finder:    { width: 860, height: 560 },
+  photos:    { width: 900, height: 620 },
+  instagram: { width: 480, height: 600 },
+  music:     { width: 700, height: 520 },
+  about:     { width: 600, height: 480 },
 }
 
 function defaultSize(app: AppId) {
@@ -80,7 +82,7 @@ export function windowManagerReducer(
         id: generateId(),
         app: action.app,
         zIndex: maxZIndex(state.windows) + 1,
-        position: action.position ?? { ...DEFAULT_POSITION },
+        position: action.position ?? { x: 80, y: 60 },
         size: defaultSize(action.app),
         minimized: false,
         maximized: false,
@@ -144,7 +146,13 @@ export function WindowManagerProvider({ children }: { children: ReactNode }) {
 
   const value: WindowManagerContextValue = {
     windows: state.windows,
-    openWindow: (app, position) => dispatch({ type: 'OPEN', app, position }),
+    openWindow: (app, position) => {
+      const pos = position ?? {
+        x: Math.floor(Math.random() * (window.innerWidth  * 0.45 - 80)) + 80,
+        y: Math.floor(Math.random() * (window.innerHeight * 0.35 - 40)) + 40,
+      }
+      dispatch({ type: 'OPEN', app, position: pos })
+    },
     closeWindow: (id) => dispatch({ type: 'CLOSE', id }),
     focusWindow: (id) => dispatch({ type: 'FOCUS', id }),
     minimizeWindow: (id) => dispatch({ type: 'MINIMIZE', id }),
