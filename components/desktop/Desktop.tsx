@@ -7,6 +7,7 @@ import { Window } from '@/components/desktop/Window'
 import { MenuBar } from '@/components/desktop/MenuBar'
 import { Dock } from '@/components/desktop/Dock'
 import { APPS } from '@/lib/apps'
+import { TerminalApp } from '@/components/apps/TerminalApp'
 
 const WallpaperScene = dynamic(() => import('@/components/wallpaper/WallpaperScene'), {
   ssr: false,
@@ -44,9 +45,10 @@ function DesktopContent() {
             onMaximize={maximizeWindow}
             onFocus={focusWindow}
           >
-            <div className="p-4 text-white/60 text-sm">
-              {config?.label ?? win.app}
-            </div>
+            {win.app === 'terminal' && <TerminalApp />}
+            {win.app !== 'terminal' && (
+              <div className="p-4 text-white/60 text-sm">{config?.label ?? win.app}</div>
+            )}
           </Window>
         )
       })}
