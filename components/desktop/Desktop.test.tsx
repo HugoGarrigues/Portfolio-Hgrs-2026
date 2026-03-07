@@ -22,6 +22,14 @@ vi.mock('@/components/wallpaper/WallpaperScene', () => ({
   default: () => <div data-testid="wallpaper" />,
 }))
 
+// BootScreen uses timers — mock it to avoid act() warnings in tests
+vi.mock('@/components/desktop/BootScreen', () => ({
+  BootScreen: ({ onComplete }: { onComplete: () => void }) => {
+    React.useEffect(() => { onComplete() }, [onComplete])
+    return null
+  },
+}))
+
 // next/dynamic with ssr:false doesn't render in jsdom — unwrap it
 // Desktop only wraps WallpaperScene dynamically, so return its mock directly
 vi.mock('next/dynamic', () => ({
@@ -31,8 +39,8 @@ vi.mock('next/dynamic', () => ({
 describe('Desktop', () => {
   it('renders the menu bar', () => {
     render(<Desktop />)
-    // MenuBar always present — has the Apple logo
-    expect(screen.getByRole('img', { name: /apple/i })).toBeInTheDocument()
+    // MenuBar always present — has the Hgrs button
+    expect(screen.getByRole('button', { name: /hgrs/i })).toBeInTheDocument()
   })
 
   it('renders the dock', () => {
@@ -48,15 +56,15 @@ describe('Desktop', () => {
 
   it('opens a window when a dock icon is clicked', () => {
     render(<Desktop />)
-    fireEvent.click(screen.getByRole('button', { name: /terminal/i }))
-    expect(screen.getByText('Terminal.app')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /projects/i }))
+    expect(screen.getByText('Projects.app')).toBeInTheDocument()
   })
 
   it('closes a window when its close button is clicked', () => {
     render(<Desktop />)
-    fireEvent.click(screen.getByRole('button', { name: /terminal/i }))
-    expect(screen.getByText('Terminal.app')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /projects/i }))
+    expect(screen.getByText('Projects.app')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /close/i }))
-    expect(screen.queryByText('Terminal.app')).not.toBeInTheDocument()
+    expect(screen.queryByText('Projects.app')).not.toBeInTheDocument()
   })
 })

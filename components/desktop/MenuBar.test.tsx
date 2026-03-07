@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import React from 'react'
 import { MenuBar } from './MenuBar'
 
@@ -21,30 +21,34 @@ describe('MenuBar', () => {
     vi.useRealTimers()
   })
 
-  it('renders the Apple logo', () => {
-    render(<MenuBar activeApp="Finder" />)
-    expect(screen.getByRole('img', { name: /apple/i })).toBeInTheDocument()
+  it('renders the Hgrs button (no Apple logo)', () => {
+    render(<MenuBar />)
+    expect(screen.queryByRole('img', { name: /apple/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /hgrs/i })).toBeInTheDocument()
   })
 
-  it('displays the active app name', () => {
-    render(<MenuBar activeApp="Terminal" />)
-    expect(screen.getByText('Terminal')).toBeInTheDocument()
+  it('renders the Hgrs pseudo button', () => {
+    render(<MenuBar />)
+    expect(screen.getByRole('button', { name: /hgrs/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /hgrs/i }).textContent).toBe('Hgrs')
   })
 
-  it('defaults to Finder when no activeApp is given', () => {
-    render(<MenuBar activeApp={undefined} />)
-    expect(screen.getByText('Finder')).toBeInTheDocument()
+  it('calls onOpenAbout when the Hgrs button is clicked', () => {
+    const onOpenAbout = vi.fn()
+    render(<MenuBar onOpenAbout={onOpenAbout} />)
+    fireEvent.click(screen.getByRole('button', { name: /hgrs/i }))
+    expect(onOpenAbout).toHaveBeenCalledTimes(1)
   })
 
-  it('displays the current time', () => {
-    render(<MenuBar activeApp="Finder" />)
-    // 14:35 formatted as locale time
+  it('displays the date and time in French format', () => {
+    render(<MenuBar />)
     expect(screen.getByRole('timer')).toBeInTheDocument()
-    expect(screen.getByRole('timer').textContent).toMatch(/\d{1,2}:\d{2}/)
+    // e.g. "Sam. 7 mars 14:35"
+    expect(screen.getByRole('timer').textContent).toMatch(/\w+\.\s+\d{1,2}\s+\w+\s+\d{2}:\d{2}/)
   })
 
   it('updates the clock every second', () => {
-    render(<MenuBar activeApp="Finder" />)
+    render(<MenuBar />)
     const before = screen.getByRole('timer').textContent
 
     act(() => {
