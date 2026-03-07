@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 
@@ -94,16 +94,50 @@ function Thumb({ gradient, label }: { gradient: string; label: string }) {
 export function FinderApp() {
   const [active, setActive]   = useState<Section>('recents')
   const [selected, setSelected] = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [containerWidth, setContainerWidth] = useState(600)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width)
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  // Auto-collapse sidebar when very narrow
+  useEffect(() => {
+    if (containerWidth < 420) setSidebarOpen(false)
+    else setSidebarOpen(true)
+  }, [containerWidth])
+
+  const showDate = containerWidth > 500
+  const showSize = containerWidth > 580
+  const showKind = containerWidth > 660
 
   const rows = active === 'recents' ? FILES : FILES.filter((f) => f.section === active)
   const dateCol = active === 'recents' ? 'Date Viewed' : 'Date Modified'
 
   return (
     // h-full is constrained by the Window size prop — no overflow
-    <div className="h-full flex flex-col overflow-hidden">
+    <div ref={containerRef} className="h-full flex flex-col overflow-hidden">
 
       {/* ── Toolbar ── */}
-      <div className="flex items-center gap-3 px-4 h-10 border-b border-white/[0.08] bg-white/[0.03] backdrop-blur-sm shrink-0 select-none">
+      <div className="flex items-center gap-2 px-3 h-10 border-b border-white/[0.08] bg-white/[0.03] backdrop-blur-sm shrink-0 select-none">
+        {/* Sidebar toggle */}
+        <button
+          onClick={() => setSidebarOpen((v) => !v)}
+          className="w-6 h-6 flex items-center justify-center rounded-md text-white/40 hover:text-white/70 hover:bg-white/[0.08] transition-colors"
+          aria-label="Toggle sidebar"
+        >
+          <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+            <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.3"/>
+            <line x1="6" y1="2" x2="6" y2="14" stroke="currentColor" strokeWidth="1.3"/>
+          </svg>
+        </button>
         {/* Back / Forward */}
         <div className="flex items-center gap-0.5">
           {(['chevL', 'chevR'] as const).map((ico) => (
@@ -119,7 +153,7 @@ export function FinderApp() {
         {/* Search pill */}
         <div className="flex items-center gap-1.5 bg-white/[0.08] rounded-lg px-2.5 py-1 text-white/30">
           <Ico d={ICONS.search} className="w-3 h-3" />
-          <span className="text-[11px]">Rechercher</span>
+          {containerWidth > 380 && <span className="text-[11px]">Rechercher</span>}
         </div>
       </div>
 
@@ -127,18 +161,20 @@ export function FinderApp() {
       <div className="flex flex-1 overflow-hidden">
 
         {/* Sidebar */}
-        <aside className="w-[168px] shrink-0 border-r border-white/[0.07] flex flex-col pt-2 pb-3 overflow-y-auto bg-white/[0.025]">
-          {/* Recents alone */}
-          <NavBtn item={NAV[0]} active={active} onSelect={setActive} />
+        {sidebarOpen && (
+          <aside className="w-[168px] shrink-0 border-r border-white/[0.07] flex flex-col pt-2 pb-3 overflow-y-auto bg-white/[0.025]">
+            {/* Recents alone */}
+            <NavBtn item={NAV[0]} active={active} onSelect={setActive} />
 
-          {/* Favorites section */}
-          <p className="px-4 mt-4 mb-1 text-[10px] font-semibold text-white/30 uppercase tracking-widest select-none">
-            Favorites
-          </p>
-          {NAV.slice(1).map((item) => (
-            <NavBtn key={item.id} item={item} active={active} onSelect={setActive} />
-          ))}
-        </aside>
+            {/* Favorites section */}
+            <p className="px-4 mt-4 mb-1 text-[10px] font-semibold text-white/30 uppercase tracking-widest select-none">
+              Favorites
+            </p>
+            {NAV.slice(1).map((item) => (
+              <NavBtn key={item.id} item={item} active={active} onSelect={setActive} />
+            ))}
+          </aside>
+        )}
 
         {/* Main pane */}
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -146,9 +182,9 @@ export function FinderApp() {
           {/* Column headers */}
           <div className="flex items-center shrink-0 border-b border-white/[0.07] px-3 h-7 select-none">
             <span className="flex-1 text-[11px] text-white/35 font-medium">Name</span>
-            <span className="w-44 text-[11px] text-white/35 font-medium">{dateCol}</span>
-            <span className="w-20 text-[11px] text-white/35 font-medium">Size</span>
-            <span className="w-28 text-[11px] text-white/35 font-medium">Kind</span>
+            {showDate && <span className="w-44 text-[11px] text-white/35 font-medium">{dateCol}</span>}
+            {showSize && <span className="w-20 text-[11px] text-white/35 font-medium">Size</span>}
+            {showKind && <span className="w-28 text-[11px] text-white/35 font-medium">Kind</span>}
           </div>
 
           {/* Rows — scrollable */}
@@ -174,15 +210,21 @@ export function FinderApp() {
                         {row.name}
                       </span>
                     </div>
-                    <span className={`w-44 shrink-0 text-[12px] ${isSel ? 'text-white/80' : 'text-white/40'}`}>
-                      {row.date}
-                    </span>
-                    <span className={`w-20 shrink-0 text-[12px] ${isSel ? 'text-white/80' : 'text-white/40'}`}>
-                      {row.size}
-                    </span>
-                    <span className={`w-28 shrink-0 text-[12px] ${isSel ? 'text-white/80' : 'text-white/40'}`}>
-                      {row.kind}
-                    </span>
+                    {showDate && (
+                      <span className={`w-44 shrink-0 text-[12px] ${isSel ? 'text-white/80' : 'text-white/40'}`}>
+                        {row.date}
+                      </span>
+                    )}
+                    {showSize && (
+                      <span className={`w-20 shrink-0 text-[12px] ${isSel ? 'text-white/80' : 'text-white/40'}`}>
+                        {row.size}
+                      </span>
+                    )}
+                    {showKind && (
+                      <span className={`w-28 shrink-0 text-[12px] ${isSel ? 'text-white/80' : 'text-white/40'}`}>
+                        {row.kind}
+                      </span>
+                    )}
                   </button>
                 )
               })

@@ -91,9 +91,11 @@ export function Window({
         position: 'fixed',
         pointerEvents: minimized ? 'none' : 'auto',
         transformOrigin: '50% 100%',
+        maxWidth: '100vw',
+        maxHeight: '100dvh',
         ...maximizedStyles,
       }}
-      className="flex flex-col rounded-xl overflow-hidden shadow-2xl shadow-black/60 min-w-[400px] backdrop-blur-xl"
+      className="flex flex-col rounded-xl overflow-hidden shadow-2xl shadow-black/60 backdrop-blur-xl"
     >
       {/* Title bar — drag handle */}
       <div
