@@ -11,6 +11,7 @@ vi.mock('framer-motion', () => ({
       ({ children, ...props }, ref) => <div ref={ref} {...props}>{children}</div>,
     ),
   },
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useMotionValue: () => ({ get: () => 0, set: vi.fn() }),
   useSpring: () => ({ get: () => 1, set: vi.fn() }),
   useTransform: () => ({ get: () => 1 }),
@@ -18,7 +19,7 @@ vi.mock('framer-motion', () => ({
 
 const apps: AppConfig[] = [
   { id: 'terminal', label: 'Terminal', icon: '💻' },
-  { id: 'about', label: 'About', icon: '🙋' },
+  { id: 'about',   label: 'About',    icon: '🙋' },
   { id: 'projects', label: 'Projects', icon: '📁' },
 ]
 
@@ -37,21 +38,23 @@ describe('Dock — rendering', () => {
     expect(screen.getByRole('button', { name: /projects/i })).toBeInTheDocument()
   })
 
-  it('shows a dot indicator under apps that have an open window', () => {
+  it('shows a visible dot under apps that have an open window', () => {
     const props = {
       ...baseProps,
       openWindows: [{ id: 'w1', app: 'terminal' as AppId, minimized: false }],
     }
     render(<Dock {...props} />)
-    const terminalBtn = screen.getByRole('button', { name: /terminal/i })
-    // The dot should be rendered inside or adjacent to the button
-    expect(terminalBtn.closest('[data-dock-item]')?.querySelector('[data-open-dot]')).toBeInTheDocument()
+    const terminalItem = screen.getByRole('button', { name: /terminal/i }).closest('[data-dock-item]')
+    const dot = terminalItem?.querySelector('[data-open-dot]')
+    expect(dot).toBeInTheDocument()
+    expect(dot?.className).toContain('opacity-100')
   })
 
-  it('does not show a dot for apps with no open window', () => {
+  it('dot is invisible for apps with no open window', () => {
     render(<Dock {...baseProps} />)
     const aboutItem = screen.getByRole('button', { name: /about/i }).closest('[data-dock-item]')
-    expect(aboutItem?.querySelector('[data-open-dot]')).not.toBeInTheDocument()
+    const dot = aboutItem?.querySelector('[data-open-dot]')
+    expect(dot?.className).toContain('opacity-0')
   })
 })
 
@@ -83,8 +86,8 @@ describe('Dock — interactions', () => {
       openWindows: [{ id: 'w-99', app: 'terminal' as AppId, minimized: true }],
     }
     render(<Dock {...props} />)
-    fireEvent.click(screen.getByRole('button', { name: /terminal/i }))
-    // minimized → re-open (which un-minimizes per WindowManager logic)
+    // Use exact label to avoid matching the "Restore terminal" minimized thumb
+    fireEvent.click(screen.getByRole('button', { name: 'Terminal' }))
     expect(onOpen).toHaveBeenCalledWith('terminal')
   })
 })
