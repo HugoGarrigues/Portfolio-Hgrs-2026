@@ -12,6 +12,7 @@ export type WindowProps = {
   minimized: boolean
   maximized: boolean
   position: { x: number; y: number }
+  size: { width: number; height: number }
   children: ReactNode
   onClose: (id: string) => void
   onMinimize: (id: string) => void
@@ -50,6 +51,7 @@ export function Window({
   minimized,
   maximized,
   position,
+  size,
   children,
   onClose,
   onMinimize,
@@ -61,7 +63,7 @@ export function Window({
 
   const maximizedStyles: React.CSSProperties = maximized
     ? { top: 0, left: 0, width: '100vw', height: '100vh', transform: 'none' }
-    : {}
+    : { width: size.width, height: size.height }
 
   return (
     <motion.div

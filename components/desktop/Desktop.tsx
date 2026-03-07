@@ -62,6 +62,7 @@ function DesktopContent() {
             minimized={win.minimized}
             maximized={win.maximized}
             position={win.position}
+            size={win.size}
             onClose={closeWindow}
             onMinimize={minimizeWindow}
             onMaximize={maximizeWindow}

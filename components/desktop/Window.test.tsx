@@ -26,6 +26,7 @@ const baseProps = {
   minimized: false,
   maximized: false,
   position: { x: 100, y: 80 },
+  size: { width: 680, height: 420 },
   onClose: vi.fn(),
   onMinimize: vi.fn(),
   onMaximize: vi.fn(),
