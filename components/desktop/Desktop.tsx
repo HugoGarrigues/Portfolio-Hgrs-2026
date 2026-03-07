@@ -10,10 +10,27 @@ import { MenuBar } from '@/components/desktop/MenuBar'
 import { Dock } from '@/components/desktop/Dock'
 import { BootScreen } from '@/components/desktop/BootScreen'
 import { APPS } from '@/lib/apps'
+import { AboutApp } from '@/components/apps/AboutApp'
+import { ProjectsApp } from '@/components/apps/ProjectsApp'
+import { TerminalApp } from '@/components/apps/TerminalApp'
 
 const WallpaperScene = dynamic(() => import('@/components/wallpaper/WallpaperScene'), {
   ssr: false,
 })
+
+function AppContent({ appId }: { appId: AppId }) {
+  switch (appId) {
+    case 'about':    return <AboutApp />
+    case 'terminal': return <TerminalApp />
+    case 'projects': return <ProjectsApp />
+    default:
+      return (
+        <div className="h-full flex items-center justify-center text-white/30 text-sm">
+          {appId} — bientôt disponible
+        </div>
+      )
+  }
+}
 
 function DesktopContent() {
   const { windows, openWindow, closeWindow, focusWindow, minimizeWindow, maximizeWindow } =
@@ -48,7 +65,7 @@ function DesktopContent() {
             onMaximize={maximizeWindow}
             onFocus={focusWindow}
           >
-            <div className="p-4 text-white/60 text-sm">{config?.label ?? win.app}</div>
+            <AppContent appId={win.app} />
           </Window>
         )
       })}
