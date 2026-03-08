@@ -16,6 +16,7 @@ const ICON_FILE: Record<AppId, string> = {
   music: 'music',
   terminal: 'terminal',
   about: 'finder',
+  contact: 'contacts',
 }
 
 function iconSrc(appId: AppId): string {
@@ -111,18 +112,23 @@ function MinimizedThumb({ win, config, onRestore }: MinimizedThumbProps) {
     <button
       aria-label={`Restore ${config.label}`}
       onClick={onRestore}
-      className="relative flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-xl"
+      className="relative flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-xl transition-transform hover:scale-110 active:scale-95"
     >
-      <Image
-        src={iconSrc(win.app)}
-        alt={config.label}
-        width={44}
-        height={44}
-        className="w-11 h-11 rounded-xl shadow-lg opacity-60"
-        draggable={false}
-      />
-      {/* Yellow dot for minimized */}
-      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-yellow-400 rounded-full" />
+      <div className="relative flex items-center justify-center">
+        <Image
+          src={iconSrc(win.app)}
+          alt={config.label}
+          width={50}
+          height={50}
+          className="w-12 h-12 rounded-xl shadow-lg"
+          draggable={false}
+        />
+        {/* Open indicator dot (as requested by user) */}
+        <span
+          className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white opacity-100"
+          aria-hidden="true"
+        />
+      </div>
     </button>
   )
 }
@@ -173,7 +179,7 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
                       key={win.id}
                       win={win}
                       config={config}
-                      onRestore={() => onFocus(win.id)}
+                      onRestore={() => onOpen(win.app)}
                     />
                   )
                 })}

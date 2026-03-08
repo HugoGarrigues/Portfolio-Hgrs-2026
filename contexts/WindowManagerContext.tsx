@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, type ReactNode } from 'react'
+import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -10,6 +10,12 @@ export type AppId =
   | 'music'
   | 'terminal'
   | 'about'
+  | 'contact'
+
+export type RecentApp = {
+  id: AppId
+  openedAt: number // timestamp
+}
 
 export type WindowState = {
   id: string
@@ -23,6 +29,7 @@ export type WindowState = {
 
 export type WindowManagerState = {
   windows: WindowState[]
+  recentApps: RecentApp[]
 }
 
 type Action =
@@ -32,17 +39,18 @@ type Action =
   | { type: 'MINIMIZE'; id: string }
   | { type: 'MAXIMIZE'; id: string }
   | { type: 'MOVE'; id: string; position: { x: number; y: number } }
+  | { type: 'SET_RECENTS'; recents: RecentApp[] }
 
 // ─── Defaults ──────────────────────────────────────────────────────────────────
 
 const DEFAULT_SIZE = { width: 760, height: 520 }
 
 const DEFAULT_SIZES: Partial<Record<AppId, { width: number; height: number }>> = {
-  finder:    { width: 860, height: 560 },
-  photos:    { width: 900, height: 620 },
+  finder: { width: 860, height: 560 },
+  photos: { width: 900, height: 620 },
   instagram: { width: 480, height: 600 },
-  music:     { width: 700, height: 520 },
-  about:     { width: 600, height: 480 },
+  music: { width: 700, height: 520 },
+  about: { width: 600, height: 480 },
 }
 
 function defaultSize(app: AppId) {
@@ -67,9 +75,14 @@ export function windowManagerReducer(
     case 'OPEN': {
       const existing = state.windows.find((w) => w.app === action.app)
 
+      // Update recents: move to top or add new
+      const filteredRecents = state.recentApps.filter(a => a.id !== action.app)
+      const newRecents = [{ id: action.app, openedAt: Date.now() }, ...filteredRecents].slice(0, 15)
+
       if (existing) {
-        // Bring to front and un-minimize
         return {
+          ...state,
+          recentApps: newRecents,
           windows: state.windows.map((w) =>
             w.id === existing.id
               ? { ...w, minimized: false, zIndex: maxZIndex(state.windows) + 1 }
@@ -88,14 +101,19 @@ export function windowManagerReducer(
         maximized: false,
       }
 
-      return { windows: [...state.windows, newWindow] }
+      return {
+        ...state,
+        recentApps: newRecents,
+        windows: [...state.windows, newWindow]
+      }
     }
 
     case 'CLOSE':
-      return { windows: state.windows.filter((w) => w.id !== action.id) }
+      return { ...state, windows: state.windows.filter((w) => w.id !== action.id) }
 
     case 'FOCUS':
       return {
+        ...state,
         windows: state.windows.map((w) =>
           w.id === action.id ? { ...w, zIndex: maxZIndex(state.windows) + 1 } : w,
         ),
@@ -103,6 +121,7 @@ export function windowManagerReducer(
 
     case 'MINIMIZE':
       return {
+        ...state,
         windows: state.windows.map((w) =>
           w.id === action.id ? { ...w, minimized: true } : w,
         ),
@@ -110,6 +129,7 @@ export function windowManagerReducer(
 
     case 'MAXIMIZE':
       return {
+        ...state,
         windows: state.windows.map((w) =>
           w.id === action.id ? { ...w, maximized: !w.maximized } : w,
         ),
@@ -117,10 +137,14 @@ export function windowManagerReducer(
 
     case 'MOVE':
       return {
+        ...state,
         windows: state.windows.map((w) =>
           w.id === action.id ? { ...w, position: action.position } : w,
         ),
       }
+
+    case 'SET_RECENTS':
+      return { ...state, recentApps: action.recents }
 
     default:
       return state
@@ -131,6 +155,7 @@ export function windowManagerReducer(
 
 type WindowManagerContextValue = {
   windows: WindowState[]
+  recentApps: RecentApp[]
   openWindow: (app: AppId, position?: { x: number; y: number }) => void
   closeWindow: (id: string) => void
   focusWindow: (id: string) => void
@@ -142,13 +167,33 @@ type WindowManagerContextValue = {
 const WindowManagerContext = createContext<WindowManagerContextValue | null>(null)
 
 export function WindowManagerProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(windowManagerReducer, { windows: [] })
+  const [state, dispatch] = useReducer(windowManagerReducer, { windows: [], recentApps: [] })
+
+  // Persistence
+  useEffect(() => {
+    const saved = localStorage.getItem('hg_recent_apps')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        dispatch({ type: 'SET_RECENTS', recents: parsed })
+      } catch (e) {
+        console.error('Failed to load recents', e)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (state.recentApps.length > 0) {
+      localStorage.setItem('hg_recent_apps', JSON.stringify(state.recentApps))
+    }
+  }, [state.recentApps])
 
   const value: WindowManagerContextValue = {
     windows: state.windows,
+    recentApps: state.recentApps,
     openWindow: (app, position) => {
       const pos = position ?? {
-        x: Math.floor(Math.random() * (window.innerWidth  * 0.45 - 80)) + 80,
+        x: Math.floor(Math.random() * (window.innerWidth * 0.45 - 80)) + 80,
         y: Math.floor(Math.random() * (window.innerHeight * 0.35 - 40)) + 40,
       }
       dispatch({ type: 'OPEN', app, position: pos })
