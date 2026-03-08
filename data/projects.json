@@ -1,0 +1,64 @@
+{
+  "projects": [
+    {
+      "id": "nexus",
+      "name": "NEXUS",
+      "tagline": "Gestion de tournois esports",
+      "description": "Plateforme complète de gestion de tournois esports. Brackets automatiques, gestion des équipes, suivi des scores en temps réel et interface admin. Système de matchmaking et notifications live.",
+      "categories": ["web-apps"],
+      "stack": ["Next.js", "Supabase", "TypeScript", "Tailwind CSS"],
+      "year": 2024,
+      "status": "Deployed",
+      "links": {
+        "github": "https://github.com/HugoGarrigues/nexus",
+        "live": null
+      },
+      "thumbnail": null
+    },
+    {
+      "id": "fridgescan",
+      "name": "FridgeScan",
+      "tagline": "IA — scan frigo & génération de recettes",
+      "description": "Scanne le contenu du frigo via une caméra Raspberry Pi, identifie les ingrédients avec GPT-4 Vision et génère des recettes personnalisées adaptées aux produits disponibles. Interface React pilotée par API Python.",
+      "categories": ["ai-agentic", "in-progress"],
+      "stack": ["React", "Python", "Raspberry Pi", "GPT-4 Vision"],
+      "year": 2025,
+      "status": "In Progress",
+      "links": {
+        "github": null,
+        "live": null
+      },
+      "thumbnail": null
+    },
+    {
+      "id": "formalib",
+      "name": "FormaLib",
+      "tagline": "SaaS B2B — gestion de formations",
+      "description": "SaaS B2B de gestion de formations professionnelles. Catalogues multi-organismes, inscriptions, paiement Stripe, espace apprenant certifié et tableau de bord formateur avec analytics.",
+      "categories": ["web-apps", "in-progress"],
+      "stack": ["Next.js", "Stripe", "PostgreSQL", "TypeScript"],
+      "year": 2025,
+      "status": "In Progress",
+      "links": {
+        "github": "https://github.com/HugoGarrigues/formalib",
+        "live": null
+      },
+      "thumbnail": null
+    },
+    {
+      "id": "leave-app",
+      "name": "Leave App",
+      "tagline": "RH — gestion des congés",
+      "description": "Application RH de gestion des congés avec workflow d'approbation multi-niveau, calcul automatique des soldes, notifications par email et dashboard manager complet.",
+      "categories": ["web-apps"],
+      "stack": ["Next.js", "Supabase", "TypeScript"],
+      "year": 2025,
+      "status": "Deployed",
+      "links": {
+        "github": "https://github.com/HugoGarrigues/leave-app",
+        "live": null
+      },
+      "thumbnail": null
+    }
+  ]
+}
