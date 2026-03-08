@@ -15,7 +15,7 @@ const ICON_FILE: Record<AppId, string> = {
   music:     'music',
   terminal:  'terminal',
   about:     'finder',
-  contact:   'contacts',
+  contact:   'finder', // TODO: replace with mail.png icon
 }
 
 function iconSrc(appId: AppId): string {
