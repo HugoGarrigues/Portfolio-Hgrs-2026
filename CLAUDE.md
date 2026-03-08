@@ -1,109 +1,96 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Commands
 
 ```bash
-npm run dev          # Start development server (localhost:3000)
-npm run build        # Production build
-npm run lint         # ESLint
-npm run test         # Vitest in watch mode
-npm run test:run     # Vitest single run
-npm run test:coverage # Vitest with coverage report
-```
-
-To run a single test file:
-```bash
+npm run dev           # localhost:3000
+npm run build         # production build
+npm run lint          # ESLint
+npm run test:run      # Vitest single run
+npm run test:coverage # coverage report
 npx vitest run path/to/file.test.tsx
 ```
 
-## Architecture
+## Concept
 
-This is a **macOS desktop simulation portfolio** — the entire UI is a fake OS environment. There is no traditional page layout or scroll-based navigation. Content is surfaced by opening, dragging, and interacting with simulated apps.
+**macOS desktop simulation portfolio** — no pages, no scroll. Everything opens as a draggable window. Aesthetic: **Void Terminal** (`#080808` background, cyan `#00FFF0` accents, Geist Mono).
 
-### Concept
+## Stack
 
-- **Desktop**: canvas with animated R3F wallpaper, hosts all windows
-- **Dock**: bottom launcher bar with app icons and minimized window thumbnails
-- **Menu Bar**: top bar showing active app name and live clock
-- **Windows**: draggable/minimizable/closeable floating panels — each contains one app's content
-
-### App Map
-
-| App | Content |
+| Layer | Tech |
 |---|---|
-| Projects.app | Finder-style file browser — sidebar categories, project cards, case study document windows |
-| Terminal.app | Fake interactive terminal — `whoami`, `skills`, `stack`, `experience` commands |
-| Work.app | Photo gallery of screenshots, demos, videos with lightbox |
-| About.app | "About This Mac" style — bio, skills summary |
-| Contact.app | Mail compose UI — sends via `app/api/contact/route.ts` (Resend) |
-| Links.app | Bookmarks manager — GitHub, LinkedIn, etc. |
-| Resume.app | PDF viewer iframe |
+| Framework | Next.js 15 App Router |
+| Language | TypeScript (strict) |
+| Styling | Tailwind CSS v4 |
+| Animation | Framer Motion 12 |
+| 3D Wallpaper | React Three Fiber 9 (SSR-unsafe — always `dynamic(..., { ssr: false })`) |
+| State | React context + `useReducer` — no external state lib |
 
-### Window State
+## Apps Status
 
-All window state lives in a single React context (`WindowManagerContext`) using `useReducer`. The state shape:
+| App | Status | Window |
+|---|---|---|
+| Finder | ✅ Done | 860 × 560 |
+| About | ✅ Done | 520 × 340 |
+| Projects | ✅ Done | 820 × 540 |
+| Mail (Contact) | 🔲 Next | 600 × 440 |
+| Preview (CV) | 🔲 | 680 × 860 |
+| Notes | 🔲 | 360 × 420 |
+| Health | 🔲 | 720 × 520 |
+| Spotify | 🔲 | 560 × 480 |
+| System Preferences | 🔲 | 640 × 480 |
+| LinkedIn (dock, ext link) | 🔲 | — |
+
+Desktop icons (external links): LinkedIn, Instagram, GitHub.
+
+Full roadmap: `docs/apps-roadmap.md`
+
+## Window Manager
+
+`WindowManagerContext` — `useReducer` with actions: `OPEN`, `CLOSE`, `FOCUS`, `MINIMIZE`, `MAXIMIZE`, `MOVE`.
 
 ```ts
 type WindowState = {
-  id: string
-  app: AppId
-  zIndex: number
+  id: string; app: AppId; zIndex: number
   position: { x: number; y: number }
   size: { width: number; height: number }
   minimized: boolean
 }
 ```
 
-Actions: `OPEN`, `CLOSE`, `FOCUS`, `MINIMIZE`, `MAXIMIZE`, `MOVE`.
+## Visual System
 
-### Directory Layout (planned)
-
-```
-app/
-  layout.tsx              # Root layout — fonts, providers
-  page.tsx                # Desktop root (the OS canvas)
-  api/
-    contact/route.ts      # Contact form endpoint (Resend)
-components/
-  desktop/
-    Desktop.tsx           # Main canvas, renders wallpaper + windows + dock
-    MenuBar.tsx
-    Dock.tsx
-    Window.tsx            # Draggable window shell with traffic lights
-  apps/
-    ProjectsApp.tsx       # Finder-style project browser
-    TerminalApp.tsx       # Fake terminal with command parsing
-    WorkApp.tsx           # Photo gallery
-    AboutApp.tsx          # About This Mac style
-    ContactApp.tsx        # Mail compose UI
-    LinksApp.tsx          # Bookmarks
-    ResumeApp.tsx         # PDF viewer
-  wallpaper/
-    WallpaperScene.tsx    # R3F scene (dynamic import, ssr: false)
-contexts/
-  WindowManagerContext.tsx
-lib/
-  apps.ts                 # App registry (id, label, icon, component)
-```
-
-### Key Constraints
-
-- **R3F is SSR-unsafe** — always import `WallpaperScene` with `dynamic(() => import(...), { ssr: false })`
-- **Framer Motion `drag`** handles window dragging — constrain with `dragConstraints` to viewport ref
-- **Z-index** is managed via the window manager — clicking any window dispatches `FOCUS` to bring it to front
-- **Mobile**: render a static "best viewed on desktop" overlay; do not attempt to simulate a mobile OS
-- **No external state library** — React context + `useReducer` is sufficient for window management
-
-### Visual System
-
+- Background: `#080808` (Void Terminal)
+- Accent: `#00FFF0` (cyan) + `#0A84FF` (macOS blue for interactive elements)
 - Window chrome: `rgba(30,30,30,0.85)` + `backdrop-blur`
-- Accent: `#0A84FF` (macOS system blue)
-- UI font: `-apple-system, BlinkMacSystemFont` (authentic macOS feel)
-- Content font: Geist Sans (body) + Geist Mono (Terminal app, code)
-- Wallpaper: animated R3F gradient mesh/particles, deep indigo → near-black
+- Fonts: Geist Sans (UI) + Geist Mono (Terminal, code)
+- Menu bar: liquid glass effect
+- About avatar: circular
 
-### Design Doc
+## Key Constraints
 
-Full approved design: `docs/plans/2026-03-07-portfolio-design.md`
+- R3F → always dynamic import with `ssr: false`
+- Framer Motion `drag` for windows — constrain with `dragConstraints` on viewport ref
+- Mobile → static "best viewed on desktop" overlay only
+- Z-index managed by window manager via `FOCUS` dispatch
+
+## Dev Workflow (MANDATORY)
+
+1. `/plan` first → wait for validation → then implement
+2. One app = one commit, push after each completed feature
+3. `/code-review` after each implementation
+
+## SEO
+
+- Lighthouse 100 target
+- Next.js Metadata API + JSON-LD structured data
+- Core Web Vitals: LCP < 2.5s, CLS < 0.1, FID < 100ms
+
+## Relevant Skills
+
+Invoke with the `Skill` tool before starting tasks:
+- `everything-claude-code:frontend-patterns` — React/Next.js patterns
+- `everything-claude-code:coding-standards` — TS/React best practices
+- `superpowers:brainstorming` — before any new feature/component
+- `superpowers:writing-plans` — before multi-step tasks
+- `superpowers:verification-before-completion` — before claiming done

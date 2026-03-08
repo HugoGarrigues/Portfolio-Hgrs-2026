@@ -4,7 +4,6 @@ import React, { createContext, useContext, useReducer, useEffect, type ReactNode
 
 export type AppId =
   | 'finder'
-  | 'projects'
   | 'instagram'
   | 'photos'
   | 'music'
@@ -46,11 +45,11 @@ type Action =
 const DEFAULT_SIZE = { width: 760, height: 520 }
 
 const DEFAULT_SIZES: Partial<Record<AppId, { width: number; height: number }>> = {
-  finder: { width: 860, height: 560 },
-  photos: { width: 900, height: 620 },
+  finder:    { width: 860, height: 560 },
+  photos:    { width: 900, height: 620 },
   instagram: { width: 480, height: 600 },
-  music: { width: 700, height: 520 },
-  about: { width: 360, height: 560 },
+  music:     { width: 700, height: 520 },
+  about:     { width: 360, height: 560 },
 }
 
 function defaultSize(app: AppId) {

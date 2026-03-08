@@ -12,7 +12,7 @@ function Demo() {
     <div className="relative w-full h-screen bg-[#0d1117] overflow-hidden font-mono">
       {/* Controls */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[9999] flex gap-2 flex-wrap justify-center">
-        {(['terminal', 'about', 'projects'] as const).map((app) => (
+        {(['terminal', 'about'] as const).map((app) => (
           <button
             key={app}
             onClick={() => openWindow(app)}
@@ -42,6 +42,7 @@ function Demo() {
           onClose={closeWindow}
           onMinimize={minimizeWindow}
           onMaximize={maximizeWindow}
+          size={win.size}
           onFocus={focusWindow}
         >
           <div className="p-6 text-white/70 text-sm space-y-2">
