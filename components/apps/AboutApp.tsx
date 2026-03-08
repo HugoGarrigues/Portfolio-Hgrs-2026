@@ -52,16 +52,13 @@ export function AboutApp() {
 
         {/* Specs list — values only, centered */}
         <div className="mt-6 flex flex-col items-center gap-1.5 text-[13px] text-white/80">
-          <span>21 ans</span>
           <span>Aix-En-Provence, France</span>
           <span>Développeur Fullstack @Laroq</span>
+          <span>21 ans</span>
         </div>
 
-        {/* Bio */}
         <p className="mt-6 text-[12px] text-white/35 leading-relaxed text-center max-w-[280px]">
-          Passionné par le design, l&apos;ingénierie web et les expériences
-          utilisateur soignées. Je construis des produits modernes avec une
-          attention au détail.
+          Développeur Full-Stack orienté Agentic Engineering. OpenClaw pour l'orchestration et l'automatisation d'agents, Claude Code pour un développement piloté par l'IA de la spec au déploiement.
         </p>
 
         {/* Footer */}
