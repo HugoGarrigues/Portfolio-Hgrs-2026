@@ -21,8 +21,8 @@ const WallpaperScene = dynamic(() => import('@/components/wallpaper/WallpaperSce
 
 function AppContent({ appId }: { appId: AppId }) {
   switch (appId) {
-    case 'about':    return <AboutApp />
-    case 'finder':   return <FinderApp />
+    case 'about': return <AboutApp />
+    case 'finder': return <FinderApp />
     case 'terminal': return <TerminalApp />
     case 'projects': return <ProjectsApp />
     default:
@@ -51,27 +51,29 @@ function DesktopContent() {
 
       {/* Windows */}
       <AnimatePresence>
-      {windows.map((win) => {
-        const config = APPS.find((a) => a.id === win.app)
-        return (
-          <Window
-            key={win.id}
-            id={win.id}
-            title={`${config?.label ?? win.app}.app`}
-            zIndex={win.zIndex}
-            minimized={win.minimized}
-            maximized={win.maximized}
-            position={win.position}
-            size={win.size}
-            onClose={closeWindow}
-            onMinimize={minimizeWindow}
-            onMaximize={maximizeWindow}
-            onFocus={focusWindow}
-          >
-            <AppContent appId={win.app} />
-          </Window>
-        )
-      })}
+        {windows.map((win) => {
+          const config = APPS.find((a) => a.id === win.app)
+          return (
+            <Window
+              key={win.id}
+              id={win.id}
+              title={`${config?.label ?? win.app}.app`}
+              zIndex={win.zIndex}
+              minimized={win.minimized}
+              maximized={win.maximized}
+              position={win.position}
+              size={win.size}
+              disableMinimize={win.app === 'about'}
+              disableMaximize={win.app === 'about'}
+              onClose={closeWindow}
+              onMinimize={minimizeWindow}
+              onMaximize={maximizeWindow}
+              onFocus={focusWindow}
+            >
+              <AppContent appId={win.app} />
+            </Window>
+          )
+        })}
       </AnimatePresence>
 
       {/* Dock */}

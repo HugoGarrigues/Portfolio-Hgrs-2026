@@ -50,7 +50,7 @@ const DEFAULT_SIZES: Partial<Record<AppId, { width: number; height: number }>> =
   photos: { width: 900, height: 620 },
   instagram: { width: 480, height: 600 },
   music: { width: 700, height: 520 },
-  about: { width: 600, height: 480 },
+  about: { width: 360, height: 560 },
 }
 
 function defaultSize(app: AppId) {

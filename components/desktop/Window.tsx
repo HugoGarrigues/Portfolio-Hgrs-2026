@@ -27,6 +27,8 @@ export type WindowProps = {
   position: { x: number; y: number }
   size: { width: number; height: number }
   children: ReactNode
+  disableMinimize?: boolean
+  disableMaximize?: boolean
   onClose: (id: string) => void
   onMinimize: (id: string) => void
   onMaximize: (id: string) => void
@@ -88,6 +90,8 @@ export function Window({
   position,
   size,
   children,
+  disableMinimize,
+  disableMaximize,
   onClose,
   onMinimize,
   onMaximize,
@@ -154,17 +158,17 @@ export function Window({
             />
             <TrafficLight
               label="Minimize"
-              color="bg-[#FFBD2E]"
-              hoverColor="hover:bg-[#FFBD2E]/80"
-              icon={TrafficIcons.Minimize}
-              onClick={() => onMinimize(id)}
+              color={disableMinimize ? 'bg-white/10' : 'bg-[#FFBD2E]'}
+              hoverColor={disableMinimize ? '' : 'hover:bg-[#FFBD2E]/80'}
+              icon={disableMinimize ? undefined : TrafficIcons.Minimize}
+              onClick={() => { if (!disableMinimize) onMinimize(id) }}
             />
             <TrafficLight
               label="Maximize"
-              color="bg-[#27C93F]"
-              hoverColor="hover:bg-[#27C93F]/80"
-              icon={TrafficIcons.Maximize}
-              onClick={() => onMaximize(id)}
+              color={disableMaximize ? 'bg-white/10' : 'bg-[#27C93F]'}
+              hoverColor={disableMaximize ? '' : 'hover:bg-[#27C93F]/80'}
+              icon={disableMaximize ? undefined : TrafficIcons.Maximize}
+              onClick={() => { if (!disableMaximize) onMaximize(id) }}
             />
           </div>
         </div>
