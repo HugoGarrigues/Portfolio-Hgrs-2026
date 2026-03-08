@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 import { useState } from 'react'
 import type { AppId } from '@/contexts/WindowManagerContext'
 import type { AppConfig } from '@/lib/apps'
@@ -8,13 +9,13 @@ import type { AppConfig } from '@/lib/apps'
 // ─── Icon paths ────────────────────────────────────────────────────────────────
 
 const ICON_FILE: Record<AppId, string> = {
-  finder:    'finder',
-  projects:  'developer_folder',
+  finder: 'finder',
+  projects: 'developer_folder',
   instagram: 'instagram',
-  photos:    'photos',
-  music:     'music',
-  terminal:  'terminal',
-  about:     'finder',
+  photos: 'photos',
+  music: 'music',
+  terminal: 'terminal',
+  about: 'finder',
 }
 
 function iconSrc(appId: AppId): string {
@@ -44,19 +45,27 @@ function DockItem({ config, isOpen, onClick }: DockItemProps) {
   const [showTooltip, setShowTooltip] = useState(false)
 
   return (
-    <div
+    <motion.div
       data-dock-item
       className="relative"
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
+      onHoverStart={() => setShowTooltip(true)}
+      onHoverEnd={() => setShowTooltip(false)}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.88 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
       {/* Tooltip */}
       {showTooltip && (
-        <div className="hidden sm:block absolute bottom-full left-1/2 -translate-x-1/2 mb-4 z-50 pointer-events-none">
-          <div className="bg-gray-900/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
+        <motion.div
+          className="hidden sm:block absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-50 pointer-events-none"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.15 }}
+        >
+          <div className="bg-gray-900/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
             {config.label}
           </div>
-        </div>
+        </motion.div>
       )}
 
       <button
@@ -64,27 +73,28 @@ function DockItem({ config, isOpen, onClick }: DockItemProps) {
         onClick={onClick}
         className="relative flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent rounded-xl"
       >
-        <div className="relative flex items-center justify-center">
+        <div
+          className="relative flex items-center justify-center"
+        >
           <Image
             src={iconSrc(config.id as AppId)}
             alt={config.label}
-            width={56}
-            height={56}
-            className="w-14 h-14 rounded-2xl"
+            width={50}
+            height={50}
+            className="w-12 h-12 rounded-xl"
             draggable={false}
           />
 
           {/* Open indicator dot */}
           <span
             data-open-dot
-            className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full transition-opacity duration-200 ${
-              isOpen ? 'bg-white opacity-100' : 'opacity-0'
-            }`}
+            className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full transition-opacity duration-200 ${isOpen ? 'bg-white opacity-100' : 'opacity-0'
+              }`}
             aria-hidden="true"
           />
         </div>
       </button>
-    </div>
+    </motion.div>
   )
 }
 
@@ -106,9 +116,9 @@ function MinimizedThumb({ win, config, onRestore }: MinimizedThumbProps) {
       <Image
         src={iconSrc(win.app)}
         alt={config.label}
-        width={56}
-        height={56}
-        className="w-14 h-14 rounded-2xl shadow-lg opacity-60"
+        width={44}
+        height={44}
+        className="w-11 h-11 rounded-xl shadow-lg opacity-60"
         draggable={false}
       />
       {/* Yellow dot for minimized */}
@@ -147,14 +157,14 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
     <>
       {/* ── Desktop dock — bottom center, horizontal ── */}
       <div className="hidden sm:flex fixed left-0 right-0 bottom-4 z-[9000] justify-center pointer-events-none">
-        <div className="bg-white/10 backdrop-blur-xl border-t border-white/20 rounded-3xl shadow-2xl px-3 py-2 pointer-events-auto">
-          <div className="flex flex-row items-end justify-center gap-2">
+        <div className="bg-white/10 backdrop-blur-xl border-t border-white/20 rounded-3xl shadow-2xl px-3 py-3 pointer-events-auto">
+          <div className="flex flex-row items-end justify-center gap-4">
             {items}
 
             {/* Separator + minimized thumbnails */}
             {minimizedWindows.length > 0 && (
               <>
-                <div className="w-px h-14 bg-white/40 mx-1 self-center" aria-hidden="true" />
+                <div className="w-px h-11 bg-white/40 mx-1 self-center" aria-hidden="true" />
                 {minimizedWindows.map((win) => {
                   const config = apps.find((a) => a.id === win.app)
                   if (!config) return null
@@ -182,7 +192,7 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
           <div className="flex flex-col items-center justify-center gap-2">
             {apps.map((app) => {
               const openWin = openWindows.find((w) => w.app === app.id)
-              const isOpen  = !!openWin && !openWin.minimized
+              const isOpen = !!openWin && !openWin.minimized
               return (
                 <button
                   key={app.id}
@@ -193,9 +203,9 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
                   <Image
                     src={iconSrc(app.id as AppId)}
                     alt={app.label}
-                    width={56}
-                    height={56}
-                    className="w-14 h-14 rounded-2xl"
+                    width={44}
+                    height={44}
+                    className="w-11 h-11 rounded-xl"
                     draggable={false}
                   />
                   {isOpen && (
