@@ -192,9 +192,17 @@ export function WindowManagerProvider({ children }: { children: ReactNode }) {
     windows: state.windows,
     recentApps: state.recentApps,
     openWindow: (app, position) => {
+      const size = defaultSize(app)
+      const count = state.windows.length
+      const offset = count * 30
+
+      // Initial centered position
+      const centerX = (window.innerWidth - size.width) / 2
+      const centerY = (window.innerHeight - size.height) / 2
+
       const pos = position ?? {
-        x: Math.floor(Math.random() * (window.innerWidth * 0.45 - 80)) + 80,
-        y: Math.floor(Math.random() * (window.innerHeight * 0.35 - 40)) + 40,
+        x: Math.max(40, centerX + offset),
+        y: Math.max(40, centerY + offset),
       }
       dispatch({ type: 'OPEN', app, position: pos })
     },
