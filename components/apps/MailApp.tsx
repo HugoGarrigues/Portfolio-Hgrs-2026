@@ -28,6 +28,7 @@ function FieldRow({
   placeholder,
   type = 'text',
   readOnly = false,
+  invalid = false,
 }: {
   label: string
   value: string
@@ -35,6 +36,7 @@ function FieldRow({
   placeholder?: string
   type?: string
   readOnly?: boolean
+  invalid?: boolean
 }) {
   return (
     <div className="flex items-center h-11 px-6 border-b border-white/[0.03] gap-3">
@@ -46,7 +48,7 @@ function FieldRow({
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
         className={`flex-1 bg-transparent text-[13px] outline-none border-none placeholder:text-white/20 ${
-          readOnly ? 'text-white/25 cursor-default select-none' : 'text-white/90'
+          readOnly ? 'text-white/25 cursor-default select-none' : invalid ? 'text-red-400/80' : 'text-white/90'
         }`}
       />
     </div>
@@ -65,7 +67,8 @@ export function MailApp() {
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
-  const canSend = form.nom.trim() && form.email.trim() && form.objet.trim() && form.message.trim()
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
+  const canSend = form.nom.trim() && emailValid && form.objet.trim() && form.message.trim()
 
   function setField(field: keyof typeof form) {
     return (v: string) => setForm((prev) => ({ ...prev, [field]: v }))
@@ -108,18 +111,15 @@ export function MailApp() {
         {/* ── Toolbar ── */}
         <nav
           onPointerDown={onDragStart}
-          className="h-12 flex items-center px-6 gap-6 select-none border-b border-white/[0.03] cursor-grab active:cursor-grabbing"
+          className="relative h-12 flex items-center px-6 select-none border-b border-white/[0.03] cursor-grab active:cursor-grabbing"
         >
-          <span
-            onPointerDown={(e) => e.stopPropagation()}
-            className="flex-1 text-[13px] font-bold text-white/95 tracking-tight pointer-events-auto cursor-default"
-          >
+          <span className="absolute inset-0 flex items-center justify-center text-[13px] font-bold text-white/95 tracking-tight pointer-events-none select-none">
             Nouveau message
           </span>
 
           <div
             onPointerDown={(e) => e.stopPropagation()}
-            className="pointer-events-auto"
+            className="ml-auto pointer-events-auto"
           >
             <button
               onClick={handleSend}
@@ -137,9 +137,8 @@ export function MailApp() {
         </nav>
 
         {/* ── Header fields ── */}
-        <FieldRow label="À" value="hugo.garrigues@icloud.com" readOnly />
         <FieldRow label="Nom" value={form.nom} onChange={setField('nom')} placeholder="Votre nom" />
-        <FieldRow label="Email" value={form.email} onChange={setField('email')} placeholder="votre@email.com" type="email" />
+        <FieldRow label="Email" value={form.email} onChange={setField('email')} placeholder="votre@email.com" type="email" invalid={form.email.length > 0 && !emailValid} />
         <FieldRow label="Objet" value={form.objet} onChange={setField('objet')} placeholder="Sujet de votre message" />
 
         {/* ── Body ── */}

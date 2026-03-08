@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
 const FROM = 'Portfolio <onboarding@resend.dev>'
-const TO   = 'hugo.garrigues@icloud.com'
+const TO   = 'garrigues.hug@gmail.com'
 
 export async function POST(req: Request) {
   const apiKey = process.env.RESEND_API_KEY
