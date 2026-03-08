@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { WindowManagerProvider, useWindowManager } from '@/contexts/WindowManagerContext'
 import type { AppId } from '@/contexts/WindowManagerContext'
@@ -21,10 +21,10 @@ const WallpaperScene = dynamic(() => import('@/components/wallpaper/WallpaperSce
 
 function AppContent({ appId }: { appId: AppId }) {
   switch (appId) {
-    case 'about':    return <AboutApp />
-    case 'finder':   return <FinderApp />
+    case 'about': return <AboutApp />
+    case 'finder': return <FinderApp />
     case 'terminal': return <TerminalApp />
-    case 'contact':  return <MailApp />
+    case 'contact': return <MailApp />
     default:
       return (
         <div className="h-full flex items-center justify-center text-white/30 text-sm">
@@ -34,9 +34,38 @@ function AppContent({ appId }: { appId: AppId }) {
   }
 }
 
+type Rect = { x: number; y: number; w: number; h: number }
+
 function DesktopContent() {
   const { windows, openWindow, closeWindow, focusWindow, minimizeWindow, maximizeWindow } =
     useWindowManager()
+
+  const [sel, setSel] = useState<Rect | null>(null)
+  const origin = useRef<{ x: number; y: number } | null>(null)
+  const layerRef = useRef<HTMLDivElement>(null)
+
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.button !== 0) return
+    origin.current = { x: e.clientX, y: e.clientY }
+    setSel({ x: e.clientX, y: e.clientY, w: 0, h: 0 })
+    layerRef.current?.setPointerCapture(e.pointerId)
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!origin.current) return
+    const { x: ox, y: oy } = origin.current
+    setSel({
+      x: Math.min(ox, e.clientX),
+      y: Math.min(oy, e.clientY),
+      w: Math.abs(e.clientX - ox),
+      h: Math.abs(e.clientY - oy),
+    })
+  }
+
+  function onPointerUp() {
+    origin.current = null
+    setSel(null)
+  }
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-black select-none" data-desktop-container>
@@ -45,6 +74,29 @@ function DesktopContent() {
 
       {/* Overlay tint — matches gucduck's bg-black/10 */}
       <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+
+      {/* Desktop selection layer — sits below windows (z-1) */}
+      <div
+        ref={layerRef}
+        className="absolute inset-0 z-[1]"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+      >
+        {sel && sel.w > 4 && sel.h > 4 && (
+          <div
+            className="absolute pointer-events-none rounded-[3px]"
+            style={{
+              left: sel.x,
+              top: sel.y,
+              width: sel.w,
+              height: sel.h,
+              background: 'rgba(255, 255, 255, 0.10)',
+              border: '1px solid rgba(255, 255, 255, 0.35)',
+            }}
+          />
+        )}
+      </div>
 
       {/* Menu bar */}
       <MenuBar onOpenAbout={() => openWindow('about')} />
