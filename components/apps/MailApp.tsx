@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useWindow } from '@/components/desktop/Window'
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -17,6 +18,42 @@ const ICONS = {
   send:  'M13 3L2 7.5l4.5 2L13 3ZM6.5 9.5L9 13l4-10',
   check: 'M2.5 8.5L6 12l7.5-8',
   warn:  'M8 2.5 1.5 13h13L8 2.5ZM8 7v3.5M8 12v.5',
+}
+
+// ─── Sending dots ────────────────────────────────────────────────────────────
+
+function SendingDots() {
+  return (
+    <span className="flex items-center gap-1">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          className="w-1 h-1 rounded-full bg-current"
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.1, 0.8] }}
+          transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15, ease: 'easeInOut' }}
+        />
+      ))}
+    </span>
+  )
+}
+
+// ─── Animated checkmark (inline, small for button) ───────────────────────────
+
+function ButtonCheck() {
+  return (
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
+      <motion.path
+        d="M2.5 8.5L6 12l7.5-8"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+      />
+    </svg>
+  )
 }
 
 // ─── Field row ────────────────────────────────────────────────────────────────
@@ -55,6 +92,32 @@ function FieldRow({
   )
 }
 
+// ─── Button content by status ────────────────────────────────────────────────
+
+const BUTTON_LABELS: Record<Status, { icon: 'send' | 'check' | 'warn'; text: string }> = {
+  idle:    { icon: 'send',  text: 'Envoyer' },
+  sending: { icon: 'send',  text: '...' },
+  sent:    { icon: 'check', text: 'Envoyé' },
+  error:   { icon: 'warn',  text: 'Erreur' },
+}
+
+function ButtonContent({ status }: { status: Status }) {
+  const { icon, text } = BUTTON_LABELS[status]
+
+  return (
+    <motion.span
+      key={status}
+      className="flex items-center gap-2"
+      initial={false}
+      animate={status === 'error' ? { x: [0, -4, 3, -2, 0] } : undefined}
+      transition={{ duration: 0.3 }}
+    >
+      {icon === 'check' ? <ButtonCheck /> : <Ico d={ICONS[icon]} className="w-3.5 h-3.5" />}
+      {status === 'sending' ? <SendingDots /> : text}
+    </motion.span>
+  )
+}
+
 // ─── MailApp ──────────────────────────────────────────────────────────────────
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
@@ -66,9 +129,27 @@ export function MailApp() {
   const [form, setForm] = useState({ nom: '', email: '', objet: '', message: '' })
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+  const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
   const canSend = form.nom.trim() && emailValid && form.objet.trim() && form.message.trim()
+
+  // Auto-dismiss sent/error back to idle after delay
+  useEffect(() => {
+    if (status === 'sent') {
+      dismissTimer.current = setTimeout(() => {
+        setStatus('idle')
+      }, 3000)
+    }
+    if (status === 'error') {
+      dismissTimer.current = setTimeout(() => {
+        setStatus('idle')
+      }, 3000)
+    }
+    return () => {
+      if (dismissTimer.current) clearTimeout(dismissTimer.current)
+    }
+  }, [status])
 
   function setField(field: keyof typeof form) {
     return (v: string) => setForm((prev) => ({ ...prev, [field]: v }))
@@ -104,6 +185,16 @@ export function MailApp() {
     }
   }
 
+  // Button color based on status
+  const btnClass =
+    status === 'sent'
+      ? 'bg-green-600 text-white cursor-default shadow-lg shadow-green-900/40'
+      : status === 'error'
+        ? 'bg-red-500/80 text-white cursor-pointer shadow-lg shadow-red-900/40'
+        : !canSend || status === 'sending'
+          ? 'bg-white/[0.05] text-white/25 cursor-default'
+          : 'bg-blue-600 hover:bg-blue-500 text-white cursor-default shadow-lg shadow-blue-900/40'
+
   return (
     <div className="h-full flex p-2 gap-2 overflow-hidden text-white font-sans bg-[#161616]">
       <div className="flex-1 flex flex-col bg-white/[0.02] rounded-2xl border border-white/[0.03] overflow-hidden">
@@ -119,20 +210,18 @@ export function MailApp() {
 
           <div
             onPointerDown={(e) => e.stopPropagation()}
-            className="ml-auto pointer-events-auto"
+            className="ml-auto pointer-events-auto z-10"
           >
-            <button
-              onClick={handleSend}
-              disabled={!canSend || status === 'sending' || status === 'sent'}
-              className={`flex items-center gap-2 text-[12px] font-semibold px-3.5 py-1.5 rounded-lg transition-all active:scale-95 ${
-                !canSend || status === 'sending' || status === 'sent'
-                  ? 'bg-white/[0.05] text-white/25 cursor-default'
-                  : 'bg-blue-600 hover:bg-blue-500 text-white cursor-default shadow-lg shadow-blue-900/40'
-              }`}
+            <motion.button
+              onClick={status === 'error' ? () => setStatus('idle') : handleSend}
+              disabled={status === 'sending' || status === 'sent' || (status === 'idle' && !canSend)}
+              whileTap={canSend && status === 'idle' ? { scale: 0.92 } : undefined}
+              className={`flex items-center gap-2 text-[12px] font-semibold px-3.5 py-1.5 rounded-lg transition-colors duration-200 ${btnClass}`}
+              role="status"
+              aria-live="polite"
             >
-              <Ico d={ICONS.send} className="w-3.5 h-3.5" />
-              {status === 'sending' ? 'Envoi…' : 'Envoyer'}
-            </button>
+              <ButtonContent status={status} />
+            </motion.button>
           </div>
         </nav>
 
@@ -150,20 +239,6 @@ export function MailApp() {
             className="flex-1 w-full bg-transparent text-[13px] text-white/80 placeholder:text-white/20 outline-none resize-none px-6 py-5 leading-relaxed"
           />
         </div>
-
-        {/* ── Status bar ── */}
-        {status === 'sent' && (
-          <div className="flex items-center gap-2 px-6 py-2.5 border-t border-white/[0.03] text-[12px] text-green-400/80">
-            <Ico d={ICONS.check} className="w-3.5 h-3.5" />
-            Message envoyé — je reviendrai vers vous rapidement.
-          </div>
-        )}
-        {status === 'error' && (
-          <div className="flex items-center gap-2 px-6 py-2.5 border-t border-white/[0.03] text-[12px] text-red-400/80">
-            <Ico d={ICONS.warn} className="w-3.5 h-3.5" />
-            {errorMsg || 'Échec de l\'envoi. Réessayez ou contactez-moi directement.'}
-          </div>
-        )}
       </div>
     </div>
   )
