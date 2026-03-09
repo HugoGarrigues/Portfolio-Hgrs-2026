@@ -14,6 +14,7 @@ import { AboutApp } from '@/components/apps/AboutApp'
 import { FinderApp } from '@/components/apps/FinderApp'
 import { TerminalApp } from '@/components/apps/TerminalApp'
 import { MailApp } from '@/components/apps/MailApp'
+import { PreviewApp } from '@/components/apps/PreviewApp'
 
 const WallpaperScene = dynamic(() => import('@/components/wallpaper/WallpaperScene'), {
   ssr: false,
@@ -25,6 +26,7 @@ function AppContent({ appId }: { appId: AppId }) {
     case 'finder': return <FinderApp />
     case 'terminal': return <TerminalApp />
     case 'contact': return <MailApp />
+    case 'preview': return <PreviewApp />
     default:
       return (
         <div className="h-full flex items-center justify-center text-white/30 text-sm">

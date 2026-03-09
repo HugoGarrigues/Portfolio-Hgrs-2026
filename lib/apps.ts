@@ -14,4 +14,5 @@ export const APPS: AppConfig[] = [
   { id: 'music',     label: 'Music',     iconFile: 'music',     defaultSize: { width: 700, height: 520 } },
   { id: 'terminal',  label: 'Terminal',  iconFile: 'terminal',  defaultSize: { width: 680, height: 420 } },
   { id: 'contact',   label: 'Mail',      iconFile: 'mail',      defaultSize: { width: 600, height: 440 } },
+  { id: 'preview',   label: 'Preview',   iconFile: 'preview',   defaultSize: { width: 680, height: 860 } },
 ]

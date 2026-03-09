@@ -16,6 +16,7 @@ const ICON_FILE: Record<AppId, string> = {
   terminal:  'terminal',
   about:     'finder',
   contact:   'mail',
+  preview:   'preview',
 }
 
 function iconSrc(appId: AppId): string {

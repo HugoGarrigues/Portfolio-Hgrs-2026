@@ -10,6 +10,7 @@ export type AppId =
   | 'terminal'
   | 'about'
   | 'contact'
+  | 'preview'
 
 export type RecentApp = {
   id: AppId
@@ -50,6 +51,7 @@ const DEFAULT_SIZES: Partial<Record<AppId, { width: number; height: number }>> =
   instagram: { width: 480, height: 600 },
   music:     { width: 700, height: 520 },
   about:     { width: 360, height: 560 },
+  preview:   { width: 680, height: 860 },
 }
 
 function defaultSize(app: AppId) {
