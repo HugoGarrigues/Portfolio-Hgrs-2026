@@ -147,7 +147,7 @@ export function Window({
         />
 
         {/* Traffic lights — fixed top overlay */}
-        <div className="absolute top-0 left-0 w-32 h-12 flex items-center px-4 z-[100] pointer-events-none">
+        <div className="absolute top-2 left-2 w-32 h-12 flex items-center px-4 z-[100] pointer-events-none">
           <div className="flex items-center gap-2 pointer-events-auto group/traffic" onClick={(e) => e.stopPropagation()}>
             <TrafficLight
               label="Close"

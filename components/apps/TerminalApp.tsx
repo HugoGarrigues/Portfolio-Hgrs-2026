@@ -104,7 +104,7 @@ export function TerminalApp() {
 
   return (
     <div
-      className="h-full flex flex-col bg-[#1a1a1a] font-mono text-[13px] text-green-400 p-3 overflow-hidden cursor-text"
+      className="h-full flex flex-col bg-[#1a1a1a] font-mono text-[13px] text-green-400 p-2 overflow-hidden cursor-text"
       onClick={() => inputRef.current?.focus()}
     >
       {/* History */}

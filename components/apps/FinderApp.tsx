@@ -75,8 +75,8 @@ const SIDEBAR_SECTIONS: { title?: string; items: NavItem[] }[] = [
     items: [
       { id: 'projects_all', label: 'Tous les projets', icon: 'folder', color: 'text-blue-400' },
       { id: 'projects_web', label: 'Web Apps',         icon: 'globe',  color: 'text-blue-400' },
-      { id: 'projects_ai',  label: 'AI / Agentic',     icon: 'brain',  color: 'text-purple-400' },
-      { id: 'projects_wip', label: 'In Progress',      icon: 'clock',  color: 'text-yellow-400' },
+      { id: 'projects_ai',  label: 'AI / Agentic',     icon: 'brain',  color: 'text-blue-400' },
+      { id: 'projects_wip', label: 'In Progress',      icon: 'clock',  color: 'text-blue-400' },
     ],
   },
   {
@@ -122,7 +122,7 @@ function AppIcon({ id, name, iconFile, selected, onSelect, onOpen }: {
       onDoubleClick={() => onOpen(id)}
       className="w-full flex flex-col items-center gap-1.5 group cursor-default select-none transition-transform active:scale-95"
     >
-      <div className={`relative w-[50px] h-[50px] ${selected ? 'after:content-[""] after:absolute after:inset-[-4px] after:bg-white/10 after:rounded-xl' : ''}`}>
+      <div className={`relative w-[50px] h-[50px] rounded-[22%] overflow-hidden ${selected ? 'after:content-[""] after:absolute after:inset-[-4px] after:bg-white/10 after:rounded-xl' : ''}`}>
         <img
           src={`/icons/${iconFile}.png`}
           alt={name}
@@ -502,7 +502,7 @@ function NavBtn({
       onPointerDown={(e) => e.stopPropagation()}
       className={`w-[calc(100%-16px)] flex items-center gap-3 mx-2 px-3 py-1.5 rounded-lg text-[13px] transition-all group ${isSel
         ? 'bg-white/10 text-white font-semibold'
-        : 'text-white/60 hover:bg-white/5 hover:text-white/90'
+        : 'text-white/60 hover:bg-white/[0.08] hover:text-white/90'
       }`}
     >
       <div className={`shrink-0 flex items-center justify-center w-4 h-4 transition-colors ${isSel ? (item.color || 'text-blue-400') : 'text-white/40 group-hover:text-white/60'}`}>

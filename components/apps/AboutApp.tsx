@@ -10,13 +10,14 @@ export function AboutApp() {
   const [imgError, setImgError] = useState(false)
 
   return (
+    <div className="h-full flex p-2 overflow-hidden text-white font-sans bg-[#161616]">
     <div
       onPointerDown={(e) => dragControls.start(e)}
-      className="h-full flex flex-col bg-[#1c1c1e] text-white select-text cursor-grab active:cursor-grabbing"
+      className="flex-1 flex flex-col bg-white/[0.02] rounded-2xl border border-white/[0.03] overflow-hidden select-text cursor-grab active:cursor-grabbing"
     >
 
       {/* Title bar — h-12 matches Window.tsx traffic lights zone */}
-      <div className="shrink-0 h-12 flex items-center justify-center border-b border-white/10 select-none">
+      <div className="shrink-0 h-12 flex items-center justify-center border-b border-white/[0.03] select-none">
         <span className="text-[13px] font-semibold text-white/70">About</span>
       </div>
 
@@ -66,6 +67,7 @@ export function AboutApp() {
           © 2026 Hugo Garrigues
         </p>
       </div>
+    </div>
     </div>
   )
 }
