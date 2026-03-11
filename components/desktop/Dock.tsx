@@ -9,18 +9,23 @@ import type { AppConfig } from '@/lib/apps'
 // ─── Icon paths ────────────────────────────────────────────────────────────────
 
 const ICON_FILE: Record<AppId, string> = {
-  finder:    'finder',
+  finder: 'finder',
   instagram: 'instagram',
-  photos:    'photos',
-  music:     'music',
-  terminal:  'terminal',
-  about:     'finder',
-  contact:   'mail',
-  preview:   'preview',
+  photos: 'photos',
+  music: 'music',
+  terminal: 'terminal',
+  about: 'finder',
+  contact: 'mail',
+  preview: 'preview',
+  settings: 'settings',
 }
 
 function iconSrc(appId: AppId): string {
-  return `/icons/${ICON_FILE[appId]}.png`
+  const file = ICON_FILE[appId]
+  if (appId === 'settings') {
+    return `/icons/settings.svg`
+  }
+  return `/icons/${file}.png`
 }
 
 // ─── Types ─────────────────────────────────────────────────────────────────────

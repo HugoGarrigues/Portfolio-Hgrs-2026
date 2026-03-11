@@ -15,22 +15,27 @@ import { FinderApp } from '@/components/apps/FinderApp'
 import { TerminalApp } from '@/components/apps/TerminalApp'
 import { MailApp } from '@/components/apps/MailApp'
 import { PreviewApp } from '@/components/apps/PreviewApp'
+import { SettingsApp } from '@/components/apps/SettingsApp'
+import { useTranslation } from '@/lib/i18n/useTranslation'
 
 const WallpaperScene = dynamic(() => import('@/components/wallpaper/WallpaperScene'), {
   ssr: false,
 })
 
 function AppContent({ appId }: { appId: AppId }) {
+  const { t } = useTranslation()
+
   switch (appId) {
     case 'about': return <AboutApp />
     case 'finder': return <FinderApp />
     case 'terminal': return <TerminalApp />
     case 'contact': return <MailApp />
     case 'preview': return <PreviewApp />
+    case 'settings': return <SettingsApp />
     default:
       return (
         <div className="h-full flex items-center justify-center text-white/30 text-sm">
-          {appId} — bientôt disponible
+          {appId} — {t('desktop.comingSoon')}
         </div>
       )
   }

@@ -11,6 +11,7 @@ export type AppId =
   | 'about'
   | 'contact'
   | 'preview'
+  | 'settings'
 
 export type RecentApp = {
   id: AppId
@@ -46,12 +47,13 @@ type Action =
 const DEFAULT_SIZE = { width: 760, height: 520 }
 
 const DEFAULT_SIZES: Partial<Record<AppId, { width: number; height: number }>> = {
-  finder:    { width: 860, height: 560 },
-  photos:    { width: 900, height: 620 },
+  finder: { width: 860, height: 560 },
+  photos: { width: 900, height: 620 },
   instagram: { width: 480, height: 600 },
-  music:     { width: 700, height: 520 },
-  about:     { width: 360, height: 560 },
-  preview:   { width: 680, height: 860 },
+  music: { width: 700, height: 520 },
+  about: { width: 360, height: 560 },
+  preview: { width: 680, height: 860 },
+  settings: { width: 640, height: 480 },
 }
 
 function defaultSize(app: AppId) {
