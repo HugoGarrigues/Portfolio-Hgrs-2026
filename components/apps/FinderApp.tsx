@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { useWindowManager } from '@/contexts/WindowManagerContext'
 import { APPS } from '@/lib/apps'
 import { useWindow } from '@/components/desktop/Window'
+import { useTranslation } from '@/lib/i18n/useTranslation'
 import { getProjects, getProjectsByCategory, type Project, type ProjectStatus } from '@/lib/projects'
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -50,56 +51,56 @@ type SectionId =
 
 type NavItem = {
   id: SectionId
-  label: string
+  labelKey: string
   icon: keyof typeof ICONS | React.ReactNode
   color?: string
 }
 
-const SIDEBAR_SECTIONS: { title?: string; items: NavItem[] }[] = [
+const SIDEBAR_SECTIONS: { titleKey?: string; items: NavItem[] }[] = [
   {
     items: [
-      { id: 'recents', label: 'Récents', icon: 'clock' },
+      { id: 'recents', labelKey: 'finder.recents', icon: 'clock' },
     ],
   },
   {
-    title: 'Favoris',
+    titleKey: 'finder.favorites',
     items: [
-      { id: 'applications', label: 'Applications',    icon: 'stack',  color: 'text-blue-500' },
-      { id: 'desktop',      label: 'Bureau',          icon: 'monitor' },
-      { id: 'documents',    label: 'Documents',       icon: 'doc' },
-      { id: 'downloads',    label: 'Téléchargements', icon: 'download' },
+      { id: 'applications', labelKey: 'finder.applications', icon: 'stack',  color: 'text-blue-500' },
+      { id: 'desktop',      labelKey: 'finder.desktop',      icon: 'monitor' },
+      { id: 'documents',    labelKey: 'finder.documents',    icon: 'doc' },
+      { id: 'downloads',    labelKey: 'finder.downloads',    icon: 'download' },
     ],
   },
   {
-    title: 'Projets',
+    titleKey: 'finder.projects',
     items: [
-      { id: 'projects_all', label: 'Tous les projets', icon: 'folder', color: 'text-blue-400' },
-      { id: 'projects_web', label: 'Web Apps',         icon: 'globe',  color: 'text-blue-400' },
-      { id: 'projects_ai',  label: 'AI / Agentic',     icon: 'brain',  color: 'text-blue-400' },
-      { id: 'projects_wip', label: 'In Progress',      icon: 'clock',  color: 'text-blue-400' },
+      { id: 'projects_all', labelKey: 'finder.allProjects', icon: 'folder', color: 'text-blue-400' },
+      { id: 'projects_web', labelKey: 'finder.webApps',     icon: 'globe',  color: 'text-blue-400' },
+      { id: 'projects_ai',  labelKey: 'finder.aiAgentic',   icon: 'brain',  color: 'text-blue-400' },
+      { id: 'projects_wip', labelKey: 'finder.inProgress',  icon: 'clock',  color: 'text-blue-400' },
     ],
   },
   {
-    title: 'Emplacements',
+    titleKey: 'finder.locations',
     items: [
-      { id: 'hgrs',  label: 'hgrs',      icon: <Ico d="M3 3h10v10H3z" /> },
-      { id: 'trash', label: 'Corbeille', icon: <Ico d="M3 4h10M5 4v9a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V4M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" /> },
+      { id: 'hgrs',  labelKey: 'hgrs',          icon: <Ico d="M3 3h10v10H3z" /> },
+      { id: 'trash', labelKey: 'finder.trash',   icon: <Ico d="M3 4h10M5 4v9a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V4M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" /> },
     ],
   },
 ]
 
-const SECTION_LABEL: Record<SectionId, string> = {
-  recents:      'Récents',
-  applications: 'Applications',
-  desktop:      'Bureau',
-  documents:    'Documents',
-  downloads:    'Téléchargements',
+const SECTION_LABEL_KEY: Record<SectionId, string> = {
+  recents:      'finder.recents',
+  applications: 'finder.applications',
+  desktop:      'finder.desktop',
+  documents:    'finder.documents',
+  downloads:    'finder.downloads',
   hgrs:         'hgrs',
-  trash:        'Corbeille',
-  projects_all: 'Tous les projets',
-  projects_web: 'Web Apps',
-  projects_ai:  'AI / Agentic',
-  projects_wip: 'In Progress',
+  trash:        'finder.trash',
+  projects_all: 'finder.allProjects',
+  projects_web: 'finder.webApps',
+  projects_ai:  'finder.aiAgentic',
+  projects_wip: 'finder.inProgress',
 }
 
 function isProjectSection(id: SectionId): boolean {
@@ -142,6 +143,7 @@ function AppIcon({ id, name, iconFile, selected, onSelect, onOpen }: {
 export function FinderApp() {
   const { openWindow, recentApps } = useWindowManager()
   const { dragControls } = useWindow()
+  const { t } = useTranslation()
 
   const [active, setActive]   = useState<SectionId>('applications')
   const [selected, setSelected] = useState<string | null>(null)
@@ -205,9 +207,9 @@ export function FinderApp() {
       >
         {SIDEBAR_SECTIONS.map((section, idx) => (
           <div key={idx} className="mb-4 pointer-events-none">
-            {section.title && (
+            {section.titleKey && (
               <h3 className="px-5 mb-2 text-[10px] font-bold text-white/20 uppercase tracking-widest select-none">
-                {section.title}
+                {t(section.titleKey)}
               </h3>
             )}
             <div className="pointer-events-auto flex flex-col gap-0.5">
@@ -255,7 +257,7 @@ export function FinderApp() {
             onPointerDown={(e) => e.stopPropagation()}
             className="text-[13px] font-bold text-white/95 tracking-tight pointer-events-auto cursor-default"
           >
-            {detail ? detail.name : SECTION_LABEL[active]}
+            {detail ? detail.name : t(SECTION_LABEL_KEY[active])}
           </span>
         </nav>
 
@@ -311,13 +313,13 @@ export function FinderApp() {
                 </div>
               ) : (
                 <div className="h-full flex items-center justify-center text-white/10 text-[13px] font-medium tracking-tight uppercase">
-                  Aucun élément récent
+                  {t('finder.noRecentItems')}
                 </div>
               )}
             </div>
           ) : (
             <div className="h-full flex items-center justify-center text-white/10 text-[13px] font-medium tracking-tight uppercase">
-              Aucun élément
+              {t('finder.noItems')}
             </div>
           )}
         </main>
@@ -334,10 +336,12 @@ function ProjectList({ projects, selected, onSelect, onOpen }: {
   onSelect: (id: string | null) => void
   onOpen: (p: Project) => void
 }) {
+  const { t } = useTranslation()
+
   if (projects.length === 0) {
     return (
       <div className="h-full flex items-center justify-center text-white/10 text-[13px] font-medium tracking-tight uppercase">
-        Aucun projet
+        {t('finder.noProjects')}
       </div>
     )
   }
@@ -346,10 +350,10 @@ function ProjectList({ projects, selected, onSelect, onOpen }: {
     <div className="flex flex-col">
       {/* Column headers */}
       <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_80px_120px] gap-4 px-6 py-2 border-b border-white/[0.04] select-none">
-        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">Nom</span>
-        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">Stack</span>
-        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">Année</span>
-        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">Statut</span>
+        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">{t('finder.columnName')}</span>
+        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">{t('finder.columnStack')}</span>
+        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">{t('finder.columnYear')}</span>
+        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">{t('finder.columnStatus')}</span>
       </div>
 
       {projects.map((project) => (
@@ -373,6 +377,8 @@ function ProjectRow({ project, selected, onSelect, onOpen }: {
   onSelect: () => void
   onOpen: () => void
 }) {
+  const { t } = useTranslation()
+
   return (
     <div
       onClick={(e) => { e.stopPropagation(); onSelect() }}
@@ -396,9 +402,9 @@ function ProjectRow({ project, selected, onSelect, onOpen }: {
 
       {/* Stack badges */}
       <div className="flex items-center gap-1 min-w-0">
-        {project.stack.slice(0, 2).map((t) => (
-          <span key={t} className="shrink-0 text-[10px] text-white/38 bg-white/[0.05] px-1.5 py-0.5 rounded">
-            {t}
+        {project.stack.slice(0, 2).map((tech) => (
+          <span key={tech} className="shrink-0 text-[10px] text-white/38 bg-white/[0.05] px-1.5 py-0.5 rounded">
+            {tech}
           </span>
         ))}
         {project.stack.length > 2 && (
@@ -411,7 +417,7 @@ function ProjectRow({ project, selected, onSelect, onOpen }: {
 
       {/* Status */}
       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full w-fit ${STATUS_STYLE[project.status]}`}>
-        {project.status}
+        {t(`finder.status.${project.status}`)}
       </span>
     </div>
   )
@@ -420,13 +426,15 @@ function ProjectRow({ project, selected, onSelect, onOpen }: {
 // ─── ProjectDetail ────────────────────────────────────────────────────────────
 
 function ProjectDetail({ project }: { project: Project }) {
+  const { t } = useTranslation()
+
   return (
     <div className="p-8 select-text">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLE[project.status]}`}>
-            {project.status}
+            {t(`finder.status.${project.status}`)}
           </span>
           <span className="text-[11px] text-white/25">{project.year}</span>
         </div>
@@ -475,7 +483,7 @@ function ProjectDetail({ project }: { project: Project }) {
               className="flex items-center gap-1.5 text-[13px] text-white/45 hover:text-white/75 transition-colors"
             >
               <Ico d={ICONS.link} className="w-4 h-4" />
-              Live demo
+              {t('finder.liveDemo')}
             </a>
           )}
         </div>
@@ -495,6 +503,7 @@ function NavBtn({
   active: SectionId
   onSelect: (id: SectionId) => void
 }) {
+  const { t } = useTranslation()
   const isSel = active === item.id
   return (
     <button
@@ -510,7 +519,7 @@ function NavBtn({
           ? <Ico d={ICONS[item.icon as keyof typeof ICONS]} className="w-full h-full" />
           : item.icon}
       </div>
-      <span className="truncate">{item.label}</span>
+      <span className="truncate">{t(item.labelKey)}</span>
     </button>
   )
 }

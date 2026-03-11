@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import { useWindow } from '@/components/desktop/Window'
+import { useTranslation } from '@/lib/i18n/useTranslation'
 
 // ─── About This Mac — portfolio style ──────────────────────────────────────
 
 export function AboutApp() {
   const { dragControls } = useWindow()
+  const { t } = useTranslation()
   const [imgError, setImgError] = useState(false)
 
   return (
@@ -18,7 +20,7 @@ export function AboutApp() {
 
       {/* Title bar — h-12 matches Window.tsx traffic lights zone */}
       <div className="shrink-0 h-12 flex items-center justify-center border-b border-white/[0.03] select-none">
-        <span className="text-[13px] font-semibold text-white/70">About</span>
+        <span className="text-[13px] font-semibold text-white/70">{t('about.title')}</span>
       </div>
 
       {/* Content */}
@@ -48,23 +50,23 @@ export function AboutApp() {
 
         {/* Subtitle */}
         <p className="text-[13px] text-white/40 mt-1">
-          Agentic Engineer · 2026
+          {t('about.subtitle')}
         </p>
 
         {/* Specs list — values only, centered */}
         <div className="mt-6 flex flex-col items-center gap-1.5 text-[13px] text-white/80">
-          <span>Aix-En-Provence, France</span>
-          <span>Développeur Fullstack @Laroq</span>
-          <span>21 ans</span>
+          <span>{t('about.location')}</span>
+          <span>{t('about.role')}</span>
+          <span>{t('about.age')}</span>
         </div>
 
         <p className="mt-6 text-[12px] text-white/35 leading-relaxed text-center max-w-[280px]">
-          Développeur Full-Stack orienté Agentic Engineering. OpenClaw pour l'orchestration et l'automatisation d'agents, Claude Code pour un développement piloté par l'IA de la spec au déploiement.
+          {t('about.bio')}
         </p>
 
         {/* Footer */}
         <p className="mt-auto pt-6 text-[11px] text-white/20 text-center">
-          © 2026 Hugo Garrigues
+          {t('about.copyright')}
         </p>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useWindow } from '@/components/desktop/Window'
+import { useTranslation } from '@/lib/i18n/useTranslation'
 import * as pdfjsLib from 'pdfjs-dist'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
@@ -18,7 +19,7 @@ function Ico({ d, className = '' }: { d: string; className?: string }) {
 
 const ICONS = {
   download: 'M8 2v8.5M4.5 7.5 8 11l3.5-3.5M3 13.5h10',
-  warn:     'M8 2.5 1.5 13h13L8 2.5ZM8 7v3.5M8 12v.5',
+  warn: 'M8 2.5 1.5 13h13L8 2.5ZM8 7v3.5M8 12v.5',
 }
 
 const PDF_PATH = '/cv/hugo-garrigues-cv.pdf'
@@ -65,6 +66,7 @@ function PdfPage({ page }: { page: pdfjsLib.PDFPageProxy }) {
 
 export function PreviewApp() {
   const { dragControls } = useWindow()
+  const { t } = useTranslation()
   const onDragStart = (e: React.PointerEvent) => dragControls.start(e)
 
   const [pages, setPages] = useState<pdfjsLib.PDFPageProxy[]>([])
@@ -125,7 +127,7 @@ export function PreviewApp() {
               className="flex items-center gap-2 text-[12px] font-semibold px-3.5 py-1.5 rounded-lg transition-all active:scale-95 bg-blue-600 hover:bg-blue-500 text-white cursor-default shadow-lg shadow-blue-900/40"
             >
               <Ico d={ICONS.download} className="w-3.5 h-3.5" />
-              Enregistrer
+              {t('preview.download')}
             </button>
           </div>
         </nav>
@@ -135,17 +137,17 @@ export function PreviewApp() {
           {error ? (
             <div className="h-full flex flex-col items-center justify-center gap-4 text-white/40 text-sm px-8 text-center">
               <Ico d={ICONS.warn} className="w-6 h-6 text-red-400/60" />
-              <p>Impossible de charger le PDF.</p>
+              <p>{t('preview.loadError')}</p>
               <button
                 onClick={handleDownload}
                 className="text-[12px] text-blue-400 hover:text-blue-300 underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
               >
-                Télécharger une copie
+                {t('preview.downloadCopy')}
               </button>
             </div>
           ) : pages.length === 0 ? (
             <div className="h-full flex items-center justify-center text-white/20 text-sm">
-              Chargement…
+              {t('preview.loading')}
             </div>
           ) : (
             <div className="flex flex-col items-center gap-6">

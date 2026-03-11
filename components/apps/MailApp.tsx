@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWindow } from '@/components/desktop/Window'
+import { useTranslation } from '@/lib/i18n/useTranslation'
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -94,15 +95,16 @@ function FieldRow({
 
 // ─── Button content by status ────────────────────────────────────────────────
 
-const BUTTON_LABELS: Record<Status, { icon: 'send' | 'check' | 'warn'; text: string }> = {
-  idle:    { icon: 'send',  text: 'Envoyer' },
-  sending: { icon: 'send',  text: '...' },
-  sent:    { icon: 'check', text: 'Envoyé' },
-  error:   { icon: 'warn',  text: 'Erreur' },
+const BUTTON_KEYS: Record<Status, { icon: 'send' | 'check' | 'warn'; textKey: string }> = {
+  idle:    { icon: 'send',  textKey: 'mail.send' },
+  sending: { icon: 'send',  textKey: 'mail.sending' },
+  sent:    { icon: 'check', textKey: 'mail.sent' },
+  error:   { icon: 'warn',  textKey: 'mail.error' },
 }
 
 function ButtonContent({ status }: { status: Status }) {
-  const { icon, text } = BUTTON_LABELS[status]
+  const { t } = useTranslation()
+  const { icon, textKey } = BUTTON_KEYS[status]
 
   return (
     <motion.span
@@ -113,7 +115,7 @@ function ButtonContent({ status }: { status: Status }) {
       transition={{ duration: 0.3 }}
     >
       {icon === 'check' ? <ButtonCheck /> : <Ico d={ICONS[icon]} className="w-3.5 h-3.5" />}
-      {status === 'sending' ? <SendingDots /> : text}
+      {status === 'sending' ? <SendingDots /> : t(textKey)}
     </motion.span>
   )
 }
@@ -124,6 +126,7 @@ type Status = 'idle' | 'sending' | 'sent' | 'error'
 
 export function MailApp() {
   const { dragControls } = useWindow()
+  const { t } = useTranslation()
   const onDragStart = (e: React.PointerEvent) => dragControls.start(e)
 
   const [form, setForm] = useState({ nom: '', email: '', objet: '', message: '' })
@@ -174,14 +177,14 @@ export function MailApp() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error ?? 'Erreur serveur')
+        throw new Error(data.error ?? t('mail.serverError'))
       }
 
       setStatus('sent')
       setForm({ nom: '', email: '', objet: '', message: '' })
     } catch (e) {
       setStatus('error')
-      setErrorMsg(e instanceof Error ? e.message : 'Une erreur est survenue')
+      setErrorMsg(e instanceof Error ? e.message : t('mail.genericError'))
     }
   }
 
@@ -205,7 +208,7 @@ export function MailApp() {
           className="relative h-12 flex items-center px-6 select-none border-b border-white/[0.03] cursor-grab active:cursor-grabbing"
         >
           <span className="absolute inset-0 flex items-center justify-center text-[13px] font-bold text-white/95 tracking-tight pointer-events-none select-none">
-            Nouveau message
+            {t('mail.newMessage')}
           </span>
 
           <div
@@ -226,16 +229,16 @@ export function MailApp() {
         </nav>
 
         {/* ── Header fields ── */}
-        <FieldRow label="Nom" value={form.nom} onChange={setField('nom')} placeholder="Votre nom" />
-        <FieldRow label="Email" value={form.email} onChange={setField('email')} placeholder="votre@email.com" type="email" invalid={form.email.length > 0 && !emailValid} />
-        <FieldRow label="Objet" value={form.objet} onChange={setField('objet')} placeholder="Sujet de votre message" />
+        <FieldRow label={t('mail.fieldName')} value={form.nom} onChange={setField('nom')} placeholder={t('mail.placeholderName')} />
+        <FieldRow label={t('mail.fieldEmail')} value={form.email} onChange={setField('email')} placeholder={t('mail.placeholderEmail')} type="email" invalid={form.email.length > 0 && !emailValid} />
+        <FieldRow label={t('mail.fieldSubject')} value={form.objet} onChange={setField('objet')} placeholder={t('mail.placeholderSubject')} />
 
         {/* ── Body ── */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <textarea
             value={form.message}
             onChange={(e) => setField('message')(e.target.value)}
-            placeholder="Votre message…"
+            placeholder={t('mail.placeholderMessage')}
             className="flex-1 w-full bg-transparent text-[13px] text-white/80 placeholder:text-white/20 outline-none resize-none px-6 py-5 leading-relaxed"
           />
         </div>
