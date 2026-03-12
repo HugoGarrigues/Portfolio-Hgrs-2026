@@ -18,27 +18,27 @@ function Ico({ d, className = '' }: { d: string; className?: string }) {
 }
 
 const ICONS = {
-  clock:    'M8 2.5a5.5 5.5 0 1 0 0 11A5.5 5.5 0 0 0 8 2.5Zm0 2v3.25l2.1 1.4',
+  clock: 'M8 2.5a5.5 5.5 0 1 0 0 11A5.5 5.5 0 0 0 8 2.5Zm0 2v3.25l2.1 1.4',
   download: 'M8 2v8M5 7l3 3 3-3M3 13h10',
-  monitor:  'M2 3.5h12v7H2zM6 12.5h4M8 10.5v2',
-  doc:      'M4 1.5h5.5l3 3V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V2a.5.5 0 0 1 .5-.5Zm5.5 0V4.5H12',
-  stack:    'M8 2.5 2.5 5.5l5.5 3 5.5-3L8 2.5ZM2.5 9.5l5.5 3 5.5-3',
-  chevL:    'M10 3.5 6 8l4 4.5',
-  chevR:    'M6 3.5 10 8l-4 4.5',
-  folder:   'M2 4.5a1 1 0 0 1 1-1h3.586a1 1 0 0 1 .707.293L8.414 5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4.5Z',
-  globe:    'M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM1.5 8h13M8 1.5C6 4 5 6 5 8s1 4 3 6.5M8 1.5C10 4 11 6 11 8s-1 4-3 6.5',
-  brain:    'M5 8a3 3 0 0 1 6 0v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1ZM3 10a5 5 0 0 1 10 0M8 5v2',
-  file:     'M4 1.5h5.5l3 3V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V2a.5.5 0 0 1 .5-.5Zm5.5 0V4.5H12',
-  github:   'M8 2a6 6 0 0 0-1.9 11.7c.3.05.4-.13.4-.28v-1.08c-1.67.36-2.02-.7-2.02-.7-.27-.7-.67-.88-.67-.88-.55-.37.04-.37.04-.37.6.04.92.62.92.62.54.92 1.4.65 1.75.5.05-.39.21-.65.38-.8-1.33-.15-2.73-.67-2.73-2.96 0-.65.23-1.18.62-1.6-.06-.15-.27-.76.06-1.58 0 0 .5-.16 1.65.62a5.7 5.7 0 0 1 3 0c1.14-.78 1.64-.62 1.64-.62.33.82.12 1.43.06 1.58.39.42.62.95.62 1.6 0 2.3-1.4 2.8-2.74 2.95.22.19.41.56.41 1.12v1.65c0 .16.11.34.42.28A6 6 0 0 0 8 2Z',
-  link:     'M6.5 9.5a3 3 0 0 0 4.24.36l1.5-1.5a3 3 0 0 0-4.24-4.24L7 5M9.5 6.5a3 3 0 0 0-4.24-.36l-1.5 1.5a3 3 0 0 0 4.24 4.24L9 11',
+  monitor: 'M2 3.5h12v7H2zM6 12.5h4M8 10.5v2',
+  doc: 'M4 1.5h5.5l3 3V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V2a.5.5 0 0 1 .5-.5Zm5.5 0V4.5H12',
+  stack: 'M8 2.5 2.5 5.5l5.5 3 5.5-3L8 2.5ZM2.5 9.5l5.5 3 5.5-3',
+  chevL: 'M10 3.5 6 8l4 4.5',
+  chevR: 'M6 3.5 10 8l-4 4.5',
+  folder: 'M2 4.5a1 1 0 0 1 1-1h3.586a1 1 0 0 1 .707.293L8.414 5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4.5Z',
+  globe: 'M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM1.5 8h13M8 1.5C6 4 5 6 5 8s1 4 3 6.5M8 1.5C10 4 11 6 11 8s-1 4-3 6.5',
+  brain: 'M5 8a3 3 0 0 1 6 0v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1ZM3 10a5 5 0 0 1 10 0M8 5v2',
+  file: 'M4 1.5h5.5l3 3V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V2a.5.5 0 0 1 .5-.5Zm5.5 0V4.5H12',
+  github: 'M8 2a6 6 0 0 0-1.9 11.7c.3.05.4-.13.4-.28v-1.08c-1.67.36-2.02-.7-2.02-.7-.27-.7-.67-.88-.67-.88-.55-.37.04-.37.04-.37.6.04.92.62.92.62.54.92 1.4.65 1.75.5.05-.39.21-.65.38-.8-1.33-.15-2.73-.67-2.73-2.96 0-.65.23-1.18.62-1.6-.06-.15-.27-.76.06-1.58 0 0 .5-.16 1.65.62a5.7 5.7 0 0 1 3 0c1.14-.78 1.64-.62 1.64-.62.33.82.12 1.43.06 1.58.39.42.62.95.62 1.6 0 2.3-1.4 2.8-2.74 2.95.22.19.41.56.41 1.12v1.65c0 .16.11.34.42.28A6 6 0 0 0 8 2Z',
+  link: 'M6.5 9.5a3 3 0 0 0 4.24.36l1.5-1.5a3 3 0 0 0-4.24-4.24L7 5M9.5 6.5a3 3 0 0 0-4.24-.36l-1.5 1.5a3 3 0 0 0 4.24 4.24L9 11',
 }
 
 // ─── Project display ──────────────────────────────────────────────────────────
 
 const STATUS_STYLE: Record<ProjectStatus, string> = {
-  'Deployed':    'bg-green-500/15 text-green-400 border border-green-500/20',
+  'Deployed': 'bg-green-500/15 text-green-400 border border-green-500/20',
   'In Progress': 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/20',
-  'Concept':     'bg-white/10 text-white/35 border border-white/10',
+  'Concept': 'bg-white/10 text-white/35 border border-white/10',
 }
 
 // ─── Sidebar data ─────────────────────────────────────────────────────────────
@@ -59,47 +59,47 @@ type NavItem = {
 const SIDEBAR_SECTIONS: { titleKey?: string; items: NavItem[] }[] = [
   {
     items: [
-      { id: 'recents', labelKey: 'finder.recents', icon: 'clock' },
+      { id: 'recents', labelKey: 'finder.recents', icon: 'clock', color: 'text-[var(--accent-color)]' },
     ],
   },
   {
     titleKey: 'finder.favorites',
     items: [
-      { id: 'applications', labelKey: 'finder.applications', icon: 'stack',  color: 'text-blue-500' },
-      { id: 'desktop',      labelKey: 'finder.desktop',      icon: 'monitor' },
-      { id: 'documents',    labelKey: 'finder.documents',    icon: 'doc' },
-      { id: 'downloads',    labelKey: 'finder.downloads',    icon: 'download' },
+      { id: 'applications', labelKey: 'finder.applications', icon: 'stack', color: 'text-[var(--accent-color)]' },
+      { id: 'desktop', labelKey: 'finder.desktop', icon: 'monitor' },
+      { id: 'documents', labelKey: 'finder.documents', icon: 'doc', color: 'text-[var(--accent-color)]' },
+      { id: 'downloads', labelKey: 'finder.downloads', icon: 'download' },
     ],
   },
   {
     titleKey: 'finder.projects',
     items: [
-      { id: 'projects_all', labelKey: 'finder.allProjects', icon: 'folder', color: 'text-blue-400' },
-      { id: 'projects_web', labelKey: 'finder.webApps',     icon: 'globe',  color: 'text-blue-400' },
-      { id: 'projects_ai',  labelKey: 'finder.aiAgentic',   icon: 'brain',  color: 'text-blue-400' },
-      { id: 'projects_wip', labelKey: 'finder.inProgress',  icon: 'clock',  color: 'text-blue-400' },
+      { id: 'projects_all', labelKey: 'finder.allProjects', icon: 'folder', color: 'text-[var(--accent-color)]' },
+      { id: 'projects_web', labelKey: 'finder.webApps', icon: 'globe', color: 'text-[var(--accent-color)]' },
+      { id: 'projects_ai', labelKey: 'finder.aiAgentic', icon: 'brain', color: 'text-[var(--accent-color)]' },
+      { id: 'projects_wip', labelKey: 'finder.inProgress', icon: 'clock', color: 'text-[var(--accent-color)]' },
     ],
   },
   {
     titleKey: 'finder.locations',
     items: [
-      { id: 'hgrs',  labelKey: 'hgrs',          icon: <Ico d="M3 3h10v10H3z" /> },
-      { id: 'trash', labelKey: 'finder.trash',   icon: <Ico d="M3 4h10M5 4v9a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V4M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" /> },
+      { id: 'hgrs', labelKey: 'hgrs', icon: <Ico d="M3 3h10v10H3z" /> },
+      { id: 'trash', labelKey: 'finder.trash', icon: <Ico d="M3 4h10M5 4v9a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V4M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" /> },
     ],
   },
 ]
 
 const SECTION_LABEL_KEY: Record<SectionId, string> = {
-  recents:      'finder.recents',
+  recents: 'finder.recents',
   applications: 'finder.applications',
-  desktop:      'finder.desktop',
-  documents:    'finder.documents',
-  downloads:    'finder.downloads',
-  hgrs:         'hgrs',
-  trash:        'finder.trash',
+  desktop: 'finder.desktop',
+  documents: 'finder.documents',
+  downloads: 'finder.downloads',
+  hgrs: 'hgrs',
+  trash: 'finder.trash',
   projects_all: 'finder.allProjects',
   projects_web: 'finder.webApps',
-  projects_ai:  'finder.aiAgentic',
+  projects_ai: 'finder.aiAgentic',
   projects_wip: 'finder.inProgress',
 }
 
@@ -127,11 +127,11 @@ function AppIcon({ id, name, iconFile, selected, onSelect, onOpen }: {
         <img
           src={`/icons/${iconFile}.png`}
           alt={name}
-          className="w-full h-full object-contain"
+          className={`w-full h-full object-contain ${id === 'settings' ? 'scale-[1.25]' : ''}`}
           draggable={false}
         />
       </div>
-      <span className={`text-[11px] leading-tight text-center px-1.5 py-0.5 rounded-[4px] break-words w-full transition-colors ${selected ? 'bg-blue-600 text-white' : 'text-white/90 font-medium group-hover:bg-white/10'}`}>
+      <span className={`text-[11px] leading-tight text-center px-1.5 py-0.5 rounded-[4px] break-words w-full transition-colors ${selected ? 'bg-[var(--accent-color)] text-white' : 'text-white/90 font-medium group-hover:bg-white/10'}`}>
         {name}
       </span>
     </div>
@@ -145,21 +145,21 @@ export function FinderApp() {
   const { dragControls } = useWindow()
   const { t } = useTranslation()
 
-  const [active, setActive]   = useState<SectionId>('applications')
+  const [active, setActive] = useState<SectionId>('applications')
   const [selected, setSelected] = useState<string | null>(null)
-  const [detail, setDetail]   = useState<Project | null>(null)
+  const [detail, setDetail] = useState<Project | null>(null)
 
-  const [history, setHistory]       = useState<SectionId[]>(['applications'])
+  const [history, setHistory] = useState<SectionId[]>(['applications'])
   const [historyIdx, setHistoryIdx] = useState(0)
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const displayApps  = APPS.filter(app => app.id !== 'finder')
+  const displayApps = APPS.filter(app => app.id !== 'finder')
 
   const filteredProjects = isProjectSection(active) ? (() => {
     if (active === 'projects_all') return getProjects()
     if (active === 'projects_wip') return getProjectsByCategory('in-progress')
     if (active === 'projects_web') return getProjectsByCategory('web-apps')
-    if (active === 'projects_ai')  return getProjectsByCategory('ai-agentic')
+    if (active === 'projects_ai') return getProjectsByCategory('ai-agentic')
     return []
   })() : []
 
@@ -192,7 +192,7 @@ export function FinderApp() {
     }
   }
 
-  const canBack    = historyIdx > 0 || !!detail
+  const canBack = historyIdx > 0 || !!detail
   const canForward = !detail && historyIdx < history.length - 1
 
   const onDragStart = (e: React.PointerEvent) => dragControls.start(e)
@@ -383,13 +383,12 @@ function ProjectRow({ project, selected, onSelect, onOpen }: {
     <div
       onClick={(e) => { e.stopPropagation(); onSelect() }}
       onDoubleClick={onOpen}
-      className={`grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_80px_120px] gap-4 items-center px-6 py-2.5 border-b border-white/[0.025] select-none transition-colors ${
-        selected ? 'bg-blue-600/20' : 'hover:bg-white/[0.03]'
-      }`}
+      className={`grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_80px_120px] gap-4 items-center px-6 py-2.5 border-b border-white/[0.025] select-none transition-colors ${selected ? 'bg-[var(--accent-color)]/20' : 'hover:bg-white/[0.03]'
+        }`}
     >
       {/* Name + tagline */}
       <div className="flex items-center gap-3 min-w-0">
-        <div className="shrink-0 w-5 h-5 text-blue-400/60">
+        <div className="shrink-0 w-5 h-5 text-[var(--accent-color)]/60">
           <Ico d={ICONS.file} className="w-full h-full" />
         </div>
         <div className="min-w-0">
@@ -468,7 +467,7 @@ function ProjectDetail({ project }: { project: Project }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1.5 text-[13px] text-blue-400 hover:text-blue-300 transition-colors"
+              className="flex items-center gap-1.5 text-[13px] text-[var(--accent-color)] hover:text-blue-300 transition-colors"
             >
               <Ico d={ICONS.github} className="w-4 h-4" />
               GitHub
@@ -505,16 +504,17 @@ function NavBtn({
 }) {
   const { t } = useTranslation()
   const isSel = active === item.id
+  const activeColor = item.color || 'text-[var(--accent-color)]'
   return (
     <button
       onClick={(e) => { e.stopPropagation(); onSelect(item.id) }}
       onPointerDown={(e) => e.stopPropagation()}
       className={`w-[calc(100%-16px)] flex items-center gap-3 mx-2 px-3 py-1.5 rounded-lg text-[13px] transition-all group ${isSel
-        ? 'bg-white/10 text-white font-semibold'
+        ? `bg-white/10 ${activeColor} font-semibold`
         : 'text-white/60 hover:bg-white/[0.08] hover:text-white/90'
-      }`}
+        }`}
     >
-      <div className={`shrink-0 flex items-center justify-center w-4 h-4 transition-colors ${isSel ? (item.color || 'text-blue-400') : 'text-white/40 group-hover:text-white/60'}`}>
+      <div className={`shrink-0 flex items-center justify-center w-4 h-4 transition-colors ${isSel ? activeColor : 'text-white/40 group-hover:text-white/60'}`}>
         {typeof item.icon === 'string'
           ? <Ico d={ICONS[item.icon as keyof typeof ICONS]} className="w-full h-full" />
           : item.icon}

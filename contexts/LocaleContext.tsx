@@ -17,8 +17,8 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   // Hydrate from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === 'fr' || stored === 'en') {
+    const stored = localStorage.getItem(STORAGE_KEY) as Locale | null
+    if (stored && ['fr', 'en', 'de', 'es', 'it'].includes(stored)) {
       setLocaleState(stored)
     }
   }, [])

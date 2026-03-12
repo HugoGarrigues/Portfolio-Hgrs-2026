@@ -3,6 +3,7 @@ import "./globals.css";
 import { LocaleProvider } from "@/contexts/LocaleContext";
 import { WallpaperProvider } from "@/contexts/WallpaperContext";
 import { AvailabilityProvider } from "@/contexts/AvailabilityContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 export const metadata: Metadata = {
   title: "Hugo Garrigues — Portfolio",
@@ -17,13 +18,15 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className="antialiased">
-        <LocaleProvider>
-          <WallpaperProvider>
-            <AvailabilityProvider>
-              {children}
-            </AvailabilityProvider>
-          </WallpaperProvider>
-        </LocaleProvider>
+        <ThemeProvider>
+          <LocaleProvider>
+            <WallpaperProvider>
+              <AvailabilityProvider>
+                {children}
+              </AvailabilityProvider>
+            </WallpaperProvider>
+          </LocaleProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

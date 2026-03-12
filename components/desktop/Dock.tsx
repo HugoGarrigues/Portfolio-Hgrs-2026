@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import type { AppId } from '@/contexts/WindowManagerContext'
 import type { AppConfig } from '@/lib/apps'
+import { useTheme } from '@/contexts/ThemeContext'
 
 // ─── Icon paths ────────────────────────────────────────────────────────────────
 
@@ -22,9 +23,6 @@ const ICON_FILE: Record<AppId, string> = {
 
 function iconSrc(appId: AppId): string {
   const file = ICON_FILE[appId]
-  if (appId === 'settings') {
-    return `/icons/settings.svg`
-  }
   return `/icons/${file}.png`
 }
 
@@ -45,9 +43,10 @@ type DockItemProps = {
   config: AppConfig
   isOpen: boolean
   onClick: () => void
+  size: number
 }
 
-function DockItem({ config, isOpen, onClick }: DockItemProps) {
+function DockItem({ config, isOpen, onClick, size }: DockItemProps) {
   const [showTooltip, setShowTooltip] = useState(false)
 
   return (
@@ -85,9 +84,10 @@ function DockItem({ config, isOpen, onClick }: DockItemProps) {
           <Image
             src={iconSrc(config.id as AppId)}
             alt={config.label}
-            width={50}
-            height={50}
-            className="w-12 h-12 rounded-xl"
+            width={size}
+            height={size}
+            style={{ width: `${size}px`, height: `${size}px` }}
+            className={`rounded-xl ${config.id === 'settings' ? 'scale-[1.25]' : ''}`}
             draggable={false}
           />
 
@@ -110,9 +110,10 @@ type MinimizedThumbProps = {
   win: OpenWindow
   config: AppConfig
   onRestore: () => void
+  size: number
 }
 
-function MinimizedThumb({ win, config, onRestore }: MinimizedThumbProps) {
+function MinimizedThumb({ win, config, onRestore, size }: MinimizedThumbProps) {
   return (
     <button
       aria-label={`Restore ${config.label}`}
@@ -123,9 +124,10 @@ function MinimizedThumb({ win, config, onRestore }: MinimizedThumbProps) {
         <Image
           src={iconSrc(win.app)}
           alt={config.label}
-          width={50}
-          height={50}
-          className="w-12 h-12 rounded-xl shadow-lg"
+          width={size}
+          height={size}
+          style={{ width: `${size}px`, height: `${size}px` }}
+          className={`rounded-xl shadow-lg ${win.app === 'settings' ? 'scale-[1.25]' : ''}`}
           draggable={false}
         />
         {/* Open indicator dot (as requested by user) */}
@@ -141,6 +143,8 @@ function MinimizedThumb({ win, config, onRestore }: MinimizedThumbProps) {
 // ─── Dock ──────────────────────────────────────────────────────────────────────
 
 export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
+  const { dockSize, autoHideDock } = useTheme()
+
   function handleIconClick(config: AppConfig) {
     const existing = openWindows.find((w) => w.app === config.id)
     if (!existing || existing.minimized) {
@@ -160,6 +164,7 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
         config={app}
         isOpen={!!openWin && !openWin.minimized}
         onClick={() => handleIconClick(app)}
+        size={dockSize}
       />
     )
   })
@@ -167,9 +172,17 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
   return (
     <>
       {/* ── Desktop dock — bottom center, horizontal ── */}
-      <div className="hidden sm:flex fixed left-0 right-0 bottom-4 z-[9000] justify-center pointer-events-none">
+      <motion.div
+        className="hidden sm:flex fixed left-0 right-0 bottom-4 z-[9000] justify-center pointer-events-none group"
+        initial={false}
+        animate={{ y: autoHideDock ? 150 : 0 }}
+        whileHover={autoHideDock ? { y: 0 } : undefined}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      >
         <div className="bg-white/10 backdrop-blur-xl border-t border-white/20 rounded-3xl shadow-2xl px-3 py-3 pointer-events-auto">
-          <div className="flex flex-row items-end justify-center gap-4">
+          {/* Invisible interactive area so hover works when peeking */}
+          {autoHideDock && <div className="absolute inset-x-0 bottom-0 h-40 group-hover:h-0" />}
+          <div className="flex flex-row items-end justify-center gap-4 relative z-10">
             {items}
 
             {/* Separator + minimized thumbnails */}
@@ -185,6 +198,7 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
                       win={win}
                       config={config}
                       onRestore={() => onOpen(win.app)}
+                      size={dockSize}
                     />
                   )
                 })}
@@ -192,7 +206,7 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Mobile dock — left side, vertical (aria-hidden so tests see only desktop) ── */}
       <div
@@ -216,7 +230,7 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
                     alt={app.label}
                     width={44}
                     height={44}
-                    className="w-11 h-11 rounded-xl"
+                    className={`w-11 h-11 rounded-xl ${app.id === 'settings' ? 'scale-[1.25]' : ''}`}
                     draggable={false}
                   />
                   {isOpen && (

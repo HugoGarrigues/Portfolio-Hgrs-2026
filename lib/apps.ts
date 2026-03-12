@@ -15,5 +15,5 @@ export const APPS: AppConfig[] = [
   { id: 'terminal', label: 'Terminal', iconFile: 'terminal', defaultSize: { width: 680, height: 420 } },
   { id: 'contact', label: 'Mail', iconFile: 'mail', defaultSize: { width: 600, height: 440 } },
   { id: 'preview', label: 'Preview', iconFile: 'preview', defaultSize: { width: 680, height: 860 } },
-  { id: 'settings', label: 'Settings', iconFile: 'settings.svg', defaultSize: { width: 640, height: 480 } },
+  { id: 'settings', label: 'Settings', iconFile: 'settings', defaultSize: { width: 640, height: 480 } },
 ]
