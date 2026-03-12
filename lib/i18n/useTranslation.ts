@@ -4,8 +4,11 @@ import type { Locale } from './locales'
 
 import fr from './translations/fr.json'
 import en from './translations/en.json'
+import de from './translations/de.json'
+import es from './translations/es.json'
+import it from './translations/it.json'
 
-const TRANSLATIONS: Record<Locale, Record<string, string>> = { fr, en }
+const TRANSLATIONS: Record<Locale, Record<string, string>> = { fr, en, de, es, it }
 
 export function useTranslation() {
   const { locale } = useLocale()

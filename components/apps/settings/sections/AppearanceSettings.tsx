@@ -21,14 +21,14 @@ export function AppearanceSettings() {
     return (
         <div className="flex flex-col gap-6 w-full">
             {/* Mode */}
-            <div className="flex flex-col p-4 bg-white/[0.02] border border-white/[0.05] rounded-xl">
-                <span className="text-[14px] font-medium text-white/90 mb-4 tracking-tight">Mode d'apparence</span>
-                <div className="flex gap-2 p-1 bg-white/[0.03] rounded-lg border border-white/[0.05]">
+            <div className="flex flex-col p-4 bg-black/[0.03] dark:bg-white/[0.02] border border-border-subtle rounded-xl">
+                <span className="text-[14px] font-medium text-foreground/90 mb-4 tracking-tight">Mode d'apparence</span>
+                <div className="flex gap-2 p-1 bg-black/5 dark:bg-white/[0.03] rounded-lg border border-border-subtle">
                     {(['light', 'dark', 'auto'] as AppearanceMode[]).map((mode) => (
                         <button
                             key={mode}
                             onClick={() => setThemeState({ appearance: mode })}
-                            className={`flex-1 py-1.5 text-[13px] font-medium rounded-md transition-all ${appearance === mode ? 'bg-white/10 text-white shadow-sm' : 'text-white/50 hover:text-white/80'
+                            className={`flex-1 py-1.5 text-[13px] font-medium rounded-md transition-all ${appearance === mode ? 'bg-black/10 dark:bg-white/10 text-foreground shadow-sm' : 'text-foreground/50 hover:text-foreground/80'
                                 }`}
                         >
                             {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -38,8 +38,8 @@ export function AppearanceSettings() {
             </div>
 
             {/* Accent Color */}
-            <div className="flex flex-col p-4 bg-white/[0.02] border border-white/[0.05] rounded-xl">
-                <span className="text-[14px] font-medium text-white/90 mb-4 tracking-tight">Couleur d'accentuation</span>
+            <div className="flex flex-col p-4 bg-black/[0.03] dark:bg-white/[0.02] border border-border-subtle rounded-xl">
+                <span className="text-[14px] font-medium text-foreground/90 mb-4 tracking-tight">Couleur d'accentuation</span>
                 <div className="flex flex-wrap gap-3">
                     {ACCENT_COLORS.map((c) => {
                         const isSelected = accentColor === c.id

@@ -36,9 +36,9 @@ const ICONS = {
 // ─── Project display ──────────────────────────────────────────────────────────
 
 const STATUS_STYLE: Record<ProjectStatus, string> = {
-  'Deployed': 'bg-green-500/15 text-green-400 border border-green-500/20',
-  'In Progress': 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/20',
-  'Concept': 'bg-white/10 text-white/35 border border-white/10',
+  'Deployed': 'bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/20',
+  'In Progress': 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20',
+  'Concept': 'bg-black/5 dark:bg-white/10 text-black/40 dark:text-white/35 border border-black/10 dark:border-white/10',
 }
 
 // ─── Sidebar data ─────────────────────────────────────────────────────────────
@@ -131,7 +131,7 @@ function AppIcon({ id, name, iconFile, selected, onSelect, onOpen }: {
           draggable={false}
         />
       </div>
-      <span className={`text-[11px] leading-tight text-center px-1.5 py-0.5 rounded-[4px] break-words w-full transition-colors ${selected ? 'bg-[var(--accent-color)] text-white' : 'text-white/90 font-medium group-hover:bg-white/10'}`}>
+      <span className={`text-[11px] leading-tight text-center px-1.5 py-0.5 rounded-[4px] break-words w-full transition-colors ${selected ? 'bg-[var(--accent-color)] text-white' : 'text-foreground/90 font-medium group-hover:bg-black/10 dark:group-hover:bg-white/10'}`}>
         {name}
       </span>
     </div>
@@ -198,17 +198,17 @@ export function FinderApp() {
   const onDragStart = (e: React.PointerEvent) => dragControls.start(e)
 
   return (
-    <div ref={containerRef} className="h-full flex p-2 gap-2 overflow-hidden text-white font-sans bg-[#161616]">
+    <div ref={containerRef} className="h-full flex p-2 gap-2 overflow-hidden text-foreground font-sans bg-background">
 
       {/* ── Sidebar ── */}
       <aside
         onPointerDown={onDragStart}
-        className="w-[190px] shrink-0 flex flex-col pt-10 pb-3 overflow-y-auto bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-white/[0.05] shadow-xl cursor-grab active:cursor-grabbing"
+        className="w-[190px] shrink-0 flex flex-col pt-10 pb-3 overflow-y-auto bg-black/5 dark:bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-border-subtle shadow-xl cursor-grab active:cursor-grabbing"
       >
         {SIDEBAR_SECTIONS.map((section, idx) => (
           <div key={idx} className="mb-4 pointer-events-none">
             {section.titleKey && (
-              <h3 className="px-5 mb-2 text-[10px] font-bold text-white/20 uppercase tracking-widest select-none">
+              <h3 className="px-5 mb-2 text-[10px] font-bold text-foreground/30 uppercase tracking-widest select-none">
                 {t(section.titleKey)}
               </h3>
             )}
@@ -227,12 +227,12 @@ export function FinderApp() {
       </aside>
 
       {/* ── Main island ── */}
-      <div className="flex-1 flex flex-col bg-white/[0.02] rounded-2xl border border-white/[0.03] overflow-hidden">
+      <div className="flex-1 flex flex-col bg-black/[0.02] dark:bg-white/[0.02] rounded-2xl border border-border-subtle overflow-hidden">
 
         {/* Toolbar */}
         <nav
           onPointerDown={onDragStart}
-          className="h-12 flex items-center px-6 gap-6 select-none border-b border-white/[0.03] cursor-grab active:cursor-grabbing"
+          className="h-12 flex items-center px-6 gap-6 select-none border-b border-border-subtle cursor-grab active:cursor-grabbing"
         >
           <div
             className="flex items-center gap-1.5 pointer-events-auto cursor-default"
@@ -241,21 +241,21 @@ export function FinderApp() {
             <button
               onClick={(e) => { e.stopPropagation(); goBack() }}
               disabled={!canBack}
-              className={`p-1 px-2.5 bg-white/[0.05] border border-white/[0.05] rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/20 ${!canBack ? 'opacity-10 cursor-default' : 'hover:bg-white/[0.12] active:bg-white/[0.2] cursor-default'}`}
+              className={`p-1 px-2.5 bg-black/[0.05] dark:bg-white/[0.05] border border-border-subtle rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/5 dark:shadow-black/20 ${!canBack ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
             >
-              <Ico d={ICONS.chevL} className="w-4 h-4 text-white/70" />
+              <Ico d={ICONS.chevL} className="w-4 h-4 text-foreground/70" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); goForward() }}
               disabled={!canForward}
-              className={`p-1 px-2.5 bg-white/[0.05] border border-white/[0.05] rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/20 ${!canForward ? 'opacity-10 cursor-default' : 'hover:bg-white/[0.12] active:bg-white/[0.2] cursor-default'}`}
+              className={`p-1 px-2.5 bg-black/[0.05] dark:bg-white/[0.05] border border-border-subtle rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/5 dark:shadow-black/20 ${!canForward ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
             >
-              <Ico d={ICONS.chevR} className="w-4 h-4 text-white/70" />
+              <Ico d={ICONS.chevR} className="w-4 h-4 text-foreground/70" />
             </button>
           </div>
           <span
             onPointerDown={(e) => e.stopPropagation()}
-            className="text-[13px] font-bold text-white/95 tracking-tight pointer-events-auto cursor-default"
+            className="text-[13px] font-bold text-foreground/95 tracking-tight pointer-events-auto cursor-default"
           >
             {detail ? detail.name : t(SECTION_LABEL_KEY[active])}
           </span>
@@ -312,13 +312,13 @@ export function FinderApp() {
                   })}
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-white/10 text-[13px] font-medium tracking-tight uppercase">
+                <div className="h-full flex items-center justify-center text-foreground/30 text-[13px] font-medium tracking-tight uppercase">
                   {t('finder.noRecentItems')}
                 </div>
               )}
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center text-white/10 text-[13px] font-medium tracking-tight uppercase">
+            <div className="h-full flex items-center justify-center text-foreground/30 text-[13px] font-medium tracking-tight uppercase">
               {t('finder.noItems')}
             </div>
           )}
@@ -340,7 +340,7 @@ function ProjectList({ projects, selected, onSelect, onOpen }: {
 
   if (projects.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center text-white/10 text-[13px] font-medium tracking-tight uppercase">
+      <div className="h-full flex items-center justify-center text-foreground/30 text-[13px] font-medium tracking-tight uppercase">
         {t('finder.noProjects')}
       </div>
     )
@@ -349,11 +349,11 @@ function ProjectList({ projects, selected, onSelect, onOpen }: {
   return (
     <div className="flex flex-col">
       {/* Column headers */}
-      <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_80px_120px] gap-4 px-6 py-2 border-b border-white/[0.04] select-none">
-        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">{t('finder.columnName')}</span>
-        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">{t('finder.columnStack')}</span>
-        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">{t('finder.columnYear')}</span>
-        <span className="text-[11px] font-semibold text-white/25 uppercase tracking-widest">{t('finder.columnStatus')}</span>
+      <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_80px_120px] gap-4 px-6 py-2 border-b border-border-subtle select-none">
+        <span className="text-[11px] font-semibold text-foreground/40 uppercase tracking-widest">{t('finder.columnName')}</span>
+        <span className="text-[11px] font-semibold text-foreground/40 uppercase tracking-widest">{t('finder.columnStack')}</span>
+        <span className="text-[11px] font-semibold text-foreground/40 uppercase tracking-widest">{t('finder.columnYear')}</span>
+        <span className="text-[11px] font-semibold text-foreground/40 uppercase tracking-widest">{t('finder.columnStatus')}</span>
       </div>
 
       {projects.map((project) => (
@@ -383,7 +383,7 @@ function ProjectRow({ project, selected, onSelect, onOpen }: {
     <div
       onClick={(e) => { e.stopPropagation(); onSelect() }}
       onDoubleClick={onOpen}
-      className={`grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_80px_120px] gap-4 items-center px-6 py-2.5 border-b border-white/[0.025] select-none transition-colors ${selected ? 'bg-[var(--accent-color)]/20' : 'hover:bg-white/[0.03]'
+      className={`grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_80px_120px] gap-4 items-center px-6 py-2.5 border-b border-border-subtle select-none transition-colors ${selected ? 'bg-[var(--accent-color)]/20' : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03]'
         }`}
     >
       {/* Name + tagline */}
@@ -392,27 +392,27 @@ function ProjectRow({ project, selected, onSelect, onOpen }: {
           <Ico d={ICONS.file} className="w-full h-full" />
         </div>
         <div className="min-w-0">
-          <p className={`text-[13px] font-medium truncate leading-tight ${selected ? 'text-white' : 'text-white/90'}`}>
+          <p className={`text-[13px] font-medium truncate leading-tight ${selected ? 'text-foreground' : 'text-foreground/90'}`}>
             {project.name}
           </p>
-          <p className="text-[10px] text-white/38 truncate">{project.tagline}</p>
+          <p className="text-[10px] text-foreground/50 truncate">{project.tagline}</p>
         </div>
       </div>
 
       {/* Stack badges */}
       <div className="flex items-center gap-1 min-w-0">
         {project.stack.slice(0, 2).map((tech) => (
-          <span key={tech} className="shrink-0 text-[10px] text-white/38 bg-white/[0.05] px-1.5 py-0.5 rounded">
+          <span key={tech} className="shrink-0 text-[10px] text-foreground/50 bg-black/5 dark:bg-white/[0.05] px-1.5 py-0.5 rounded">
             {tech}
           </span>
         ))}
         {project.stack.length > 2 && (
-          <span className="text-[10px] text-white/25 shrink-0">+{project.stack.length - 2}</span>
+          <span className="text-[10px] text-foreground/40 shrink-0">+{project.stack.length - 2}</span>
         )}
       </div>
 
       {/* Year */}
-      <span className="text-[12px] text-white/38">{project.year}</span>
+      <span className="text-[12px] text-foreground/50">{project.year}</span>
 
       {/* Status */}
       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full w-fit ${STATUS_STYLE[project.status]}`}>
@@ -435,23 +435,23 @@ function ProjectDetail({ project }: { project: Project }) {
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLE[project.status]}`}>
             {t(`finder.status.${project.status}`)}
           </span>
-          <span className="text-[11px] text-white/25">{project.year}</span>
+          <span className="text-[11px] text-foreground/40">{project.year}</span>
         </div>
-        <h1 className="text-2xl font-semibold text-white leading-tight mb-1">{project.name}</h1>
-        <p className="text-sm text-white/38">{project.tagline}</p>
+        <h1 className="text-2xl font-semibold text-foreground leading-tight mb-1">{project.name}</h1>
+        <p className="text-sm text-foreground/50">{project.tagline}</p>
       </div>
 
       {/* Description */}
-      <p className="text-[13px] text-white/60 leading-relaxed mb-8 max-w-lg">
+      <p className="text-[13px] text-foreground/70 leading-relaxed mb-8 max-w-lg">
         {project.description}
       </p>
 
       {/* Stack */}
       <div className="mb-8">
-        <h2 className="text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-3">Stack</h2>
+        <h2 className="text-[10px] font-semibold text-foreground/40 uppercase tracking-widest mb-3">Stack</h2>
         <div className="flex flex-wrap gap-2">
           {project.stack.map((t) => (
-            <span key={t} className="text-xs text-white/60 bg-white/[0.07] px-2.5 py-1 rounded-md">
+            <span key={t} className="text-xs text-foreground/70 bg-black/[0.04] dark:bg-white/[0.07] px-2.5 py-1 rounded-md">
               {t}
             </span>
           ))}
@@ -479,7 +479,7 @@ function ProjectDetail({ project }: { project: Project }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1.5 text-[13px] text-white/45 hover:text-white/75 transition-colors"
+              className="flex items-center gap-1.5 text-[13px] text-foreground/60 hover:text-foreground/90 transition-colors"
             >
               <Ico d={ICONS.link} className="w-4 h-4" />
               {t('finder.liveDemo')}
@@ -510,11 +510,11 @@ function NavBtn({
       onClick={(e) => { e.stopPropagation(); onSelect(item.id) }}
       onPointerDown={(e) => e.stopPropagation()}
       className={`w-[calc(100%-16px)] flex items-center gap-3 mx-2 px-3 py-1.5 rounded-lg text-[13px] transition-all group ${isSel
-        ? `bg-white/10 ${activeColor} font-semibold`
-        : 'text-white/60 hover:bg-white/[0.08] hover:text-white/90'
+        ? `bg-black/5 dark:bg-white/10 ${activeColor} font-semibold`
+        : 'text-foreground/60 hover:bg-black/[0.05] dark:hover:bg-white/[0.08] hover:text-foreground'
         }`}
     >
-      <div className={`shrink-0 flex items-center justify-center w-4 h-4 transition-colors ${isSel ? activeColor : 'text-white/40 group-hover:text-white/60'}`}>
+      <div className={`shrink-0 flex items-center justify-center w-4 h-4 transition-colors ${isSel ? activeColor : 'text-foreground/40 group-hover:text-foreground/70'}`}>
         {typeof item.icon === 'string'
           ? <Ico d={ICONS[item.icon as keyof typeof ICONS]} className="w-full h-full" />
           : item.icon}

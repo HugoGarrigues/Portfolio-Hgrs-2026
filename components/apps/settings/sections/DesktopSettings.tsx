@@ -15,8 +15,8 @@ export function DesktopSettings() {
     return (
         <div className="flex flex-col gap-6 w-full">
             {/* Wallpapers */}
-            <div className="flex flex-col p-4 bg-white/[0.02] border border-white/[0.05] rounded-xl">
-                <span className="text-[14px] font-medium text-white/90 mb-4 tracking-tight">Fonds d'écran</span>
+            <div className="flex flex-col p-4 bg-black/[0.03] dark:bg-white/[0.02] border border-border-subtle rounded-xl">
+                <span className="text-[14px] font-medium text-foreground/90 mb-4 tracking-tight">Fonds d'écran</span>
                 <div className="grid grid-cols-3 gap-3">
                     {WALLPAPERS.map(w => (
                         <button
@@ -31,7 +31,7 @@ export function DesktopSettings() {
                                     }`}
                                 style={w.style}
                             />
-                            <span className={`text-[11px] font-medium leading-tight text-center ${wallpaper === w.id ? 'text-white' : 'text-white/50'}`}>
+                            <span className={`text-[11px] font-medium leading-tight text-center ${wallpaper === w.id ? 'text-foreground' : 'text-foreground/50'}`}>
                                 {t(w.labelKey)}
                             </span>
                         </button>
