@@ -158,14 +158,14 @@ export function Window({
             />
             <TrafficLight
               label="Minimize"
-              color={disableMinimize ? 'bg-black/10 dark:bg-white/10' : 'bg-[#FFBD2E]'}
+              color={disableMinimize ? 'bg-black/20 dark:bg-white/20' : 'bg-[#FFBD2E]'}
               hoverColor={disableMinimize ? '' : 'hover:bg-[#FFBD2E]/80'}
               icon={disableMinimize ? undefined : TrafficIcons.Minimize}
               onClick={() => { if (!disableMinimize) onMinimize(id) }}
             />
             <TrafficLight
               label="Maximize"
-              color={disableMaximize ? 'bg-black/10 dark:bg-white/10' : 'bg-[#27C93F]'}
+              color={disableMaximize ? 'bg-black/20 dark:bg-white/20' : 'bg-[#27C93F]'}
               hoverColor={disableMaximize ? '' : 'hover:bg-[#27C93F]/80'}
               icon={disableMaximize ? undefined : TrafficIcons.Maximize}
               onClick={() => { if (!disableMaximize) onMaximize(id) }}

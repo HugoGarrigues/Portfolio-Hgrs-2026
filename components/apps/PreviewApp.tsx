@@ -124,7 +124,7 @@ export function PreviewApp() {
           >
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 text-[12px] font-semibold px-3.5 py-1.5 rounded-lg transition-all active:scale-95 bg-blue-600 hover:bg-blue-500 text-foreground cursor-default shadow-lg shadow-blue-900/40"
+              className="flex items-center gap-2 text-[12px] font-semibold px-3.5 py-1.5 rounded-lg transition-all active:scale-95 bg-[var(--accent-color)] opacity-90 hover:opacity-100 text-white cursor-default shadow-[0_0_12px_var(--accent-color)_inset] shadow-[var(--accent-color)]/40"
             >
               <Ico d={ICONS.download} className="w-3.5 h-3.5" />
               {t('preview.download')}
