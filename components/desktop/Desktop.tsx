@@ -34,7 +34,7 @@ function AppContent({ appId }: { appId: AppId }) {
     case 'settings': return <SettingsApp />
     default:
       return (
-        <div className="h-full flex items-center justify-center text-white/30 text-sm">
+        <div className="h-full flex items-center justify-center text-foreground/30 text-sm">
           {appId} — {t('desktop.comingSoon')}
         </div>
       )

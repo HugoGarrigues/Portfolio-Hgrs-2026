@@ -67,7 +67,7 @@ function DockItem({ config, isOpen, onClick, size }: DockItemProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.15 }}
         >
-          <div className="bg-gray-900/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
+          <div className="bg-gray-900/60 backdrop-blur-sm text-foreground text-xs px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
             {config.label}
           </div>
         </motion.div>
@@ -179,7 +179,7 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
         whileHover={autoHideDock ? { y: 0 } : undefined}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        <div className="bg-white/10 backdrop-blur-xl border-t border-white/20 rounded-3xl shadow-2xl px-3 py-3 pointer-events-auto">
+        <div className="bg-black/10 dark:bg-white/10 backdrop-blur-xl border-t border-white/20 rounded-3xl shadow-2xl px-3 py-3 pointer-events-auto">
           {/* Invisible interactive area so hover works when peeking */}
           {autoHideDock && <div className="absolute inset-x-0 bottom-0 h-40 group-hover:h-0" />}
           <div className="flex flex-row items-end justify-center gap-4 relative z-10">
@@ -213,7 +213,7 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
         className="flex sm:hidden fixed left-4 top-1/2 -translate-y-1/2 z-[9000] pointer-events-none"
         aria-hidden="true"
       >
-        <div className="bg-white/10 backdrop-blur-xl border-r border-white/20 rounded-3xl shadow-2xl px-1.5 py-3 pointer-events-auto">
+        <div className="bg-black/10 dark:bg-white/10 backdrop-blur-xl border-r border-white/20 rounded-3xl shadow-2xl px-1.5 py-3 pointer-events-auto">
           <div className="flex flex-col items-center justify-center gap-2">
             {apps.map((app) => {
               const openWin = openWindows.find((w) => w.app === app.id)

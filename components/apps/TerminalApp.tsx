@@ -110,7 +110,7 @@ export function TerminalApp() {
       {/* History */}
       <div className="flex-1 overflow-y-auto space-y-0.5">
         {history.map((line, i) => (
-          <div key={i} className={line.type === 'error' ? 'text-red-400' : line.type === 'input' ? 'text-white' : 'text-green-400'}>
+          <div key={i} className={line.type === 'error' ? 'text-red-400' : line.type === 'input' ? 'text-foreground' : 'text-green-400'}>
             {line.type === 'input' && (
               <span className="text-green-500 mr-2">{PROMPT}</span>
             )}
@@ -132,7 +132,7 @@ export function TerminalApp() {
           autoFocus
           spellCheck={false}
           autoComplete="off"
-          className="flex-1 bg-transparent text-white outline-none caret-green-400"
+          className="flex-1 bg-transparent text-foreground outline-none caret-green-400"
           aria-label="terminal input"
         />
       </div>

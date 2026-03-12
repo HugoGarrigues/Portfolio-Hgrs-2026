@@ -38,7 +38,7 @@ const ICONS = {
 const STATUS_STYLE: Record<ProjectStatus, string> = {
   'Deployed': 'bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/20',
   'In Progress': 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20',
-  'Concept': 'bg-black/5 dark:bg-white/10 text-black/40 dark:text-white/35 border border-black/10 dark:border-white/10',
+  'Concept': 'bg-black/5 dark:bg-black/10 dark:bg-white/10 text-black/40 dark:text-foreground/35 border border-black/10 dark:border-border-subtle',
 }
 
 // ─── Sidebar data ─────────────────────────────────────────────────────────────
@@ -123,7 +123,7 @@ function AppIcon({ id, name, iconFile, selected, onSelect, onOpen }: {
       onDoubleClick={() => onOpen(id)}
       className="w-full flex flex-col items-center gap-1.5 group cursor-default select-none transition-transform active:scale-95"
     >
-      <div className={`relative w-[50px] h-[50px] rounded-[22%] overflow-hidden ${selected ? 'after:content-[""] after:absolute after:inset-[-4px] after:bg-white/10 after:rounded-xl' : ''}`}>
+      <div className={`relative w-[50px] h-[50px] rounded-[22%] overflow-hidden ${selected ? 'after:content-[""] after:absolute after:inset-[-4px] after:bg-black/10 dark:bg-white/10 after:rounded-xl' : ''}`}>
         <img
           src={`/icons/${iconFile}.png`}
           alt={name}
@@ -131,7 +131,7 @@ function AppIcon({ id, name, iconFile, selected, onSelect, onOpen }: {
           draggable={false}
         />
       </div>
-      <span className={`text-[11px] leading-tight text-center px-1.5 py-0.5 rounded-[4px] break-words w-full transition-colors ${selected ? 'bg-[var(--accent-color)] text-white' : 'text-foreground/90 font-medium group-hover:bg-black/10 dark:group-hover:bg-white/10'}`}>
+      <span className={`text-[11px] leading-tight text-center px-1.5 py-0.5 rounded-[4px] break-words w-full transition-colors ${selected ? 'bg-[var(--accent-color)] text-foreground' : 'text-foreground/90 font-medium group-hover:bg-black/10 dark:group-hover:bg-black/10 dark:bg-white/10'}`}>
         {name}
       </span>
     </div>
@@ -203,7 +203,7 @@ export function FinderApp() {
       {/* ── Sidebar ── */}
       <aside
         onPointerDown={onDragStart}
-        className="w-[190px] shrink-0 flex flex-col pt-10 pb-3 overflow-y-auto bg-black/5 dark:bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-border-subtle shadow-xl cursor-grab active:cursor-grabbing"
+        className="w-[190px] shrink-0 flex flex-col pt-10 pb-3 overflow-y-auto bg-black/5 dark:bg-black/[0.04] dark:bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-border-subtle shadow-xl cursor-grab active:cursor-grabbing"
       >
         {SIDEBAR_SECTIONS.map((section, idx) => (
           <div key={idx} className="mb-4 pointer-events-none">
@@ -227,7 +227,7 @@ export function FinderApp() {
       </aside>
 
       {/* ── Main island ── */}
-      <div className="flex-1 flex flex-col bg-black/[0.02] dark:bg-white/[0.02] rounded-2xl border border-border-subtle overflow-hidden">
+      <div className="flex-1 flex flex-col bg-black/[0.02] dark:bg-black/[0.03] dark:bg-white/[0.02] rounded-2xl border border-border-subtle overflow-hidden">
 
         {/* Toolbar */}
         <nav
@@ -241,14 +241,14 @@ export function FinderApp() {
             <button
               onClick={(e) => { e.stopPropagation(); goBack() }}
               disabled={!canBack}
-              className={`p-1 px-2.5 bg-black/[0.05] dark:bg-white/[0.05] border border-border-subtle rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/5 dark:shadow-black/20 ${!canBack ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
+              className={`p-1 px-2.5 bg-black/[0.05] dark:bg-black/[0.05] dark:bg-white/[0.05] border border-border-subtle rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/5 dark:shadow-black/20 ${!canBack ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
             >
               <Ico d={ICONS.chevL} className="w-4 h-4 text-foreground/70" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); goForward() }}
               disabled={!canForward}
-              className={`p-1 px-2.5 bg-black/[0.05] dark:bg-white/[0.05] border border-border-subtle rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/5 dark:shadow-black/20 ${!canForward ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
+              className={`p-1 px-2.5 bg-black/[0.05] dark:bg-black/[0.05] dark:bg-white/[0.05] border border-border-subtle rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/5 dark:shadow-black/20 ${!canForward ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
             >
               <Ico d={ICONS.chevR} className="w-4 h-4 text-foreground/70" />
             </button>
@@ -383,7 +383,7 @@ function ProjectRow({ project, selected, onSelect, onOpen }: {
     <div
       onClick={(e) => { e.stopPropagation(); onSelect() }}
       onDoubleClick={onOpen}
-      className={`grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_80px_120px] gap-4 items-center px-6 py-2.5 border-b border-border-subtle select-none transition-colors ${selected ? 'bg-[var(--accent-color)]/20' : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.03]'
+      className={`grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_80px_120px] gap-4 items-center px-6 py-2.5 border-b border-border-subtle select-none transition-colors ${selected ? 'bg-[var(--accent-color)]/20' : 'hover:bg-black/[0.03] dark:hover:bg-black/5 dark:bg-white/[0.03]'
         }`}
     >
       {/* Name + tagline */}
@@ -402,7 +402,7 @@ function ProjectRow({ project, selected, onSelect, onOpen }: {
       {/* Stack badges */}
       <div className="flex items-center gap-1 min-w-0">
         {project.stack.slice(0, 2).map((tech) => (
-          <span key={tech} className="shrink-0 text-[10px] text-foreground/50 bg-black/5 dark:bg-white/[0.05] px-1.5 py-0.5 rounded">
+          <span key={tech} className="shrink-0 text-[10px] text-foreground/50 bg-black/5 dark:bg-black/[0.05] dark:bg-white/[0.05] px-1.5 py-0.5 rounded">
             {tech}
           </span>
         ))}
@@ -510,7 +510,7 @@ function NavBtn({
       onClick={(e) => { e.stopPropagation(); onSelect(item.id) }}
       onPointerDown={(e) => e.stopPropagation()}
       className={`w-[calc(100%-16px)] flex items-center gap-3 mx-2 px-3 py-1.5 rounded-lg text-[13px] transition-all group ${isSel
-        ? `bg-black/5 dark:bg-white/10 ${activeColor} font-semibold`
+        ? `bg-black/5 dark:bg-black/10 dark:bg-white/10 ${activeColor} font-semibold`
         : 'text-foreground/60 hover:bg-black/[0.05] dark:hover:bg-white/[0.08] hover:text-foreground'
         }`}
     >

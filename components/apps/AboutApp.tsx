@@ -12,15 +12,15 @@ export function AboutApp() {
   const [imgError, setImgError] = useState(false)
 
   return (
-    <div className="h-full flex p-2 overflow-hidden text-white font-sans bg-[#161616]">
+    <div className="h-full flex p-2 overflow-hidden text-foreground font-sans bg-background">
     <div
       onPointerDown={(e) => dragControls.start(e)}
-      className="flex-1 flex flex-col bg-white/[0.02] rounded-2xl border border-white/[0.03] overflow-hidden select-text cursor-grab active:cursor-grabbing"
+      className="flex-1 flex flex-col bg-black/[0.03] dark:bg-white/[0.02] rounded-2xl border border-border-subtle overflow-hidden select-text cursor-grab active:cursor-grabbing"
     >
 
       {/* Title bar — h-12 matches Window.tsx traffic lights zone */}
-      <div className="shrink-0 h-12 flex items-center justify-center border-b border-white/[0.03] select-none">
-        <span className="text-[13px] font-semibold text-white/70">{t('about.title')}</span>
+      <div className="shrink-0 h-12 flex items-center justify-center border-b border-border-subtle select-none">
+        <span className="text-[13px] font-semibold text-foreground/70">{t('about.title')}</span>
       </div>
 
       {/* Content */}
@@ -44,28 +44,28 @@ export function AboutApp() {
         </div>
 
         {/* Name */}
-        <h1 className="text-[22px] font-bold tracking-tight text-white">
+        <h1 className="text-[22px] font-bold tracking-tight text-foreground">
           Hugo Garrigues
         </h1>
 
         {/* Subtitle */}
-        <p className="text-[13px] text-white/40 mt-1">
+        <p className="text-[13px] text-foreground/40 mt-1">
           {t('about.subtitle')}
         </p>
 
         {/* Specs list — values only, centered */}
-        <div className="mt-6 flex flex-col items-center gap-1.5 text-[13px] text-white/80">
+        <div className="mt-6 flex flex-col items-center gap-1.5 text-[13px] text-foreground/80">
           <span>{t('about.location')}</span>
           <span>{t('about.role')}</span>
           <span>{t('about.age')}</span>
         </div>
 
-        <p className="mt-6 text-[12px] text-white/35 leading-relaxed text-center max-w-[280px]">
+        <p className="mt-6 text-[12px] text-foreground/35 leading-relaxed text-center max-w-[280px]">
           {t('about.bio')}
         </p>
 
         {/* Footer */}
-        <p className="mt-auto pt-6 text-[11px] text-white/20 text-center">
+        <p className="mt-auto pt-6 text-[11px] text-foreground/20 text-center">
           {t('about.copyright')}
         </p>
       </div>

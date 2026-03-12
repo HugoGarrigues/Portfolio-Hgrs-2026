@@ -43,8 +43,8 @@ export function BootScreen({ onComplete }: BootScreenProps) {
     >
       <div className="flex flex-col items-center gap-8">
         {/* Logo — initials */}
-        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-          <span className="text-white font-semibold text-lg tracking-tight">HG</span>
+        <div className="w-12 h-12 rounded-2xl bg-black/10 dark:bg-white/10 flex items-center justify-center">
+          <span className="text-foreground font-semibold text-lg tracking-tight">HG</span>
         </div>
 
         {/* Progress bar */}
@@ -54,7 +54,7 @@ export function BootScreen({ onComplete }: BootScreenProps) {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-label="Loading"
-          className="w-[300px] h-1 bg-white/20 rounded-full overflow-hidden"
+          className="w-[300px] h-1 bg-black/20 dark:bg-white/20 rounded-full overflow-hidden"
         >
           <div
             className="h-full bg-white rounded-full transition-all duration-300 ease-out"

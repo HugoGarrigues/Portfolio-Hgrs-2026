@@ -16,9 +16,9 @@ function Ico({ d, className = '' }: { d: string; className?: string }) {
 }
 
 const ICONS = {
-  send:  'M13 3L2 7.5l4.5 2L13 3ZM6.5 9.5L9 13l4-10',
+  send: 'M13 3L2 7.5l4.5 2L13 3ZM6.5 9.5L9 13l4-10',
   check: 'M2.5 8.5L6 12l7.5-8',
-  warn:  'M8 2.5 1.5 13h13L8 2.5ZM8 7v3.5M8 12v.5',
+  warn: 'M8 2.5 1.5 13h13L8 2.5ZM8 7v3.5M8 12v.5',
 }
 
 // ─── Sending dots ────────────────────────────────────────────────────────────
@@ -77,17 +77,16 @@ function FieldRow({
   invalid?: boolean
 }) {
   return (
-    <div className="flex items-center h-11 px-6 border-b border-white/[0.03] gap-3">
-      <span className="w-14 shrink-0 text-[12px] text-white/25 select-none text-right">{label}</span>
+    <div className="flex items-center h-11 px-6 border-b border-border-subtle gap-3">
+      <span className="w-14 shrink-0 text-[12px] text-foreground/25 select-none text-right">{label}</span>
       <input
         type={type}
         value={value}
         readOnly={readOnly}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
-        className={`flex-1 bg-transparent text-[13px] outline-none border-none placeholder:text-white/20 ${
-          readOnly ? 'text-white/25 cursor-default select-none' : invalid ? 'text-red-400/80' : 'text-white/90'
-        }`}
+        className={`flex-1 bg-transparent text-[13px] outline-none border-none placeholder:text-foreground/20 ${readOnly ? 'text-foreground/25 cursor-default select-none' : invalid ? 'text-red-400/80' : 'text-foreground/90'
+          }`}
       />
     </div>
   )
@@ -96,10 +95,10 @@ function FieldRow({
 // ─── Button content by status ────────────────────────────────────────────────
 
 const BUTTON_KEYS: Record<Status, { icon: 'send' | 'check' | 'warn'; textKey: string }> = {
-  idle:    { icon: 'send',  textKey: 'mail.send' },
-  sending: { icon: 'send',  textKey: 'mail.sending' },
-  sent:    { icon: 'check', textKey: 'mail.sent' },
-  error:   { icon: 'warn',  textKey: 'mail.error' },
+  idle: { icon: 'send', textKey: 'mail.send' },
+  sending: { icon: 'send', textKey: 'mail.sending' },
+  sent: { icon: 'check', textKey: 'mail.sent' },
+  error: { icon: 'warn', textKey: 'mail.error' },
 }
 
 function ButtonContent({ status }: { status: Status }) {
@@ -191,23 +190,23 @@ export function MailApp() {
   // Button color based on status
   const btnClass =
     status === 'sent'
-      ? 'bg-green-600 text-white cursor-default shadow-lg shadow-green-900/40'
+      ? 'bg-green-600 text-white cursor-default shadow-lg shadow-green-900/40' // keep green for success
       : status === 'error'
         ? 'bg-red-500/80 text-white cursor-pointer shadow-lg shadow-red-900/40'
         : !canSend || status === 'sending'
-          ? 'bg-white/[0.05] text-white/25 cursor-default'
-          : 'bg-blue-600 hover:bg-blue-500 text-white cursor-default shadow-lg shadow-blue-900/40'
+          ? 'bg-black/[0.05] dark:bg-white/[0.05] text-foreground/25 cursor-default'
+          : 'bg-[var(--accent-color)] opacity-90 hover:opacity-100 text-white cursor-default shadow-[0_0_12px_var(--accent-color)_inset] shadow-[var(--accent-color)]/40'
 
   return (
-    <div className="h-full flex p-2 gap-2 overflow-hidden text-white font-sans bg-[#161616]">
-      <div className="flex-1 flex flex-col bg-white/[0.02] rounded-2xl border border-white/[0.03] overflow-hidden">
+    <div className="h-full flex p-2 gap-2 overflow-hidden text-foreground font-sans bg-background">
+      <div className="flex-1 flex flex-col bg-black/[0.03] dark:bg-white/[0.02] rounded-2xl border border-border-subtle overflow-hidden">
 
         {/* ── Toolbar ── */}
         <nav
           onPointerDown={onDragStart}
-          className="relative h-12 flex items-center px-6 select-none border-b border-white/[0.03] cursor-grab active:cursor-grabbing"
+          className="relative h-12 flex items-center px-6 select-none border-b border-border-subtle cursor-grab active:cursor-grabbing"
         >
-          <span className="absolute inset-0 flex items-center justify-center text-[13px] font-bold text-white/95 tracking-tight pointer-events-none select-none">
+          <span className="absolute inset-0 flex items-center justify-center text-[13px] font-bold text-foreground/95 tracking-tight pointer-events-none select-none">
             {t('mail.newMessage')}
           </span>
 
@@ -239,7 +238,7 @@ export function MailApp() {
             value={form.message}
             onChange={(e) => setField('message')(e.target.value)}
             placeholder={t('mail.placeholderMessage')}
-            className="flex-1 w-full bg-transparent text-[13px] text-white/80 placeholder:text-white/20 outline-none resize-none px-6 py-5 leading-relaxed"
+            className="flex-1 w-full bg-transparent text-[13px] text-foreground/80 placeholder:text-foreground/20 outline-none resize-none px-6 py-5 leading-relaxed"
           />
         </div>
       </div>

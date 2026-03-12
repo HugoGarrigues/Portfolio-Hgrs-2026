@@ -42,9 +42,9 @@ type NavItem = {
 const SIDEBAR_SECTIONS: { titleKey?: string; items: NavItem[] }[] = [
     {
         items: [
-            { id: 'appearance', labelKey: 'settings.appearance', icon: 'appearance', component: AppearanceSettings },
-            { id: 'desktop', labelKey: 'settings.desktop', icon: 'desktop', component: DesktopSettings },
             { id: 'general', labelKey: 'settings.general', icon: 'general', component: GeneralSettings },
+            { id: 'desktop', labelKey: 'settings.desktop', icon: 'desktop', component: DesktopSettings },
+            { id: 'appearance', labelKey: 'settings.appearance', icon: 'appearance', component: AppearanceSettings },
         ],
     },
     {
@@ -74,7 +74,7 @@ function NavBtn({
             onClick={(e) => { e.stopPropagation(); onSelect(item.id) }}
             onPointerDown={(e) => e.stopPropagation()}
             className={`w-[calc(100%-16px)] flex items-center gap-3 mx-2 px-3 py-1.5 rounded-lg text-[13px] transition-all group ${isSel
-                ? `bg-black/5 dark:bg-white/10 ${activeColor} font-semibold`
+                ? `bg-black/5 dark:bg-black/10 dark:bg-white/10 ${activeColor} font-semibold`
                 : 'text-foreground/60 hover:bg-black/[0.05] dark:hover:bg-white/[0.08] hover:text-foreground'
                 }`}
         >
@@ -129,7 +129,7 @@ export function SettingsApp() {
             {/* ── Sidebar ── */}
             <aside
                 onPointerDown={onDragStart}
-                className="w-[190px] shrink-0 flex flex-col pt-10 pb-3 overflow-y-auto bg-black/5 dark:bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-border-subtle shadow-xl cursor-grab active:cursor-grabbing"
+                className="w-[190px] shrink-0 flex flex-col pt-10 pb-3 overflow-y-auto bg-black/5 dark:bg-black/[0.04] dark:bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-border-subtle shadow-xl cursor-grab active:cursor-grabbing"
             >
                 {SIDEBAR_SECTIONS.map((section, idx) => (
                     <div key={idx} className="mb-4 pointer-events-none">
@@ -153,7 +153,7 @@ export function SettingsApp() {
             </aside>
 
             {/* ── Main Island ── */}
-            <div className="flex-1 flex flex-col bg-black/[0.02] dark:bg-white/[0.02] rounded-2xl border border-border-subtle overflow-hidden relative">
+            <div className="flex-1 flex flex-col bg-black/[0.02] dark:bg-black/[0.03] dark:bg-white/[0.02] rounded-2xl border border-border-subtle overflow-hidden relative">
                 {/* Toolbar */}
                 <nav
                     onPointerDown={onDragStart}
@@ -167,7 +167,7 @@ export function SettingsApp() {
                             aria-label="Back"
                             onClick={(e) => { e.stopPropagation(); goBack() }}
                             disabled={!canBack}
-                            className={`p-1 px-2.5 bg-black/[0.05] dark:bg-white/[0.05] border border-border-subtle rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/5 dark:shadow-black/20 ${!canBack ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
+                            className={`p-1 px-2.5 bg-black/[0.05] dark:bg-black/[0.05] dark:bg-white/[0.05] border border-border-subtle rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/5 dark:shadow-black/20 ${!canBack ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
                         >
                             <Ico d={ICONS.chevL} className="w-4 h-4 text-foreground/70" />
                         </button>
@@ -175,7 +175,7 @@ export function SettingsApp() {
                             aria-label="Forward"
                             onClick={(e) => { e.stopPropagation(); goForward() }}
                             disabled={!canForward}
-                            className={`p-1 px-2.5 bg-black/[0.05] dark:bg-white/[0.05] border border-border-subtle rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/5 dark:shadow-black/20 ${!canForward ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
+                            className={`p-1 px-2.5 bg-black/[0.05] dark:bg-black/[0.05] dark:bg-white/[0.05] border border-border-subtle rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/5 dark:shadow-black/20 ${!canForward ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
                         >
                             <Ico d={ICONS.chevR} className="w-4 h-4 text-foreground/70" />
                         </button>

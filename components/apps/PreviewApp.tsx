@@ -106,15 +106,15 @@ export function PreviewApp() {
   }, [])
 
   return (
-    <div className="h-full flex p-2 gap-2 overflow-hidden text-white font-sans bg-[#161616]">
-      <div className="flex-1 flex flex-col bg-white/[0.02] rounded-2xl border border-white/[0.03] overflow-hidden">
+    <div className="h-full flex p-2 gap-2 overflow-hidden text-foreground font-sans bg-background">
+      <div className="flex-1 flex flex-col bg-black/[0.03] dark:bg-white/[0.02] rounded-2xl border border-border-subtle overflow-hidden">
 
         {/* ── Toolbar ── */}
         <nav
           onPointerDown={onDragStart}
-          className="relative h-12 flex items-center px-6 select-none border-b border-white/[0.03] cursor-grab active:cursor-grabbing"
+          className="relative h-12 flex items-center px-6 select-none border-b border-border-subtle cursor-grab active:cursor-grabbing"
         >
-          <span className="absolute inset-0 flex items-center justify-center text-[13px] font-bold text-white/95 tracking-tight pointer-events-none select-none px-24">
+          <span className="absolute inset-0 flex items-center justify-center text-[13px] font-bold text-foreground/95 tracking-tight pointer-events-none select-none px-24">
             hugo-garrigues-cv.pdf
           </span>
 
@@ -124,7 +124,7 @@ export function PreviewApp() {
           >
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 text-[12px] font-semibold px-3.5 py-1.5 rounded-lg transition-all active:scale-95 bg-blue-600 hover:bg-blue-500 text-white cursor-default shadow-lg shadow-blue-900/40"
+              className="flex items-center gap-2 text-[12px] font-semibold px-3.5 py-1.5 rounded-lg transition-all active:scale-95 bg-blue-600 hover:bg-blue-500 text-foreground cursor-default shadow-lg shadow-blue-900/40"
             >
               <Ico d={ICONS.download} className="w-3.5 h-3.5" />
               {t('preview.download')}
@@ -135,7 +135,7 @@ export function PreviewApp() {
         {/* ── Content ── */}
         <div className="flex-1 overflow-y-auto">
           {error ? (
-            <div className="h-full flex flex-col items-center justify-center gap-4 text-white/40 text-sm px-8 text-center">
+            <div className="h-full flex flex-col items-center justify-center gap-4 text-foreground/40 text-sm px-8 text-center">
               <Ico d={ICONS.warn} className="w-6 h-6 text-red-400/60" />
               <p>{t('preview.loadError')}</p>
               <button
@@ -146,7 +146,7 @@ export function PreviewApp() {
               </button>
             </div>
           ) : pages.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-white/20 text-sm">
+            <div className="h-full flex items-center justify-center text-foreground/20 text-sm">
               {t('preview.loading')}
             </div>
           ) : (
