@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 
-export type WallpaperId = 'default' | 'void' | 'gradient'
+export type WallpaperId = 'default' | 'void' | 'gradient' | 'monterey_dark' | 'sierra_sunset' | 'tahoe' | 'sierra_evening' | 'monterey_wwdc'
 
 export type WallpaperOption = {
   id: WallpaperId
@@ -14,18 +14,33 @@ export const WALLPAPERS: WallpaperOption[] = [
   {
     id: 'default',
     labelKey: 'settings.wallpaper.default',
-    style: { backgroundImage: "url('/wallpaper.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' },
+    style: { backgroundImage: "url('/background/wallpaper.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' },
   },
   {
-    id: 'void',
-    labelKey: 'settings.wallpaper.void',
-    style: { background: '#080808' },
+    id: 'monterey_dark',
+    labelKey: 'settings.wallpaper.monterey_dark',
+    style: { backgroundImage: "url('/background/macos-monterey-stock-black-dark-mode-layers-5k-3840x2160-5889.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' },
   },
   {
-    id: 'gradient',
-    labelKey: 'settings.wallpaper.gradient',
-    style: { background: 'linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 40%, #0a1a2e 70%, #080808 100%)' },
+    id: 'sierra_sunset',
+    labelKey: 'settings.wallpaper.sierra_sunset',
+    style: { backgroundImage: "url('/background/macos-sierra-mountain-peak-sunset-evening-stock-5k-3840x2160-3987.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' },
   },
+  {
+    id: 'tahoe',
+    labelKey: 'settings.wallpaper.tahoe',
+    style: { backgroundImage: "url('/background/26-Tahoe-Dark-6K.png')", backgroundSize: 'cover', backgroundPosition: 'center' },
+  },
+  {
+    id: 'sierra_evening',
+    labelKey: 'settings.wallpaper.sierra_evening',
+    style: { backgroundImage: "url('/background/macos-sierra-sierra-nevada-mountain-range-evening-sunlight-3840x2160-4048.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' },
+  },
+  {
+    id: 'monterey_wwdc',
+    labelKey: 'settings.wallpaper.monterey_wwdc',
+    style: { backgroundImage: "url('/background/macos-monterey-wwdc-21-stock-dark-mode-5k-6016x6016-5585.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' },
+  }
 ]
 
 type WallpaperContextType = {
@@ -37,14 +52,15 @@ type WallpaperContextType = {
 const WallpaperContext = createContext<WallpaperContextType | null>(null)
 
 const STORAGE_KEY = 'hgrs-wallpaper'
+const VALID_WALLPAPERS = WALLPAPERS.map(w => w.id)
 
 export function WallpaperProvider({ children }: { children: ReactNode }) {
   const [wallpaper, setWallpaperState] = useState<WallpaperId>('default')
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === 'default' || stored === 'void' || stored === 'gradient') {
-      setWallpaperState(stored)
+    const stored = localStorage.getItem(STORAGE_KEY) as WallpaperId | null
+    if (stored && VALID_WALLPAPERS.includes(stored as WallpaperId)) {
+      setWallpaperState(stored as WallpaperId)
     }
   }, [])
 

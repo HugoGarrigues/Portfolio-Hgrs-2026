@@ -66,5 +66,10 @@
   "settings.accent.gray": "Gray",
   "settings.wallpaper.default": "Default",
   "settings.wallpaper.void": "Void Terminal",
-  "settings.wallpaper.gradient": "Gradient"
+  "settings.wallpaper.gradient": "Gradient",
+  "settings.wallpaper.monterey_dark": "Monterey (Dark)",
+  "settings.wallpaper.monterey_wwdc": "Monterey WWDC",
+  "settings.wallpaper.tahoe": "Lake Tahoe",
+  "settings.wallpaper.sierra_evening": "Sierra Evening",
+  "settings.wallpaper.sierra_sunset": "Sierra Sunset"
 }
