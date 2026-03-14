@@ -43,7 +43,7 @@
 ---
 
 ### 4. Mail — Contact Form
-**Status:** To build
+**Status:** Done
 **Priority:** HIGH
 
 | Field | Value |
@@ -55,7 +55,7 @@
 ---
 
 ### 5. Preview — CV Viewer
-**Status:** To build
+**Status:** Done
 **Priority:** HIGH
 
 | Field | Value |
@@ -114,15 +114,27 @@
 
 ---
 
-### 10. System Preferences — Stack & Settings
-**Status:** To build
+### 10. Settings — System Preferences
+**Status:** Done
 **Priority:** LOW
 
 | Field | Value |
 |---|---|
 | Window size | 640 × 480 |
-| Content | Sections: Tech Stack (icons grid), Availability toggle (open to work on/off), Social links, Theme toggle |
-| Interactions | Availability toggle updates a visible status badge on the desktop, social links open in new tab |
+| Content | Sections: General (Language, Layout), Desktop (Wallpapers), Appearance (Theme, Colors) |
+| Interactions | Modify global appearance, select languages via i18n, change background images |
+
+---
+
+### 11. Terminal — Developer Tools
+**Status:** Done
+**Priority:** LOW
+
+| Field | Value |
+|---|---|
+| Window size | 640 × 400 |
+| Content | Command line interface simulation |
+| Interactions | Execute basic commands, portfolio exploration via CLI |
 
 ---
 
@@ -140,13 +152,16 @@ Desktop icons are double-clickable file icons sitting on the wallpaper, not dock
 
 ## Build Order Summary
 
-| Priority | App |
-|---|---|
-| HIGH | Projects |
-| HIGH | Mail |
-| HIGH | Preview (CV) |
-| MEDIUM | Notes |
-| MEDIUM | Health |
-| MEDIUM | Spotify |
-| LOW | System Preferences |
-| LOW | LinkedIn (dock) |
+| Priority | App | Status |
+|---|---|---|
+| HIGH | Finder | ✅ Done |
+| HIGH | About | ✅ Done |
+| HIGH | Mail | ✅ Done |
+| HIGH | Preview (CV) | ✅ Done |
+| HIGH | Projects | ⏳ To build |
+| MEDIUM | Notes | ⏳ To build |
+| MEDIUM | Health | ⏳ To build |
+| MEDIUM | Spotify | ⏳ To build |
+| LOW | Settings | ✅ Done |
+| LOW | Terminal | ✅ Done |
+| LOW | LinkedIn (dock) | ⏳ To build |
