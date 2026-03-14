@@ -45,9 +45,8 @@ const STATUS_STYLE: Record<ProjectStatus, string> = {
 
 type SectionId =
   | 'recents'
-  | 'applications' | 'desktop' | 'documents' | 'downloads'
-  | 'hgrs' | 'trash'
-  | 'projects_all' | 'projects_web' | 'projects_ai' | 'projects_wip'
+  | 'applications' | 'desktop' | 'documents' | 'trash'
+  | 'projects_all' | 'projects_pro' | 'projects_personal' | 'projects_school'
 
 type NavItem = {
   id: SectionId
@@ -68,22 +67,20 @@ const SIDEBAR_SECTIONS: { titleKey?: string; items: NavItem[] }[] = [
       { id: 'applications', labelKey: 'finder.applications', icon: 'stack', color: 'text-[var(--accent-color)]' },
       { id: 'desktop', labelKey: 'finder.desktop', icon: 'monitor' },
       { id: 'documents', labelKey: 'finder.documents', icon: 'doc', color: 'text-[var(--accent-color)]' },
-      { id: 'downloads', labelKey: 'finder.downloads', icon: 'download' },
     ],
   },
   {
     titleKey: 'finder.projects',
     items: [
       { id: 'projects_all', labelKey: 'finder.allProjects', icon: 'folder', color: 'text-[var(--accent-color)]' },
-      { id: 'projects_web', labelKey: 'finder.webApps', icon: 'globe', color: 'text-[var(--accent-color)]' },
-      { id: 'projects_ai', labelKey: 'finder.aiAgentic', icon: 'brain', color: 'text-[var(--accent-color)]' },
-      { id: 'projects_wip', labelKey: 'finder.inProgress', icon: 'clock', color: 'text-[var(--accent-color)]' },
+      { id: 'projects_pro', labelKey: 'finder.pro', icon: 'globe', color: 'text-[var(--accent-color)]' },
+      { id: 'projects_personal', labelKey: 'finder.personal', icon: 'brain', color: 'text-[var(--accent-color)]' },
+      { id: 'projects_school', labelKey: 'finder.school', icon: 'stack', color: 'text-[var(--accent-color)]' },
     ],
   },
   {
     titleKey: 'finder.locations',
     items: [
-      { id: 'hgrs', labelKey: 'hgrs', icon: <Ico d="M3 3h10v10H3z" /> },
       { id: 'trash', labelKey: 'finder.trash', icon: <Ico d="M3 4h10M5 4v9a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V4M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" /> },
     ],
   },
@@ -94,17 +91,15 @@ const SECTION_LABEL_KEY: Record<SectionId, string> = {
   applications: 'finder.applications',
   desktop: 'finder.desktop',
   documents: 'finder.documents',
-  downloads: 'finder.downloads',
-  hgrs: 'hgrs',
   trash: 'finder.trash',
   projects_all: 'finder.allProjects',
-  projects_web: 'finder.webApps',
-  projects_ai: 'finder.aiAgentic',
-  projects_wip: 'finder.inProgress',
+  projects_pro: 'finder.pro',
+  projects_personal: 'finder.personal',
+  projects_school: 'finder.school',
 }
 
 function isProjectSection(id: SectionId): boolean {
-  return id === 'projects_all' || id === 'projects_web' || id === 'projects_ai' || id === 'projects_wip'
+  return id === 'projects_all' || id === 'projects_pro' || id === 'projects_personal' || id === 'projects_school'
 }
 
 // ─── AppIcon (Applications grid) ──────────────────────────────────────────────
@@ -157,9 +152,9 @@ export function FinderApp() {
 
   const filteredProjects = isProjectSection(active) ? (() => {
     if (active === 'projects_all') return getProjects()
-    if (active === 'projects_wip') return getProjectsByCategory('in-progress')
-    if (active === 'projects_web') return getProjectsByCategory('web-apps')
-    if (active === 'projects_ai') return getProjectsByCategory('ai-agentic')
+    if (active === 'projects_pro') return getProjectsByCategory('pro')
+    if (active === 'projects_personal') return getProjectsByCategory('personal')
+    if (active === 'projects_school') return getProjectsByCategory('school')
     return []
   })() : []
 
@@ -349,11 +344,11 @@ function ProjectList({ projects, selected, onSelect, onOpen }: {
   return (
     <div className="flex flex-col">
       {/* Column headers */}
-      <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_80px_120px] gap-4 px-6 py-2 border-b border-border-subtle select-none">
+      <div className="grid grid-cols-[minmax(0,1fr)_100px_120px_80px] gap-4 px-6 py-2 border-b border-border-subtle select-none">
         <span className="text-[11px] font-semibold text-foreground/40 uppercase tracking-widest">{t('finder.columnName')}</span>
-        <span className="text-[11px] font-semibold text-foreground/40 uppercase tracking-widest">{t('finder.columnStack')}</span>
-        <span className="text-[11px] font-semibold text-foreground/40 uppercase tracking-widest">{t('finder.columnYear')}</span>
+        <span className="text-[11px] font-semibold text-foreground/40 uppercase tracking-widest">{t('finder.columnTheme')}</span>
         <span className="text-[11px] font-semibold text-foreground/40 uppercase tracking-widest">{t('finder.columnStatus')}</span>
+        <span className="text-[11px] font-semibold text-foreground/40 uppercase tracking-widest text-right">{t('finder.columnYear')}</span>
       </div>
 
       {projects.map((project) => (
@@ -383,7 +378,7 @@ function ProjectRow({ project, selected, onSelect, onOpen }: {
     <div
       onClick={(e) => { e.stopPropagation(); onSelect() }}
       onDoubleClick={onOpen}
-      className={`grid grid-cols-[minmax(0,2fr)_minmax(0,2fr)_80px_120px] gap-4 items-center px-6 py-2.5 border-b border-border-subtle select-none transition-colors ${selected ? 'bg-[var(--accent-color)]/20' : 'hover:bg-black/[0.03] dark:hover:bg-black/5 dark:bg-white/[0.03]'
+      className={`grid grid-cols-[minmax(0,1fr)_100px_120px_80px] gap-4 items-center px-6 py-2.5 border-b border-border-subtle select-none transition-colors ${selected ? 'bg-[var(--accent-color)]/20' : 'hover:bg-black/[0.03] dark:hover:bg-black/5 dark:bg-white/[0.03]'
         }`}
     >
       {/* Name + tagline */}
@@ -395,29 +390,23 @@ function ProjectRow({ project, selected, onSelect, onOpen }: {
           <p className={`text-[13px] font-medium truncate leading-tight ${selected ? 'text-foreground' : 'text-foreground/90'}`}>
             {project.name}
           </p>
-          <p className="text-[10px] text-foreground/50 truncate">{project.tagline}</p>
         </div>
       </div>
 
-      {/* Stack badges */}
-      <div className="flex items-center gap-1 min-w-0">
-        {project.stack.slice(0, 2).map((tech) => (
-          <span key={tech} className="shrink-0 text-[10px] text-foreground/50 bg-black/5 dark:bg-black/[0.05] dark:bg-white/[0.05] px-1.5 py-0.5 rounded">
-            {tech}
-          </span>
-        ))}
-        {project.stack.length > 2 && (
-          <span className="text-[10px] text-foreground/40 shrink-0">+{project.stack.length - 2}</span>
-        )}
+      {/* Theme */}
+      <div className="flex items-center min-w-0">
+        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-foreground/70 border border-black/10 dark:border-border-subtle truncate">
+          {project.theme}
+        </span>
       </div>
-
-      {/* Year */}
-      <span className="text-[12px] text-foreground/50">{project.year}</span>
 
       {/* Status */}
       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full w-fit ${STATUS_STYLE[project.status]}`}>
         {t(`finder.status.${project.status}`)}
       </span>
+
+      {/* Year */}
+      <span className="text-[12px] text-foreground/50 text-right">{project.year}</span>
     </div>
   )
 }
@@ -428,65 +417,105 @@ function ProjectDetail({ project }: { project: Project }) {
   const { t } = useTranslation()
 
   return (
-    <div className="p-8 select-text">
+    <div className="p-6 select-text">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLE[project.status]}`}>
-            {t(`finder.status.${project.status}`)}
-          </span>
-          <span className="text-[11px] text-foreground/40">{project.year}</span>
+      <div className="mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-1">
+          {/* Title */}
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold text-foreground leading-tight mb-1">{project.name}</h1>
+          </div>
+
+          {/* Tags and year */}
+          <div className="flex items-center gap-2 pt-1 shrink-0">
+            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLE[project.status]}`}>
+              {t(`finder.status.${project.status}`)}
+            </span>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-foreground/70 border border-black/10 dark:border-border-subtle">
+              {project.theme}
+            </span>
+            <span className="text-[11px] text-foreground/40">{project.year}</span>
+          </div>
         </div>
-        <h1 className="text-2xl font-semibold text-foreground leading-tight mb-1">{project.name}</h1>
-        <p className="text-sm text-foreground/50">{project.tagline}</p>
       </div>
 
       {/* Description */}
-      <p className="text-[13px] text-foreground/70 leading-relaxed mb-8 max-w-lg">
+      <p className="text-[12px] text-foreground/70 leading-relaxed mb-5 max-w-lg">
         {project.description}
       </p>
 
-      {/* Stack */}
-      <div className="mb-8">
-        <h2 className="text-[10px] font-semibold text-foreground/40 uppercase tracking-widest mb-3">Stack</h2>
-        <div className="flex flex-wrap gap-2">
-          {project.stack.map((t) => (
-            <span key={t} className="text-xs text-foreground/70 bg-black/[0.04] dark:bg-white/[0.07] px-2.5 py-1 rounded-md">
-              {t}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Links */}
-      {(project.links.github || project.links.live) && (
-        <div className="flex items-center gap-5">
-          {project.links.github && (
-            <a
-              href={project.links.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1.5 text-[13px] text-[var(--accent-color)] hover:text-blue-300 transition-colors"
-            >
-              <Ico d={ICONS.github} className="w-4 h-4" />
-              GitHub
-            </a>
-          )}
-          {project.links.live && (
-            <a
-              href={project.links.live}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1.5 text-[13px] text-foreground/60 hover:text-foreground/90 transition-colors"
-            >
-              <Ico d={ICONS.link} className="w-4 h-4" />
-              {t('finder.liveDemo')}
-            </a>
-          )}
+      {/* Galerie */}
+      {project.images && project.images.length > 0 && (
+        <div className="mb-5">
+          <h2 className="text-[10px] font-semibold text-foreground/40 uppercase tracking-widest mb-2">Galerie</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {project.images.map((img, idx) => (
+              <div key={idx} className="group relative aspect-video rounded-xl overflow-hidden border border-border-subtle bg-black/5 dark:bg-white/5 shadow-sm">
+                <img
+                  src={img}
+                  alt={`${project.name} screenshot ${idx + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
+              </div>
+            ))}
+          </div>
         </div>
       )}
+
+      {/* Stack & Links */}
+      <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-2">
+        {/* Stack */}
+        <div className="flex-1 min-w-0">
+          <h2 className="text-[10px] font-semibold text-foreground/40 uppercase tracking-widest mb-2">Stack</h2>
+          <div className="flex flex-wrap gap-1.5">
+            {project.stack.slice(0, 7).map((t) => (
+              <span key={t} className="text-[11px] text-foreground/70 bg-black/[0.04] dark:bg-white/[0.07] px-2 py-0.5 rounded-md">
+                {t}
+              </span>
+            ))}
+            {project.stack.length > 7 && (
+              <span className="text-[11px] text-foreground/40 px-1 py-0.5">+{project.stack.length - 7}</span>
+            )}
+          </div>
+        </div>
+
+        {/* Links */}
+        {(project.links.github || project.links.live) && (
+          <div className="shrink-0 w-full sm:w-48">
+            <h2 className="text-[10px] font-semibold text-foreground/40 uppercase tracking-widest mb-2">Lien</h2>
+            <div className="flex flex-col gap-2">
+              {project.links.github && (
+                <a
+                  href={project.links.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-1.5 text-[12px] text-foreground/80 hover:text-[var(--accent-color)] transition-colors truncate"
+                  title={project.links.github}
+                >
+                  <Ico d={ICONS.github} className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">GitHub Repo</span>
+                </a>
+              )}
+              {project.links.live && (
+                <a
+                  href={project.links.live}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-1.5 text-[12px] text-foreground/80 hover:text-[var(--accent-color)] transition-colors truncate"
+                  title={project.links.live}
+                >
+                  <Ico d={ICONS.link} className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">{project.links.live.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}</span>
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

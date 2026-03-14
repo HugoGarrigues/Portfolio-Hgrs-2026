@@ -2,7 +2,7 @@ import projectsData from '@/data/projects.json'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type ProjectCategory = 'web-apps' | 'ai-agentic' | 'in-progress'
+export type ProjectCategory = 'pro' | 'personal' | 'school'
 export type ProjectStatus = 'Deployed' | 'In Progress' | 'Concept'
 
 export type Project = {
@@ -11,6 +11,7 @@ export type Project = {
   tagline: string
   description: string
   categories: ProjectCategory[]
+  theme: string
   stack: string[]
   year: number
   status: ProjectStatus
@@ -19,6 +20,7 @@ export type Project = {
     live: string | null
   }
   thumbnail: string | null
+  images?: string[]
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
