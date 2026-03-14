@@ -5,7 +5,7 @@ import { useTranslation } from '@/lib/i18n/useTranslation'
 import { useTheme } from '@/contexts/ThemeContext'
 
 const MoonIcon = () => (
-  <svg className="w-3.5 h-3.5 text-foreground/90" fill="currentColor" viewBox="0 0 20 20">
+  <svg className="w-3.5 h-3.5 text-white/90 drop-shadow-md" fill="currentColor" viewBox="0 0 20 20">
     <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
   </svg>
 )
@@ -47,7 +47,7 @@ export function MenuBar({ onOpenAbout }: MenuBarProps) {
         <button
           onClick={onOpenAbout}
           aria-label="Hgrs — open about"
-          className="text-foreground text-[13px] font-semibold transition-opacity hover:opacity-70 focus:outline-none"
+          className="text-white drop-shadow-md text-[13px] font-semibold transition-opacity hover:opacity-70 focus:outline-none"
         >
           Hgrs
         </button>
@@ -56,7 +56,7 @@ export function MenuBar({ onOpenAbout }: MenuBarProps) {
       {/* Right — date + time */}
       <div className="ml-auto flex items-center gap-3">
         {doNotDisturb && <MoonIcon />}
-        <time role="timer" className="text-foreground text-[13px] font-semibold">
+        <time role="timer" className="text-white drop-shadow-md text-[13px] font-semibold">
           {dateTime}
         </time>
       </div>

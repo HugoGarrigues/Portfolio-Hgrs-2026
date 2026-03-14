@@ -131,7 +131,7 @@ function AppIcon({ id, name, iconFile, selected, onSelect, onOpen }: {
           draggable={false}
         />
       </div>
-      <span className={`text-[11px] leading-tight text-center px-1.5 py-0.5 rounded-[4px] break-words w-full transition-colors ${selected ? 'bg-[var(--accent-color)] text-foreground' : 'text-foreground/90 font-medium group-hover:bg-black/10 dark:group-hover:bg-black/10 dark:bg-white/10'}`}>
+      <span className={`text-[11px] leading-tight text-center px-1.5 py-0.5 rounded-[4px] break-words w-full transition-colors ${selected ? 'bg-[var(--accent-color)] text-foreground' : 'text-foreground/90 font-medium'}`}>
         {name}
       </span>
     </div>
