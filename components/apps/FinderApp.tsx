@@ -118,11 +118,12 @@ function AppIcon({ id, name, iconFile, selected, onSelect, onOpen }: {
       onDoubleClick={() => onOpen(id)}
       className="w-full flex flex-col items-center gap-1.5 group cursor-default select-none transition-transform active:scale-95"
     >
-      <div className={`relative w-[50px] h-[50px] rounded-[22%] overflow-hidden ${selected ? 'after:content-[""] after:absolute after:inset-[-4px] after:bg-black/10 dark:bg-white/10 after:rounded-xl' : ''}`}>
+      <div className={`relative w-[50px] h-[50px] flex items-center justify-center rounded-[22%] overflow-visible ${selected ? 'after:content-[""] after:absolute after:inset-[-4px] after:bg-black/10 dark:bg-white/10 after:rounded-xl' : ''}`}>
         <img
           src={`/icons/${iconFile}.png`}
           alt={name}
-          className={`w-full h-full object-contain ${id === 'settings' ? 'scale-[1.25]' : ''}`}
+          className={`w-full h-full object-contain ${['settings', 'notes', 'health', 'spotify'].includes(id) ? 'scale-[1.25]' : ''
+            }`}
           draggable={false}
         />
       </div>
