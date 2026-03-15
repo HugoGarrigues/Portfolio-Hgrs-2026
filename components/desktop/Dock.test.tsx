@@ -6,10 +6,11 @@ import type { AppId } from '@/contexts/WindowManagerContext'
 import type { AppConfig } from '@/lib/apps'
 
 const apps: AppConfig[] = [
-  { id: 'finder',    label: 'Finder',    iconFile: 'finder' },
-  { id: 'projects',  label: 'Projects',  iconFile: 'developer_folder' },
-  { id: 'instagram', label: 'Instagram', iconFile: 'instagram' },
+  { id: 'finder', label: 'Finder', iconFile: 'finder' },
+  { id: 'notes', label: 'Notes', iconFile: 'notes' },
+  { id: 'health', label: 'Health', iconFile: 'health' },
 ]
+
 
 const baseProps = {
   apps,
@@ -22,17 +23,17 @@ describe('Dock — rendering', () => {
   it('renders an icon for each app', () => {
     render(<Dock {...baseProps} />)
     expect(screen.getByRole('button', { name: /finder/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /projects/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /instagram/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /notes/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /notes/i })).toBeInTheDocument()
   })
 
   it('shows a visible dot under apps that have an open window', () => {
     const props = {
       ...baseProps,
-      openWindows: [{ id: 'w1', app: 'projects' as AppId, minimized: false }],
+      openWindows: [{ id: 'w1', app: 'notes' as AppId, minimized: false }],
     }
     render(<Dock {...props} />)
-    const projectsItem = screen.getByRole('button', { name: /projects/i }).closest('[data-dock-item]')
+    const projectsItem = screen.getByRole('button', { name: /notes/i }).closest('[data-dock-item]')
     const dot = projectsItem?.querySelector('[data-open-dot]')
     expect(dot).toBeInTheDocument()
     expect(dot?.className).toContain('opacity-100')
@@ -50,8 +51,8 @@ describe('Dock — interactions', () => {
   it('calls onOpen with the app id when clicking a dock icon for a closed app', () => {
     const onOpen = vi.fn()
     render(<Dock {...baseProps} onOpen={onOpen} />)
-    fireEvent.click(screen.getByRole('button', { name: /projects/i }))
-    expect(onOpen).toHaveBeenCalledWith('projects')
+    fireEvent.click(screen.getByRole('button', { name: /notes/i }))
+    expect(onOpen).toHaveBeenCalledWith('notes')
   })
 
   it('calls onFocus with the window id when clicking a dock icon for an already-open app', () => {
@@ -59,10 +60,10 @@ describe('Dock — interactions', () => {
     const props = {
       ...baseProps,
       onFocus,
-      openWindows: [{ id: 'w-99', app: 'projects' as AppId, minimized: false }],
+      openWindows: [{ id: 'w-99', app: 'notes' as AppId, minimized: false }],
     }
     render(<Dock {...props} />)
-    fireEvent.click(screen.getByRole('button', { name: /projects/i }))
+    fireEvent.click(screen.getByRole('button', { name: /notes/i }))
     expect(onFocus).toHaveBeenCalledWith('w-99')
   })
 
@@ -71,10 +72,10 @@ describe('Dock — interactions', () => {
     const props = {
       ...baseProps,
       onOpen,
-      openWindows: [{ id: 'w-99', app: 'projects' as AppId, minimized: true }],
+      openWindows: [{ id: 'w-99', app: 'notes' as AppId, minimized: true }],
     }
     render(<Dock {...props} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Projects' }))
-    expect(onOpen).toHaveBeenCalledWith('projects')
+    fireEvent.click(screen.getByRole('button', { name: 'Notes' }))
+    expect(onOpen).toHaveBeenCalledWith('notes')
   })
 })

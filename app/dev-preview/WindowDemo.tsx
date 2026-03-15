@@ -12,7 +12,7 @@ function Demo() {
     <div className="relative w-full h-screen bg-[#0d1117] overflow-hidden font-mono">
       {/* Controls */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[9999] flex gap-2 flex-wrap justify-center">
-        {(['terminal', 'about'] as const).map((app) => (
+        {(['finder', 'about'] as const).map((app) => (
           <button
             key={app}
             onClick={() => openWindow(app)}

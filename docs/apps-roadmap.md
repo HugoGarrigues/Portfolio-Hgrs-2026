@@ -30,18 +30,6 @@
 
 ---
 
-### 3. Projects — Portfolio Projects
-**Status:** To build
-**Priority:** HIGH
-
-| Field | Value |
-|---|---|
-| Window size | 820 × 540 |
-| Content | Grid of project cards: NEXUS, FridgeScan, FormaLib, Leave App — each with screenshot, description, stack, links |
-| Interactions | Click card → opens detail window (case study), links to GitHub / live demo |
-
----
-
 ### 4. Mail — Contact Form
 **Status:** Done
 **Priority:** HIGH
@@ -72,9 +60,9 @@
 
 | Field | Value |
 |---|---|
-| Window size | 360 × 420 |
-| Content | Yellow notepad-style textarea, multiple notes support |
-| Interactions | Type freely, notes persist in localStorage, create/delete notes |
+| Window size | 400 × 500 |
+| Content | Yellow notepad-style interface. Acts as a guestbook / message board for visitors to leave public notes. |
+| Interactions | Type messages, save to database, view messages left by other visitors. |
 
 ---
 
@@ -84,9 +72,9 @@
 
 | Field | Value |
 |---|---|
-| Window size | 720 × 520 |
-| Content | PPL split display, current PRs (bench, squat, deadlift, OHP), lean bulk stats (weight, calories, protein), weekly schedule |
-| Interactions | Read-only dashboard style, animated progress rings for macros |
+| Window size | 760 × 540 |
+| Content | Dashboard displaying daily bodybuilding stats, integrated with an OpenClaw agent. |
+| Interactions | View lean bulk progress, PRs, and daily workout insights synced from agent. |
 
 ---
 
@@ -96,23 +84,24 @@
 
 | Field | Value |
 |---|---|
-| Window size | 560 × 480 |
-| Content | Favorite playlists with cover art, currently playing track (embedded Spotify widget or static) |
-| Interactions | Click playlist → opens Spotify embed or external link |
+| Window size | 800 × 600 |
+| Content | Displays allowed public playlists from my personal Spotify account. |
+| Interactions | Browse playlists, click to listen (Spotify embed). |
 
 ---
 
-### 9. LinkedIn — External Link Launcher
+### 9. Photos — Visual Gallery
 **Status:** To build
-**Priority:** LOW
+**Priority:** MEDIUM
 
 | Field | Value |
 |---|---|
-| Window size | N/A (no window) |
-| Content | Dock icon only — clicking opens linkedin.com/in/hgrs in new tab |
-| Interactions | Direct external redirect, no window spawned |
+| Window size | 860 × 600 |
+| Content | Masonry grid of project screenshots, UI designs, and prototypes. |
+| Interactions | Click to open lightbox, scroll through visual work. |
 
 ---
+
 
 ### 10. Settings — System Preferences
 **Status:** Done
@@ -126,18 +115,6 @@
 
 ---
 
-### 11. Terminal — Developer Tools
-**Status:** Done
-**Priority:** LOW
-
-| Field | Value |
-|---|---|
-| Window size | 640 × 400 |
-| Content | Command line interface simulation |
-| Interactions | Execute basic commands, portfolio exploration via CLI |
-
----
-
 ## Desktop Icons
 
 | Icon | Target | Behavior |
@@ -146,7 +123,7 @@
 | Instagram | instagram.com/hgrs | Opens in new tab |
 | GitHub | github.com/hgrs | Opens in new tab |
 
-Desktop icons are double-clickable file icons sitting on the wallpaper, not dock items.
+*Note: Social links (LinkedIn, GitHub, Instagram) will exclusively live on the desktop as folder/link icons, not in the main Dock.*
 
 ---
 
@@ -158,10 +135,9 @@ Desktop icons are double-clickable file icons sitting on the wallpaper, not dock
 | HIGH | About | ✅ Done |
 | HIGH | Mail | ✅ Done |
 | HIGH | Preview (CV) | ✅ Done |
-| HIGH | Projects | ⏳ To build |
+| HIGH | Projects (in Finder) | ✅ Done |
 | MEDIUM | Notes | ⏳ To build |
 | MEDIUM | Health | ⏳ To build |
 | MEDIUM | Spotify | ⏳ To build |
+| MEDIUM | Photos | ⏳ To build |
 | LOW | Settings | ✅ Done |
-| LOW | Terminal | ✅ Done |
-| LOW | LinkedIn (dock) | ⏳ To build |

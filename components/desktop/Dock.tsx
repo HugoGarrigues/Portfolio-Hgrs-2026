@@ -11,15 +11,16 @@ import { useTheme } from '@/contexts/ThemeContext'
 
 const ICON_FILE: Record<AppId, string> = {
   finder: 'finder',
-  instagram: 'instagram',
-  photos: 'photos',
-  music: 'music',
-  terminal: 'terminal',
   about: 'finder',
   contact: 'mail',
   preview: 'preview',
   settings: 'settings',
+  notes: 'notes',
+  health: 'health',
+  spotify: 'spotify',
+  photos: 'photos',
 }
+
 
 function iconSrc(appId: AppId): string {
   const file = ICON_FILE[appId]
@@ -78,16 +79,15 @@ function DockItem({ config, isOpen, onClick, size }: DockItemProps) {
         onClick={onClick}
         className="relative flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent rounded-xl"
       >
-        <div
-          className="relative flex items-center justify-center"
-        >
+        <div className="relative flex items-center justify-center">
           <Image
             src={iconSrc(config.id as AppId)}
             alt={config.label}
             width={size}
             height={size}
             style={{ width: `${size}px`, height: `${size}px` }}
-            className={`rounded-xl ${config.id === 'settings' ? 'scale-[1.25]' : ''}`}
+            className={`rounded-xl ${['settings', 'notes', 'health', 'spotify'].includes(config.id) ? 'scale-[1.25]' : ''
+              }`}
             draggable={false}
           />
 
@@ -127,7 +127,8 @@ function MinimizedThumb({ win, config, onRestore, size }: MinimizedThumbProps) {
           width={size}
           height={size}
           style={{ width: `${size}px`, height: `${size}px` }}
-          className={`rounded-xl shadow-lg ${win.app === 'settings' ? 'scale-[1.25]' : ''}`}
+          className={`rounded-xl shadow-lg ${['settings', 'notes', 'health', 'spotify'].includes(win.app) ? 'scale-[1.25]' : ''
+            }`}
           draggable={false}
         />
         {/* Open indicator dot (as requested by user) */}
@@ -225,14 +226,17 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
                   className="relative flex items-center justify-center focus:outline-none rounded-xl"
                   tabIndex={-1}
                 >
-                  <Image
-                    src={iconSrc(app.id as AppId)}
-                    alt={app.label}
-                    width={44}
-                    height={44}
-                    className={`w-11 h-11 rounded-xl ${app.id === 'settings' ? 'scale-[1.25]' : ''}`}
-                    draggable={false}
-                  />
+                  <div className="relative flex items-center justify-center">
+                    <Image
+                      src={iconSrc(app.id as AppId)}
+                      alt={app.label}
+                      width={44}
+                      height={44}
+                      className={`w-11 h-11 rounded-xl ${['settings', 'notes', 'health', 'spotify'].includes(app.id) ? 'scale-[1.25]' : ''
+                        }`}
+                      draggable={false}
+                    />
+                  </div>
                   {isOpen && (
                     <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-1 h-1 bg-white rounded-full" />
                   )}

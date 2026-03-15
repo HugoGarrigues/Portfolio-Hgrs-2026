@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import React from 'react'
 import {
@@ -10,19 +10,19 @@ import {
 
 // ─── Reducer unit tests ────────────────────────────────────────────────────────
 
-const emptyState: WindowManagerState = { windows: [] }
+const emptyState: WindowManagerState = { windows: [], recentApps: [] }
 
 describe('windowManagerReducer — OPEN', () => {
   it('adds a window with correct app and default values', () => {
     const state = windowManagerReducer(emptyState, {
       type: 'OPEN',
-      app: 'projects',
+      app: 'finder',
       position: { x: 100, y: 80 },
     })
 
     expect(state.windows).toHaveLength(1)
     const win = state.windows[0]
-    expect(win.app).toBe('projects')
+    expect(win.app).toBe('finder')
     expect(win.position).toEqual({ x: 100, y: 80 })
     expect(win.minimized).toBe(false)
     expect(win.maximized).toBe(false)
@@ -32,10 +32,10 @@ describe('windowManagerReducer — OPEN', () => {
 
   it('assigns the highest zIndex when opening alongside existing windows', () => {
     const state1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
-    const state2 = windowManagerReducer(state1, { type: 'OPEN', app: 'projects' })
+    const state2 = windowManagerReducer(state1, { type: 'OPEN', app: 'finder' })
 
     const zIndexes = state2.windows.map((w) => w.zIndex)
-    const newestZIndex = state2.windows.find((w) => w.app === 'projects')!.zIndex
+    const newestZIndex = state2.windows.find((w) => w.app === 'finder')!.zIndex
     expect(newestZIndex).toBe(Math.max(...zIndexes))
   })
 
@@ -43,7 +43,7 @@ describe('windowManagerReducer — OPEN', () => {
     const state1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const existingId = state1.windows[0].id
 
-    const state2 = windowManagerReducer(state1, { type: 'OPEN', app: 'projects' })
+    const state2 = windowManagerReducer(state1, { type: 'OPEN', app: 'finder' })
     const state3 = windowManagerReducer(state2, { type: 'OPEN', app: 'finder' })
 
     expect(state3.windows).toHaveLength(2)
@@ -64,7 +64,7 @@ describe('windowManagerReducer — OPEN', () => {
 
 describe('windowManagerReducer — CLOSE', () => {
   it('removes the window with the given id', () => {
-    const state1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'projects' })
+    const state1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const id = state1.windows[0].id
     const state2 = windowManagerReducer(state1, { type: 'CLOSE', id })
 
@@ -72,7 +72,7 @@ describe('windowManagerReducer — CLOSE', () => {
   })
 
   it('leaves other windows untouched', () => {
-    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'projects' })
+    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'finder' })
     const idToClose = s1.windows[0].id
     const s3 = windowManagerReducer(s2, { type: 'CLOSE', id: idToClose })
@@ -82,7 +82,7 @@ describe('windowManagerReducer — CLOSE', () => {
   })
 
   it('is a no-op for an unknown id', () => {
-    const state1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'projects' })
+    const state1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const state2 = windowManagerReducer(state1, { type: 'CLOSE', id: 'nonexistent' })
 
     expect(state2.windows).toHaveLength(1)
@@ -91,7 +91,7 @@ describe('windowManagerReducer — CLOSE', () => {
 
 describe('windowManagerReducer — FOCUS', () => {
   it('gives the focused window the highest zIndex', () => {
-    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'projects' })
+    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'finder' })
     const projectsId = s1.windows[0].id
 
@@ -103,7 +103,7 @@ describe('windowManagerReducer — FOCUS', () => {
   })
 
   it('does not change the number of windows', () => {
-    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'projects' })
+    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'finder' })
     const s3 = windowManagerReducer(s2, { type: 'FOCUS', id: s1.windows[0].id })
 
@@ -113,7 +113,7 @@ describe('windowManagerReducer — FOCUS', () => {
 
 describe('windowManagerReducer — MINIMIZE', () => {
   it('sets minimized to true', () => {
-    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'projects' })
+    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const id = s1.windows[0].id
     const s2 = windowManagerReducer(s1, { type: 'MINIMIZE', id })
 
@@ -121,7 +121,7 @@ describe('windowManagerReducer — MINIMIZE', () => {
   })
 
   it('does not remove the window', () => {
-    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'projects' })
+    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const s2 = windowManagerReducer(s1, { type: 'MINIMIZE', id: s1.windows[0].id })
 
     expect(s2.windows).toHaveLength(1)
@@ -130,7 +130,7 @@ describe('windowManagerReducer — MINIMIZE', () => {
 
 describe('windowManagerReducer — MAXIMIZE', () => {
   it('toggles maximized on', () => {
-    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'projects' })
+    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const id = s1.windows[0].id
     const s2 = windowManagerReducer(s1, { type: 'MAXIMIZE', id })
 
@@ -138,7 +138,7 @@ describe('windowManagerReducer — MAXIMIZE', () => {
   })
 
   it('toggles maximized off when already maximized', () => {
-    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'projects' })
+    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const id = s1.windows[0].id
     const s2 = windowManagerReducer(s1, { type: 'MAXIMIZE', id })
     const s3 = windowManagerReducer(s2, { type: 'MAXIMIZE', id })
@@ -149,7 +149,7 @@ describe('windowManagerReducer — MAXIMIZE', () => {
 
 describe('windowManagerReducer — MOVE', () => {
   it('updates the position of the given window', () => {
-    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'projects' })
+    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const id = s1.windows[0].id
     const s2 = windowManagerReducer(s1, { type: 'MOVE', id, position: { x: 300, y: 200 } })
 
@@ -157,7 +157,7 @@ describe('windowManagerReducer — MOVE', () => {
   })
 
   it('does not mutate other window positions', () => {
-    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'projects' })
+    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'finder' })
     const projectsId = s1.windows[0].id
     const finderOriginalPosition = { ...s2.windows.find((w) => w.app === 'finder')!.position }
@@ -176,7 +176,7 @@ describe('windowManagerReducer — MOVE', () => {
 
 describe('useWindowManager hook', () => {
   it('throws when used outside WindowManagerProvider', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
     expect(() => renderHook(() => useWindowManager())).toThrow()
     consoleSpy.mockRestore()
   })
@@ -200,10 +200,10 @@ describe('useWindowManager hook', () => {
       wrapper: ({ children }) => <WindowManagerProvider>{children}</WindowManagerProvider>,
     })
 
-    act(() => result.current.openWindow('projects'))
+    act(() => result.current.openWindow('finder'))
 
     expect(result.current.windows).toHaveLength(1)
-    expect(result.current.windows[0].app).toBe('projects')
+    expect(result.current.windows[0].app).toBe('finder')
   })
 
   it('closes a window via closeWindow', () => {
@@ -211,7 +211,7 @@ describe('useWindowManager hook', () => {
       wrapper: ({ children }) => <WindowManagerProvider>{children}</WindowManagerProvider>,
     })
 
-    act(() => result.current.openWindow('projects'))
+    act(() => result.current.openWindow('finder'))
     const id = result.current.windows[0].id
     act(() => result.current.closeWindow(id))
 

@@ -9,10 +9,10 @@ import { Window } from '@/components/desktop/Window'
 import { MenuBar } from '@/components/desktop/MenuBar'
 import { Dock } from '@/components/desktop/Dock'
 import { BootScreen } from '@/components/desktop/BootScreen'
+import { DesktopIcons } from '@/components/desktop/DesktopIcons'
 import { APPS } from '@/lib/apps'
 import { AboutApp } from '@/components/apps/AboutApp'
 import { FinderApp } from '@/components/apps/FinderApp'
-import { TerminalApp } from '@/components/apps/TerminalApp'
 import { MailApp } from '@/components/apps/MailApp'
 import { PreviewApp } from '@/components/apps/PreviewApp'
 import { SettingsApp } from '@/components/apps/SettingsApp'
@@ -28,7 +28,6 @@ function AppContent({ appId }: { appId: AppId }) {
   switch (appId) {
     case 'about': return <AboutApp />
     case 'finder': return <FinderApp />
-    case 'terminal': return <TerminalApp />
     case 'contact': return <MailApp />
     case 'preview': return <PreviewApp />
     case 'settings': return <SettingsApp />
@@ -134,6 +133,9 @@ function DesktopContent() {
           )
         })}
       </AnimatePresence>
+
+      {/* Desktop Icons */}
+      <DesktopIcons />
 
       {/* Dock */}
       <Dock

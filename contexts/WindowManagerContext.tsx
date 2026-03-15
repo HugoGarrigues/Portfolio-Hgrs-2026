@@ -4,14 +4,14 @@ import React, { createContext, useContext, useReducer, useEffect, type ReactNode
 
 export type AppId =
   | 'finder'
-  | 'instagram'
-  | 'photos'
-  | 'music'
-  | 'terminal'
   | 'about'
   | 'contact'
   | 'preview'
   | 'settings'
+  | 'notes'
+  | 'health'
+  | 'spotify'
+  | 'photos'
 
 export type RecentApp = {
   id: AppId
@@ -48,12 +48,13 @@ const DEFAULT_SIZE = { width: 760, height: 520 }
 
 const DEFAULT_SIZES: Partial<Record<AppId, { width: number; height: number }>> = {
   finder: { width: 860, height: 560 },
-  photos: { width: 900, height: 620 },
-  instagram: { width: 480, height: 600 },
-  music: { width: 700, height: 520 },
   about: { width: 360, height: 560 },
   preview: { width: 680, height: 860 },
   settings: { width: 640, height: 480 },
+  notes: { width: 360, height: 420 },
+  health: { width: 720, height: 520 },
+  spotify: { width: 560, height: 480 },
+  photos: { width: 860, height: 600 },
 }
 
 function defaultSize(app: AppId) {
