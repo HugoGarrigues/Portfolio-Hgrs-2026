@@ -1,103 +1,218 @@
-# Documentation de l'Application Notes (Portfolio OS)
+# Plan de l'application Notes (Portfolio OS)
 
-Ce document récapitule l'intégralité du processus de réflexion, de mise en place, et de code réalisé pour l'application **Notes** de l'OS Portfolio, qui sert de "Guestbook" (Livre d'or) public pour les visiteurs, en imitant l'interface exacte de l'application Notes de macOS Tahoe.
-
----
-
-## 1. Objectif & Design de l'App
-
-- **Rôle :** Un livre d'or public sous forme de post-its / notes. Les visiteurs peuvent y laisser un pseudo, un titre, et un message.
-- **Design :** Réplication parfaite de l'application **Notes de macOS Tahoe** en mode sombre (Dark Mode).
-  - Barre latérale (Sidebar) avec sections "iCloud", "Notes", "Suppr. récentes" (Corbeille) et "Tags".
-  - En-tête avec bouton "Nouvelle Note" (SquarePen), "Plus" (...), et barre de recherche.
-  - Grille asymétrique (Masonry) affichant les cartes de notes avec le titre en gras et le jour de création en dessous.
-  - Easter Egg : Déplacement des notes vers la corbeille ("Suppr. récentes") avec possibilité de restauration.
+Ce document transforme la note existante en **plan d'implémentation clair** pour l'application **Notes** du Portfolio OS. Il inclut aussi les **skills à utiliser** pour exécuter le travail dans le bon ordre.
 
 ---
 
-## 2. Infrastructure Base de Données (Supabase)
+## 1. Objectif produit
 
-Pour la persistance des notes, nous avons choisi **Supabase**.
+Créer une application **Notes** servant de **guestbook public** dans le Portfolio OS, avec une interface inspirée de **Notes sur macOS Tahoe** en mode sombre.
 
-### Identifiants de connexion (`.env.local`)
-Ces variables ont été ajoutées à la racine du projet :
+### Attendus UX
+
+- Affichage d'une liste de notes sous forme de cartes.
+- Création d'une note avec `pseudo`, `titre`, `message`.
+- Navigation entre les notes actives et la corbeille.
+- Recherche locale dans les notes.
+- Déplacement d'une note vers la corbeille, puis restauration.
+- Interface fidèle à l'OS Portfolio et cohérente sur desktop et mobile.
+
+---
+
+## 2. Skills à utiliser
+
+J'ai utilisé la logique de `.agents/skills/find-skills/SKILL.md` pour déterminer les skills pertinents à partir du besoin. Pour ce projet, les skills à utiliser sont ceux déjà disponibles dans le repo.
+
+### Skills principaux
+
+1. **`react-nextjs-development`**
+   - À utiliser pour la structure globale de l'application dans Next.js App Router, les composants React, les routes API, le typage TypeScript et l'intégration au projet.
+
+2. **`senior-frontend`**
+   - À utiliser pour la qualité d'implémentation frontend, l'accessibilité, la structure des composants, la robustesse UI et la revue de code.
+
+3. **`tailwind-css-patterns`**
+   - À utiliser pour construire toute l'interface Notes, la sidebar, l'en-tête, la grille de cartes, la modale d'édition et les états responsive.
+
+4. **`vercel-react-best-practices`**
+   - À utiliser pour éviter les patterns React/Next.js coûteux, améliorer les performances perçues, limiter les rerenders inutiles et garder une base saine.
+
+### Skills optionnels selon l'implémentation
+
+5. **`framer-motion`**
+   - À utiliser uniquement si l'app Notes inclut de vraies animations: ouverture de fenêtre, transitions de cartes, apparition de la modale, micro-interactions ou transitions de layout.
+
+6. **`find-skills`**
+   - À réutiliser si une nouvelle partie du scope apparaît et qu'un besoin spécialisé n'est pas couvert par les skills ci-dessus.
+
+### Skills non prioritaires pour cette app
+
+- **`backend-dev-guidelines`** : non prioritaire ici, car cette app est un projet Next.js frontend-centric et non un monorepo Langfuse/tRPC/Express.
+- **`skill-creator` / `skill-installer`** : utiles seulement si un skill manque réellement et qu'il faut en installer ou en créer un nouveau.
+
+---
+
+## 3. Ordre d'utilisation recommandé des skills
+
+### Phase 1 - Architecture et base applicative
+
+- Utiliser **`react-nextjs-development`**
+- Puis vérifier la qualité de structure avec **`senior-frontend`**
+
+### Phase 2 - Construction de l'interface
+
+- Utiliser **`tailwind-css-patterns`**
+- Compléter avec **`senior-frontend`** pour l'accessibilité, la hiérarchie visuelle et les états UX
+
+### Phase 3 - Performance et finition React/Next.js
+
+- Utiliser **`vercel-react-best-practices`**
+- Ajouter **`framer-motion`** seulement si des animations réelles sont retenues
+
+### Phase 4 - Extension éventuelle du scope
+
+- Utiliser **`find-skills`** si un nouveau besoin apparaît, par exemple authentification, persistence avancée, workflow de contenu ou animations complexes
+
+---
+
+## 4. Plan fonctionnel de l'application
+
+### A. Interface Notes
+
+- Sidebar avec sections:
+  - `iCloud`
+  - `Notes`
+  - `Suppr. récentes`
+  - `Tags`
+- En-tête avec:
+  - bouton `Nouvelle Note`
+  - bouton d'actions secondaires
+  - champ de recherche
+- Zone principale:
+  - grille de notes
+  - état vide si aucune note
+  - filtre local sur le titre et le contenu
+
+### B. Création et édition
+
+- Ouvrir une interface de composition au clic sur `Nouvelle Note`
+- Champs requis:
+  - `author_name`
+  - `title`
+  - `content`
+- Validation minimale côté client
+- Soumission vers l'API
+- Mise à jour immédiate de l'interface après création
+
+### C. Gestion des dossiers
+
+- Dossier principal `notes`
+- Dossier corbeille `bin`
+- Déplacement d'une note vers la corbeille
+- Restauration d'une note depuis la corbeille
+
+### D. Recherche
+
+- Recherche locale instantanée
+- Filtrage par `title` et `content`
+- Conservation d'une UI fluide même avec plusieurs notes
+
+---
+
+## 5. Plan technique
+
+### Frontend
+
+- Composant principal: `components/apps/NotesApp.tsx`
+- Gestion d'état locale pour:
+  - dossier actif
+  - recherche
+  - notes chargées
+  - état de composition
+  - chargement / erreur
+- Responsive design aligné avec les conventions existantes du Portfolio OS
+
+### Backend / API
+
+- Route API: `app/api/notes/route.ts`
+- Endpoints prévus:
+  - `GET /api/notes?folder=notes|bin`
+  - `POST /api/notes`
+  - `PATCH /api/notes`
+
+### Persistance
+
+- Connexion Supabase via `lib/supabase.ts`
+- Table `notes` avec les champs:
+  - `id`
+  - `title`
+  - `content`
+  - `author_name`
+  - `folder`
+  - `author_type`
+  - `created_at`
+
+---
+
+## 6. Préparation base de données
+
+### Variables d'environnement
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://dwnjrvuhihxokhutqkzg.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_NtRiFK7gvfeowQ6-HwThwA_HBxtPn0K
 ```
 
-### Schéma SQL de la table `notes`
-Ce script a été (ou doit être) exécuté manuellement sur la console SQL de votre projet Supabase :
+### Schéma SQL prévu
+
 ```sql
 CREATE TABLE notes (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   author_name TEXT NOT NULL,
-  folder TEXT DEFAULT 'notes', -- Valeurs: 'notes' (actif) ou 'bin' (corbeille)
-  author_type TEXT DEFAULT 'guest', -- Valeurs: 'me' (admin) ou 'guest' (visiteur)
+  folder TEXT DEFAULT 'notes',
+  author_type TEXT DEFAULT 'guest',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Désactivation des règles de sécurité (Row Level Security) car l'accès est 100% public 
--- pour lire et créer des notes (Guestbook).
 ALTER TABLE notes DISABLE ROW LEVEL SECURITY;
 ```
 
+### Point d'attention
+
+- La désactivation de la RLS rend le guestbook 100% public.
+- Si l'application doit évoluer, il faudra revoir cette décision avant mise en production avancée.
+
 ---
 
-## 3. Dépendances Installées
+## 7. Dépendances prévues
 
-Installation du SDK JavaScript officiel de Supabase pour communiquer avec la base depuis Next.js :
 ```bash
 npm install @supabase/supabase-js
 ```
 
----
-
-## 4. Fichiers Créés / Modifiés
-
-### A. Client Supabase : `lib/supabase.ts`
-Fichier servant à initialiser la connexion Supabase et à l'exporter pour l'utiliser dans nos routes API.
-```typescript
-import { createClient } from '@supabase/supabase-js'
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!, 
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
-```
-
-### B. Routes API (Backend) : `app/api/notes/route.ts`
-Gestion complète du CRUD des notes via des requêtes HTTP :
-- **`GET /api/notes?folder={nom_du_dossier}`** :
-  - Récupère toutes les notes d'un dossier donné (`notes` ou `bin`) classées de la plus récente à la plus ancienne.
-- **`POST /api/notes`** :
-  - Accepte `title`, `content`, `author_name`.
-  - Insère la nouvelle note dans la table avec le dossier `notes` par défaut et le type `guest`.
-- **`PATCH /api/notes`** :
-  - Accepte l'ID d'une note (`id`) et sa nouvelle destination (`folder`). 
-  - Utilisé pour l'easter egg : envoyer une note à la corbeille ou la restaurer.
-
-### C. Interface Utilisateur (Frontend) : `components/apps/NotesApp.tsx`
-C'est le composant principal du système d'exploitation pour cette application.
-- **Gestion d'état locale :**
-  - Un système de navigation entre les dossiers "Notes" actives et la "Corbeille" (`activeFolder`).
-  - Une barre de recherche pour filtrer en direct le contenu des notes et les titres (`searchQuery`).
-  - Un affichage modal par-dessus l'interface (`isComposing`) pour que les invités puissent écrire leur message.
-- **Requêtes Fetch (`useEffect`) :**
-  - Chargement asynchrone des notes à l'ouverture de l'application et lors du changement de dossier (API GET).
-  - Suppression optimiste lors du déplacement d'une note (API PATCH).
-
-### D. Enregistrement Système (OS)
-L'application était déjà déclarée dans `lib/apps.ts` sous l'identifiant `notes`. Le composant frontend se charge d'instancier ses dimensions par défaut (400x500 originellement, mais adapté avec des styles responsifs tailwind dans `NotesApp.tsx`).
+`framer-motion` est déjà présent dans le projet et ne doit être utilisé que si les animations apportent une vraie valeur.
 
 ---
 
-## 5. Flux d'utilisation final (UX de l'invité)
-1. Le visiteur double-clique sur l'icône de l'app "Notes".
-2. La fenêtre s'ouvre, montrant les notes existantes (requête API de démarrage).
-3. Il clique sur le bouton de création au-dessus de la recherche (carré avec crayon).
-4. La pop-ip s'ouvre (similant l'éditeur).
-5. Il remplit son Pseudo, le Titre et son Message, puis clique sur "Save".
-6. La note s'enregistre via l'API, s'ajoute dynamiquement à la liste et apparaît comme une mini page web assombrie dans la grille principale. 
-7. Il peut passer sa souris sur une note et cliquer sur la corbeille pour la déplacer dans la section "Suppr. récentes" ajoutant un aspect "bac à sable" interactif.
+## 8. Étapes d'exécution concrètes
+
+1. Structurer l'app avec **`react-nextjs-development`**.
+2. Construire l'UI avec **`tailwind-css-patterns`**.
+3. Revoir l'ergonomie et la qualité de code avec **`senior-frontend`**.
+4. Vérifier les performances et patterns React avec **`vercel-react-best-practices`**.
+5. Ajouter **`framer-motion`** uniquement pour les animations nécessaires.
+6. Réutiliser **`find-skills`** si le scope change et nécessite un nouveau skill.
+
+---
+
+## 9. Résultat final attendu
+
+Une application **Notes** crédible, stable et intégrée au Portfolio OS, avec:
+
+- une expérience proche de macOS Notes,
+- une persistance des messages visiteurs,
+- une navigation simple entre notes actives et corbeille,
+- un rendu frontend propre, performant et maintenable,
+- un usage de skills cohérent avec le stack réel du projet.
