@@ -32,10 +32,10 @@ describe('windowManagerReducer — OPEN', () => {
 
   it('assigns the highest zIndex when opening alongside existing windows', () => {
     const state1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
-    const state2 = windowManagerReducer(state1, { type: 'OPEN', app: 'finder' })
+    const state2 = windowManagerReducer(state1, { type: 'OPEN', app: 'notes' })
 
     const zIndexes = state2.windows.map((w) => w.zIndex)
-    const newestZIndex = state2.windows.find((w) => w.app === 'finder')!.zIndex
+    const newestZIndex = state2.windows.find((w) => w.app === 'notes')!.zIndex
     expect(newestZIndex).toBe(Math.max(...zIndexes))
   })
 
@@ -43,7 +43,7 @@ describe('windowManagerReducer — OPEN', () => {
     const state1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const existingId = state1.windows[0].id
 
-    const state2 = windowManagerReducer(state1, { type: 'OPEN', app: 'finder' })
+    const state2 = windowManagerReducer(state1, { type: 'OPEN', app: 'notes' })
     const state3 = windowManagerReducer(state2, { type: 'OPEN', app: 'finder' })
 
     expect(state3.windows).toHaveLength(2)
@@ -73,12 +73,12 @@ describe('windowManagerReducer — CLOSE', () => {
 
   it('leaves other windows untouched', () => {
     const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
-    const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'finder' })
+    const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'notes' })
     const idToClose = s1.windows[0].id
     const s3 = windowManagerReducer(s2, { type: 'CLOSE', id: idToClose })
 
     expect(s3.windows).toHaveLength(1)
-    expect(s3.windows[0].app).toBe('finder')
+    expect(s3.windows[0].app).toBe('notes')
   })
 
   it('is a no-op for an unknown id', () => {
@@ -92,19 +92,19 @@ describe('windowManagerReducer — CLOSE', () => {
 describe('windowManagerReducer — FOCUS', () => {
   it('gives the focused window the highest zIndex', () => {
     const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
-    const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'finder' })
-    const projectsId = s1.windows[0].id
+    const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'notes' })
+    const finderId = s1.windows[0].id
 
-    const s3 = windowManagerReducer(s2, { type: 'FOCUS', id: projectsId })
+    const s3 = windowManagerReducer(s2, { type: 'FOCUS', id: finderId })
 
     const maxZ = Math.max(...s3.windows.map((w) => w.zIndex))
-    const projectsZ = s3.windows.find((w) => w.id === projectsId)!.zIndex
-    expect(projectsZ).toBe(maxZ)
+    const finderZ = s3.windows.find((w) => w.id === finderId)!.zIndex
+    expect(finderZ).toBe(maxZ)
   })
 
   it('does not change the number of windows', () => {
     const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
-    const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'finder' })
+    const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'notes' })
     const s3 = windowManagerReducer(s2, { type: 'FOCUS', id: s1.windows[0].id })
 
     expect(s3.windows).toHaveLength(2)
@@ -158,17 +158,18 @@ describe('windowManagerReducer — MOVE', () => {
 
   it('does not mutate other window positions', () => {
     const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
-    const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'finder' })
-    const projectsId = s1.windows[0].id
+    const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'notes' })
+    const finderId = s1.windows[0].id
     const finderOriginalPosition = { ...s2.windows.find((w) => w.app === 'finder')!.position }
 
     const s3 = windowManagerReducer(s2, {
       type: 'MOVE',
-      id: projectsId,
+      id: finderId,
       position: { x: 999, y: 999 },
     })
 
-    expect(s3.windows.find((w) => w.app === 'finder')!.position).toEqual(finderOriginalPosition)
+    expect(s3.windows.find((w) => w.app === 'notes')!.position).toEqual(s2.windows.find((w) => w.app === 'notes')!.position)
+    expect(s3.windows.find((w) => w.app === 'finder')!.position).toEqual({ x: 999, y: 999 })
   })
 })
 

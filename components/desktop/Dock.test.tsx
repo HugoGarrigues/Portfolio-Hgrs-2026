@@ -4,6 +4,7 @@ import React from 'react'
 import { Dock } from './Dock'
 import type { AppId } from '@/contexts/WindowManagerContext'
 import type { AppConfig } from '@/lib/apps'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 
 const apps: AppConfig[] = [
   { id: 'finder', label: 'Finder', iconFile: 'finder' },
@@ -19,9 +20,17 @@ const baseProps = {
   onFocus: vi.fn(),
 }
 
+function renderDock(props: React.ComponentProps<typeof Dock>) {
+  return render(
+    <ThemeProvider>
+      <Dock {...props} />
+    </ThemeProvider>,
+  )
+}
+
 describe('Dock — rendering', () => {
   it('renders an icon for each app', () => {
-    render(<Dock {...baseProps} />)
+    renderDock(baseProps)
     expect(screen.getByRole('button', { name: /finder/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /notes/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /notes/i })).toBeInTheDocument()
@@ -32,7 +41,7 @@ describe('Dock — rendering', () => {
       ...baseProps,
       openWindows: [{ id: 'w1', app: 'notes' as AppId, minimized: false }],
     }
-    render(<Dock {...props} />)
+    renderDock(props)
     const projectsItem = screen.getByRole('button', { name: /notes/i }).closest('[data-dock-item]')
     const dot = projectsItem?.querySelector('[data-open-dot]')
     expect(dot).toBeInTheDocument()
@@ -40,7 +49,7 @@ describe('Dock — rendering', () => {
   })
 
   it('dot is invisible for apps with no open window', () => {
-    render(<Dock {...baseProps} />)
+    renderDock(baseProps)
     const finderItem = screen.getByRole('button', { name: /finder/i }).closest('[data-dock-item]')
     const dot = finderItem?.querySelector('[data-open-dot]')
     expect(dot?.className).toContain('opacity-0')
@@ -50,7 +59,7 @@ describe('Dock — rendering', () => {
 describe('Dock — interactions', () => {
   it('calls onOpen with the app id when clicking a dock icon for a closed app', () => {
     const onOpen = vi.fn()
-    render(<Dock {...baseProps} onOpen={onOpen} />)
+    renderDock({ ...baseProps, onOpen })
     fireEvent.click(screen.getByRole('button', { name: /notes/i }))
     expect(onOpen).toHaveBeenCalledWith('notes')
   })
@@ -62,7 +71,7 @@ describe('Dock — interactions', () => {
       onFocus,
       openWindows: [{ id: 'w-99', app: 'notes' as AppId, minimized: false }],
     }
-    render(<Dock {...props} />)
+    renderDock(props)
     fireEvent.click(screen.getByRole('button', { name: /notes/i }))
     expect(onFocus).toHaveBeenCalledWith('w-99')
   })
@@ -74,7 +83,7 @@ describe('Dock — interactions', () => {
       onOpen,
       openWindows: [{ id: 'w-99', app: 'notes' as AppId, minimized: true }],
     }
-    render(<Dock {...props} />)
+    renderDock(props)
     fireEvent.click(screen.getByRole('button', { name: 'Notes' }))
     expect(onOpen).toHaveBeenCalledWith('notes')
   })

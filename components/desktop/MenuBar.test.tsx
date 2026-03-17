@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act, fireEvent } from '@testing-library/react'
 import React from 'react'
 import { MenuBar } from './MenuBar'
+import { LocaleProvider } from '@/contexts/LocaleContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 
 vi.mock('framer-motion', () => ({
   motion: {
@@ -10,6 +12,16 @@ vi.mock('framer-motion', () => ({
     ),
   },
 }))
+
+function renderMenuBar(props: React.ComponentProps<typeof MenuBar> = {}) {
+  return render(
+    <ThemeProvider>
+      <LocaleProvider>
+        <MenuBar {...props} />
+      </LocaleProvider>
+    </ThemeProvider>,
+  )
+}
 
 describe('MenuBar', () => {
   beforeEach(() => {
@@ -22,33 +34,33 @@ describe('MenuBar', () => {
   })
 
   it('renders the Hgrs button (no Apple logo)', () => {
-    render(<MenuBar />)
+    renderMenuBar()
     expect(screen.queryByRole('img', { name: /apple/i })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /hgrs/i })).toBeInTheDocument()
   })
 
   it('renders the Hgrs pseudo button', () => {
-    render(<MenuBar />)
+    renderMenuBar()
     expect(screen.getByRole('button', { name: /hgrs/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /hgrs/i }).textContent).toBe('Hgrs')
   })
 
   it('calls onOpenAbout when the Hgrs button is clicked', () => {
     const onOpenAbout = vi.fn()
-    render(<MenuBar onOpenAbout={onOpenAbout} />)
+    renderMenuBar({ onOpenAbout })
     fireEvent.click(screen.getByRole('button', { name: /hgrs/i }))
     expect(onOpenAbout).toHaveBeenCalledTimes(1)
   })
 
   it('displays the date and time in French format', () => {
-    render(<MenuBar />)
+    renderMenuBar()
     expect(screen.getByRole('timer')).toBeInTheDocument()
     // e.g. "Sam. 7 mars 14:35"
     expect(screen.getByRole('timer').textContent).toMatch(/\w+\.\s+\d{1,2}\s+\w+\s+\d{2}:\d{2}/)
   })
 
   it('updates the clock every second', () => {
-    render(<MenuBar />)
+    renderMenuBar()
     const before = screen.getByRole('timer').textContent
 
     act(() => {

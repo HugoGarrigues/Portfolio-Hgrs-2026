@@ -1,218 +1,553 @@
-# Plan de l'application Notes (Portfolio OS)
+# Notes App Implementation Plan
 
-Ce document transforme la note existante en **plan d'implémentation clair** pour l'application **Notes** du Portfolio OS. Il inclut aussi les **skills à utiliser** pour exécuter le travail dans le bon ordre.
+> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
----
+**Goal:** Build a public Notes guestbook inside Portfolio OS with a macOS Notes-inspired UI, Supabase persistence through a Next.js API route, instant publishing, local search, and a 24-hour submission limit per browser/device.
 
-## 1. Objectif produit
+**Architecture:** The Notes UI lives in a dedicated desktop app component and talks only to `/api/notes`. The API route validates requests, enforces the cooldown with a browser-stored `client_id`, and reads/writes published notes in Supabase. Moderation stays out of the app and is handled directly in Supabase.
 
-Créer une application **Notes** servant de **guestbook public** dans le Portfolio OS, avec une interface inspirée de **Notes sur macOS Tahoe** en mode sombre.
-
-### Attendus UX
-
-- Affichage d'une liste de notes sous forme de cartes.
-- Création d'une note avec `pseudo`, `titre`, `message`.
-- Navigation entre les notes actives et la corbeille.
-- Recherche locale dans les notes.
-- Déplacement d'une note vers la corbeille, puis restauration.
-- Interface fidèle à l'OS Portfolio et cohérente sur desktop et mobile.
+**Tech Stack:** Next.js App Router, React 19, TypeScript, Tailwind CSS v4, Vitest, Testing Library, Supabase JavaScript client.
 
 ---
 
-## 2. Skills à utiliser
+## File Structure
 
-J'ai utilisé la logique de `.agents/skills/find-skills/SKILL.md` pour déterminer les skills pertinents à partir du besoin. Pour ce projet, les skills à utiliser sont ceux déjà disponibles dans le repo.
+### Create
 
-### Skills principaux
+- `components/apps/NotesApp.tsx`
+- `components/apps/notes/NotesSidebar.tsx`
+- `components/apps/notes/NotesToolbar.tsx`
+- `components/apps/notes/NotesList.tsx`
+- `components/apps/notes/NoteCard.tsx`
+- `components/apps/notes/NotesComposer.tsx`
+- `components/apps/notes/types.ts`
+- `components/apps/NotesApp.test.tsx`
+- `app/api/notes/route.ts`
+- `app/api/notes/route.test.ts`
+- `lib/notes/client-id.ts`
+- `lib/notes/validation.ts`
+- `lib/notes/cooldown.ts`
+- `lib/supabase.ts`
+- `lib/supabase-server.ts`
 
-1. **`react-nextjs-development`**
-   - À utiliser pour la structure globale de l'application dans Next.js App Router, les composants React, les routes API, le typage TypeScript et l'intégration au projet.
+### Modify
 
-2. **`senior-frontend`**
-   - À utiliser pour la qualité d'implémentation frontend, l'accessibilité, la structure des composants, la robustesse UI et la revue de code.
+- `components/desktop/Desktop.tsx`
+- `lib/i18n/translations/en.json`
+- `lib/i18n/translations/fr.json`
+- `lib/i18n/translations/de.json`
+- `lib/i18n/translations/es.json`
+- `lib/i18n/translations/it.json`
+- `docs/notes-app-plan.md`
 
-3. **`tailwind-css-patterns`**
-   - À utiliser pour construire toute l'interface Notes, la sidebar, l'en-tête, la grille de cartes, la modale d'édition et les états responsive.
+### Optional Create If Needed During Implementation
 
-4. **`vercel-react-best-practices`**
-   - À utiliser pour éviter les patterns React/Next.js coûteux, améliorer les performances perçues, limiter les rerenders inutiles et garder une base saine.
+- `vitest.setup.ts`
 
-### Skills optionnels selon l'implémentation
+### Infrastructure Outside Repo
 
-5. **`framer-motion`**
-   - À utiliser uniquement si l'app Notes inclut de vraies animations: ouverture de fenêtre, transitions de cartes, apparition de la modale, micro-interactions ou transitions de layout.
+- Supabase table: `notes`
+- Supabase environment variables in local `.env.local`
 
-6. **`find-skills`**
-   - À réutiliser si une nouvelle partie du scope apparaît et qu'un besoin spécialisé n'est pas couvert par les skills ci-dessus.
+## Task 1: Install and Wire Supabase
 
-### Skills non prioritaires pour cette app
+**Files:**
+- Modify: `package.json`
+- Create: `lib/supabase.ts`
+- Create: `lib/supabase-server.ts`
 
-- **`backend-dev-guidelines`** : non prioritaire ici, car cette app est un projet Next.js frontend-centric et non un monorepo Langfuse/tRPC/Express.
-- **`skill-creator` / `skill-installer`** : utiles seulement si un skill manque réellement et qu'il faut en installer ou en créer un nouveau.
+- [ ] **Step 1: Add the dependency**
 
----
+Run: `npm install @supabase/supabase-js`
 
-## 3. Ordre d'utilisation recommandé des skills
+Expected: package install completes and `package.json` / lockfile include `@supabase/supabase-js`.
 
-### Phase 1 - Architecture et base applicative
+- [ ] **Step 2: Add a browser-safe Supabase helper**
 
-- Utiliser **`react-nextjs-development`**
-- Puis vérifier la qualité de structure avec **`senior-frontend`**
+Create `lib/supabase.ts` with a small client factory based on:
 
-### Phase 2 - Construction de l'interface
+```ts
+import { createClient } from '@supabase/supabase-js'
 
-- Utiliser **`tailwind-css-patterns`**
-- Compléter avec **`senior-frontend`** pour l'accessibilité, la hiérarchie visuelle et les états UX
+export function createSupabaseBrowserClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-### Phase 3 - Performance et finition React/Next.js
+  if (!url || !anonKey) {
+    throw new Error('Supabase public env vars are missing')
+  }
 
-- Utiliser **`vercel-react-best-practices`**
-- Ajouter **`framer-motion`** seulement si des animations réelles sont retenues
+  return createClient(url, anonKey)
+}
+```
 
-### Phase 4 - Extension éventuelle du scope
+- [ ] **Step 3: Add a server-side Supabase helper**
 
-- Utiliser **`find-skills`** si un nouveau besoin apparaît, par exemple authentification, persistence avancée, workflow de contenu ou animations complexes
+Create `lib/supabase-server.ts` with:
 
----
+```ts
+import { createClient } from '@supabase/supabase-js'
 
-## 4. Plan fonctionnel de l'application
+export function createSupabaseServerClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-### A. Interface Notes
+  if (!url || !anonKey) {
+    throw new Error('Supabase env vars are missing')
+  }
 
-- Sidebar avec sections:
-  - `iCloud`
-  - `Notes`
-  - `Suppr. récentes`
-  - `Tags`
-- En-tête avec:
-  - bouton `Nouvelle Note`
-  - bouton d'actions secondaires
-  - champ de recherche
-- Zone principale:
-  - grille de notes
-  - état vide si aucune note
-  - filtre local sur le titre et le contenu
+  return createClient(url, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+}
+```
 
-### B. Création et édition
+- [ ] **Step 4: Record the required local environment**
 
-- Ouvrir une interface de composition au clic sur `Nouvelle Note`
-- Champs requis:
-  - `author_name`
-  - `title`
-  - `content`
-- Validation minimale côté client
-- Soumission vers l'API
-- Mise à jour immédiate de l'interface après création
-
-### C. Gestion des dossiers
-
-- Dossier principal `notes`
-- Dossier corbeille `bin`
-- Déplacement d'une note vers la corbeille
-- Restauration d'une note depuis la corbeille
-
-### D. Recherche
-
-- Recherche locale instantanée
-- Filtrage par `title` et `content`
-- Conservation d'une UI fluide même avec plusieurs notes
-
----
-
-## 5. Plan technique
-
-### Frontend
-
-- Composant principal: `components/apps/NotesApp.tsx`
-- Gestion d'état locale pour:
-  - dossier actif
-  - recherche
-  - notes chargées
-  - état de composition
-  - chargement / erreur
-- Responsive design aligné avec les conventions existantes du Portfolio OS
-
-### Backend / API
-
-- Route API: `app/api/notes/route.ts`
-- Endpoints prévus:
-  - `GET /api/notes?folder=notes|bin`
-  - `POST /api/notes`
-  - `PATCH /api/notes`
-
-### Persistance
-
-- Connexion Supabase via `lib/supabase.ts`
-- Table `notes` avec les champs:
-  - `id`
-  - `title`
-  - `content`
-  - `author_name`
-  - `folder`
-  - `author_type`
-  - `created_at`
-
----
-
-## 6. Préparation base de données
-
-### Variables d'environnement
+Document or add locally:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://dwnjrvuhihxokhutqkzg.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_NtRiFK7gvfeowQ6-HwThwA_HBxtPn0K
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 ```
 
-### Schéma SQL prévu
+Expected: local development has the two public Supabase env vars available.
 
-```sql
-CREATE TABLE notes (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  author_name TEXT NOT NULL,
-  folder TEXT DEFAULT 'notes',
-  author_type TEXT DEFAULT 'guest',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
-ALTER TABLE notes DISABLE ROW LEVEL SECURITY;
-```
-
-### Point d'attention
-
-- La désactivation de la RLS rend le guestbook 100% public.
-- Si l'application doit évoluer, il faudra revoir cette décision avant mise en production avancée.
-
----
-
-## 7. Dépendances prévues
+- [ ] **Step 5: Commit**
 
 ```bash
-npm install @supabase/supabase-js
+git add package.json package-lock.json lib/supabase.ts lib/supabase-server.ts docs/notes-app-plan.md
+git commit -m "chore: add notes app supabase setup"
 ```
 
-`framer-motion` est déjà présent dans le projet et ne doit être utilisé que si les animations apportent une vraie valeur.
+## Task 2: Create the Notes Database Contract
 
----
+**Files:**
+- Create: `lib/notes/types.ts` or `components/apps/notes/types.ts` if the app owns the shapes
+- Create: `lib/notes/validation.ts`
+- Create: `lib/notes/cooldown.ts`
+- Infrastructure: Supabase SQL editor
 
-## 8. Étapes d'exécution concrètes
+- [ ] **Step 1: Create the database table in Supabase**
 
-1. Structurer l'app avec **`react-nextjs-development`**.
-2. Construire l'UI avec **`tailwind-css-patterns`**.
-3. Revoir l'ergonomie et la qualité de code avec **`senior-frontend`**.
-4. Vérifier les performances et patterns React avec **`vercel-react-best-practices`**.
-5. Ajouter **`framer-motion`** uniquement pour les animations nécessaires.
-6. Réutiliser **`find-skills`** si le scope change et nécessite un nouveau skill.
+Run in Supabase SQL editor:
 
----
+```sql
+create table if not exists notes (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  content text not null,
+  author_name text not null,
+  client_id text not null,
+  status text not null default 'published',
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
 
-## 9. Résultat final attendu
+create index if not exists notes_status_created_at_idx
+  on notes (status, created_at desc);
 
-Une application **Notes** crédible, stable et intégrée au Portfolio OS, avec:
+create index if not exists notes_client_id_created_at_idx
+  on notes (client_id, created_at desc);
+```
 
-- une expérience proche de macOS Notes,
-- une persistance des messages visiteurs,
-- une navigation simple entre notes actives et corbeille,
-- un rendu frontend propre, performant et maintenable,
-- un usage de skills cohérent avec le stack réel du projet.
+Expected: `notes` exists with the indexes needed for public reads and cooldown checks.
+
+- [ ] **Step 2: Define shared Notes types**
+
+Create the shared types:
+
+```ts
+export type NoteStatus = 'published'
+
+export type NoteRecord = {
+  id: string
+  title: string
+  content: string
+  author_name: string
+  client_id: string
+  status: NoteStatus
+  created_at: string
+  updated_at: string
+}
+
+export type CreateNoteInput = {
+  displayName: string
+  title: string
+  message: string
+  clientId: string
+}
+```
+
+- [ ] **Step 3: Add input validation helpers**
+
+Create `lib/notes/validation.ts` with rules for required trimmed fields and max lengths, for example:
+
+```ts
+export const NOTE_LIMITS = {
+  displayName: 60,
+  title: 120,
+  message: 1200,
+} as const
+```
+
+The helper should return normalized values or a clear error object for invalid input.
+
+- [ ] **Step 4: Add cooldown helpers**
+
+Create `lib/notes/cooldown.ts` with helpers such as:
+
+```ts
+export const NOTES_COOLDOWN_MS = 24 * 60 * 60 * 1000
+
+export function getNextAllowedAt(createdAt: string) {
+  return new Date(new Date(createdAt).getTime() + NOTES_COOLDOWN_MS).toISOString()
+}
+
+export function isCooldownActive(createdAt: string, now = Date.now()) {
+  return new Date(createdAt).getTime() + NOTES_COOLDOWN_MS > now
+}
+```
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add lib/notes/validation.ts lib/notes/cooldown.ts components/apps/notes/types.ts
+git commit -m "feat: define notes data model and validation"
+```
+
+## Task 3: Implement the Notes API Route
+
+**Files:**
+- Create: `app/api/notes/route.ts`
+- Test: `app/api/notes/route.test.ts`
+- Create: `lib/supabase-server.ts`
+- Create: `lib/notes/validation.ts`
+- Create: `lib/notes/cooldown.ts`
+
+- [ ] **Step 1: Write the failing API tests**
+
+Cover at minimum:
+
+```ts
+it('returns published notes sorted newest first')
+it('rejects invalid payloads')
+it('rejects a second note during the 24h cooldown')
+it('creates a published note when submission is allowed')
+```
+
+Run: `npm run test:run -- app/api/notes/route.test.ts`
+
+Expected: FAIL because the route does not exist yet.
+
+- [ ] **Step 2: Implement `GET /api/notes`**
+
+Add a `GET` handler that:
+- creates a Supabase server client
+- selects `published` notes only
+- orders by `created_at` descending
+- returns a JSON payload like:
+
+```ts
+return NextResponse.json({ notes })
+```
+
+- [ ] **Step 3: Implement `POST /api/notes`**
+
+Add a `POST` handler that:
+- parses JSON safely
+- validates and trims `displayName`, `title`, `message`, and `clientId`
+- queries the latest note for the same `client_id`
+- rejects with `429` if cooldown is active
+- inserts a new `published` note
+- returns the created note and the next allowed time
+
+Suggested response shape:
+
+```ts
+return NextResponse.json({
+  note,
+  cooldown: { nextAllowedAt },
+})
+```
+
+- [ ] **Step 4: Run the API tests**
+
+Run: `npm run test:run -- app/api/notes/route.test.ts`
+
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add app/api/notes/route.ts app/api/notes/route.test.ts lib/notes/validation.ts lib/notes/cooldown.ts lib/supabase-server.ts
+git commit -m "feat: add notes api route"
+```
+
+## Task 4: Add Client-Side Notes Utilities
+
+**Files:**
+- Create: `lib/notes/client-id.ts`
+- Create: `components/apps/notes/types.ts`
+
+- [ ] **Step 1: Create a stable client-id helper**
+
+Add `lib/notes/client-id.ts` with logic similar to:
+
+```ts
+const STORAGE_KEY = 'hg_notes_client_id'
+
+export function getNotesClientId() {
+  const existing = window.localStorage.getItem(STORAGE_KEY)
+  if (existing) return existing
+
+  const next = crypto.randomUUID()
+  window.localStorage.setItem(STORAGE_KEY, next)
+  return next
+}
+```
+
+- [ ] **Step 2: Define client-facing Notes view models**
+
+Keep the UI-facing type narrow:
+
+```ts
+export type Note = {
+  id: string
+  title: string
+  content: string
+  authorName: string
+  createdAt: string
+}
+
+export type NotesCooldown = {
+  nextAllowedAt: string | null
+}
+```
+
+- [ ] **Step 3: Add any mapping helpers needed between API and UI shapes**
+
+Example:
+
+```ts
+export function mapNoteRecord(record: {
+  id: string
+  title: string
+  content: string
+  author_name: string
+  created_at: string
+}) {
+  return {
+    id: record.id,
+    title: record.title,
+    content: record.content,
+    authorName: record.author_name,
+    createdAt: record.created_at,
+  }
+}
+```
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add lib/notes/client-id.ts components/apps/notes/types.ts
+git commit -m "feat: add notes client utilities"
+```
+
+## Task 5: Build the Notes UI Components
+
+**Files:**
+- Create: `components/apps/NotesApp.tsx`
+- Create: `components/apps/notes/NotesSidebar.tsx`
+- Create: `components/apps/notes/NotesToolbar.tsx`
+- Create: `components/apps/notes/NotesList.tsx`
+- Create: `components/apps/notes/NoteCard.tsx`
+- Create: `components/apps/notes/NotesComposer.tsx`
+- Modify: `components/desktop/Desktop.tsx`
+
+- [ ] **Step 1: Write the failing UI tests**
+
+Cover at minimum:
+
+```ts
+it('renders fetched notes')
+it('filters notes locally from the search field')
+it('submits a new note and appends it to the list')
+it('shows cooldown messaging after a successful submission')
+it('shows an empty state when no notes exist')
+```
+
+Run: `npm run test:run -- components/apps/NotesApp.test.tsx`
+
+Expected: FAIL because the Notes app is not implemented yet.
+
+- [ ] **Step 2: Build the static app shell**
+
+Create `components/apps/NotesApp.tsx` using the same window/app conventions as `FinderApp.tsx` and `MailApp.tsx`:
+- outer `p-2 gap-2` shell
+- draggable sidebar and toolbar zones through `useWindow()`
+- dark background and rounded inner panels matching the design system
+
+- [ ] **Step 3: Split the app into focused UI pieces**
+
+Implement:
+- `NotesSidebar` for the left rail and posting rule
+- `NotesToolbar` for title, search, and `New Note`
+- `NotesList` for empty state and cards
+- `NoteCard` for single-note rendering
+- `NotesComposer` for the create form and submission state
+
+- [ ] **Step 4: Add data loading and local search**
+
+Inside `NotesApp.tsx`:
+- fetch `/api/notes` on mount
+- store notes, loading, error, search, and cooldown state
+- filter by `title` and `content` in memory
+
+- [ ] **Step 5: Add submission flow**
+
+On submit:
+- read `client_id` from `getNotesClientId()`
+- `POST` to `/api/notes`
+- append the returned note to local state
+- update cooldown state from the response
+- disable or hide the composer action until cooldown expires
+
+- [ ] **Step 6: Wire the app into the desktop switch**
+
+Update `components/desktop/Desktop.tsx`:
+
+```ts
+import { NotesApp } from '@/components/apps/NotesApp'
+```
+
+And add:
+
+```ts
+case 'notes': return <NotesApp />
+```
+
+- [ ] **Step 7: Run the Notes app tests**
+
+Run: `npm run test:run -- components/apps/NotesApp.test.tsx`
+
+Expected: PASS
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add components/apps/NotesApp.tsx components/apps/notes components/desktop/Desktop.tsx components/apps/NotesApp.test.tsx
+git commit -m "feat: add notes desktop app"
+```
+
+## Task 6: Add Notes Localization
+
+**Files:**
+- Modify: `lib/i18n/translations/en.json`
+- Modify: `lib/i18n/translations/fr.json`
+- Modify: `lib/i18n/translations/de.json`
+- Modify: `lib/i18n/translations/es.json`
+- Modify: `lib/i18n/translations/it.json`
+
+- [ ] **Step 1: Add Notes translation keys in English first**
+
+Add a `notes` namespace with keys like:
+
+```json
+{
+  "notes": {
+    "title": "Notes",
+    "newNote": "New Note",
+    "searchPlaceholder": "Search",
+    "postingRule": "1 note every 24 hours on this device",
+    "emptyTitle": "No notes yet",
+    "emptyBody": "Be the first to leave a note.",
+    "fieldDisplayName": "Name",
+    "fieldTitle": "Title",
+    "fieldMessage": "Message",
+    "submit": "Publish",
+    "submitting": "Publishing…",
+    "cooldownTitle": "You already posted a note",
+    "cooldownBody": "You can publish another note after {date}.",
+    "validationRequired": "All fields are required",
+    "serverError": "Unable to publish your note right now"
+  }
+}
+```
+
+- [ ] **Step 2: Add matching keys to the other locale files**
+
+Keep the same key structure in `fr`, `de`, `es`, and `it`.
+
+- [ ] **Step 3: Use the translation keys in the Notes components**
+
+Replace hardcoded UI strings in the Notes app with `useTranslation()`.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add lib/i18n/translations/en.json lib/i18n/translations/fr.json lib/i18n/translations/de.json lib/i18n/translations/es.json lib/i18n/translations/it.json components/apps/NotesApp.tsx components/apps/notes
+git commit -m "feat: localize notes app copy"
+```
+
+## Task 7: Verify the Full Feature
+
+**Files:**
+- Modify as needed based on failures found during verification
+
+- [ ] **Step 1: Run lint**
+
+Run: `npm run lint`
+
+Expected: PASS
+
+- [ ] **Step 2: Run targeted tests**
+
+Run: `npm run test:run -- app/api/notes/route.test.ts components/apps/NotesApp.test.tsx`
+
+Expected: PASS
+
+- [ ] **Step 3: Run the full test suite**
+
+Run: `npm run test:run`
+
+Expected: PASS
+
+- [ ] **Step 4: Manual smoke test in the app**
+
+Run: `npm run dev`
+
+Verify manually:
+- Notes opens from the Dock/Finder
+- Existing notes load
+- Search filters locally
+- New note submission works
+- A second submission on the same device is blocked for 24 hours
+- The success/cooldown copy is readable on desktop and mobile sizes
+
+- [ ] **Step 5: Final commit**
+
+```bash
+git add .
+git commit -m "feat: ship notes guestbook app"
+```
+
+## Implementation Notes
+
+- Do not reintroduce public trash or restore controls in V1.
+- Do not add hidden admin UI for moderation.
+- Keep search fully client-side unless performance proves otherwise.
+- Prefer small components over one large `NotesApp.tsx`.
+- Follow the existing dark window styling from `components/apps/FinderApp.tsx` and `components/apps/MailApp.tsx`.
+- Only add Framer Motion if the animation has a clear product reason.
+
+## Done Definition
+
+The feature is complete when:
+
+- the Notes app renders as a first-class Portfolio OS app
+- published notes are loaded from Supabase through `/api/notes`
+- visitors can create exactly one note per device every 24 hours
+- local search works
+- the UI is translated through the existing i18n system
+- tests and lint pass
