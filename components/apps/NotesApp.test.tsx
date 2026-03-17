@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { LocaleProvider } from '@/contexts/LocaleContext'
@@ -72,20 +72,38 @@ describe('NotesApp', () => {
     )
   }
 
-  it('renders fetched notes and filters them locally', async () => {
+  it('auto-selects the first note and filters the gallery locally', async () => {
     const user = userEvent.setup()
     renderNotesApp()
 
-    expect(await screen.findByText('Newest note')).toBeInTheDocument()
-    expect(screen.getByText('Older note')).toBeInTheDocument()
+    const detailPane = await screen.findByLabelText('Note detail')
+    const gallery = screen.getByLabelText('Notes gallery')
+    await waitFor(() => {
+      expect(within(detailPane).getByRole('heading', { name: 'Newest note' })).toBeInTheDocument()
+    })
+    expect(within(gallery).getByText('Older note')).toBeInTheDocument()
+    expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
+    expect(within(detailPane).getByText('Ada')).toBeInTheDocument()
 
     await user.type(screen.getByPlaceholderText('Search'), 'fresh')
 
-    expect(screen.getByText('Newest note')).toBeInTheDocument()
-    expect(screen.queryByText('Older note')).not.toBeInTheDocument()
+    expect(within(gallery).getByText('Newest note')).toBeInTheDocument()
+    expect(within(gallery).queryByText('Older note')).not.toBeInTheDocument()
   })
 
-  it('submits a new note and shows cooldown messaging after success', async () => {
+  it('switches the reading pane when a tile is selected', async () => {
+    const user = userEvent.setup()
+    renderNotesApp()
+
+    const detailPane = await screen.findByLabelText('Note detail')
+    await user.click(screen.getByRole('button', { name: /Open note Older note/i }))
+
+    expect(within(detailPane).getByRole('heading', { name: 'Older note' })).toBeInTheDocument()
+    expect(within(detailPane).getByText('Something thoughtful')).toBeInTheDocument()
+    expect(within(detailPane).getByText('Linus')).toBeInTheDocument()
+  })
+
+  it('submits a new note, selects it, and shows cooldown messaging after success', async () => {
     const user = userEvent.setup()
     renderNotesApp()
 
@@ -97,10 +115,13 @@ describe('NotesApp', () => {
     await user.type(screen.getByLabelText('Message'), 'Created from the modal')
     await user.click(screen.getByRole('button', { name: 'Publish' }))
 
+    const detailPane = await screen.findByLabelText('Note detail')
     await waitFor(() => {
-      expect(screen.getByText('Posted note')).toBeInTheDocument()
+      expect(within(detailPane).getByRole('heading', { name: 'Posted note' })).toBeInTheDocument()
     })
 
+    expect(within(detailPane).getByText('Created from the modal')).toBeInTheDocument()
+    expect(within(detailPane).getByText('Grace')).toBeInTheDocument()
     expect(screen.getByText(/You already posted a note/i)).toBeInTheDocument()
   })
 

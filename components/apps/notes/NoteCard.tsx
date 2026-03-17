@@ -2,28 +2,42 @@ import type { Note } from './types'
 
 type NoteCardProps = {
   note: Note
+  selected: boolean
+  onSelect: (id: string) => void
 }
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
+    weekday: 'short',
   }).format(new Date(date))
 }
 
-export function NoteCard({ note }: NoteCardProps) {
+export function NoteCard({ note, selected, onSelect }: NoteCardProps) {
   return (
-    <article className="rounded-2xl border border-border-subtle bg-white/[0.04] p-4 shadow-lg shadow-black/10">
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-[13px] font-semibold text-foreground/95">{note.title}</h3>
-          <p className="mt-1 text-[11px] text-foreground/45">{note.authorName}</p>
+    <button
+      type="button"
+      aria-label={`Open note ${note.title}`}
+      onClick={() => onSelect(note.id)}
+      className={`group flex min-h-[160px] w-full flex-col rounded-xl border p-4 text-left transition duration-150 ${selected
+          ? 'border-[var(--accent-color)]/30 bg-[var(--accent-color)]/10 shadow-[0_0_0_1px_rgba(var(--accent-color),0.1)]'
+          : 'border-border-subtle bg-black/5 dark:bg-white/[0.03] hover:border-border-subtle hover:bg-black/10 dark:hover:bg-white/[0.06]'
+        }`}
+    >
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h3 className="truncate text-[13px] font-semibold tracking-tight text-foreground/95">
+            {note.title}
+          </h3>
+          <p className="mt-1 truncate text-[11px] text-foreground/50">{note.authorName}</p>
         </div>
-        <p className="text-[10px] uppercase tracking-widest text-foreground/25">{formatDate(note.createdAt)}</p>
+        <p className="shrink-0 pt-0.5 text-[10px] uppercase tracking-widest text-foreground/40">
+          {formatDate(note.createdAt)}
+        </p>
       </div>
 
-      <p className="text-[12px] leading-6 text-foreground/80">{note.content}</p>
-    </article>
+      <p className="line-clamp-4 text-[12px] leading-relaxed text-foreground/70">
+        {note.content}
+      </p>
+    </button>
   )
 }

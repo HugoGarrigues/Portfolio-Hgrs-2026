@@ -4,7 +4,7 @@
 
 ## Goal
 
-Build a public Notes guestbook inside Portfolio OS with a dark macOS Notes-inspired interface, instant publishing, and a simple 24-hour submission limit per browser/device.
+Build a public Notes guestbook inside Portfolio OS with a dark macOS Notes-inspired interface, instant publishing, a gallery-style browsing experience, and a simple 24-hour submission limit per browser/device.
 
 ## Product Scope
 
@@ -38,7 +38,7 @@ Build a public Notes guestbook inside Portfolio OS with a dark macOS Notes-inspi
 
 The Notes app uses a Next.js API route as the single read/write gateway between the public client and Supabase. The browser never talks directly to Supabase for this feature.
 
-The frontend is responsible for rendering the desktop-style Notes interface, managing local UI state, performing local search, and persisting a stable `client_id` in browser storage. The API route is responsible for validation, cooldown enforcement, and all database reads/writes.
+The frontend is responsible for rendering the desktop-style Notes interface, managing local UI state, performing local search, tracking the currently selected note, and persisting a stable `client_id` in browser storage. The API route is responsible for validation, cooldown enforcement, and all database reads/writes.
 
 ## UI Design
 
@@ -46,32 +46,47 @@ The frontend is responsible for rendering the desktop-style Notes interface, man
 
 - The app lives in `components/apps/NotesApp.tsx`
 - It must match the existing Portfolio OS app-window layout and dark visual language
-- It should feel visually consistent with the Finder and Mail apps already present in the project
+- It should feel closer to native Apple Notes than to a generic web guestbook
 
-### V1 Layout
+### V2 Layout Direction
 
-- Left sidebar with:
-  - `Notes`
-  - a small informational area describing the 24-hour posting rule
-- Toolbar with:
-  - title
-  - `New Note` action
-  - search field
-- Main content area with:
-  - list of published notes
+The redesigned Notes app follows a 3-column structure inspired by the reference UI:
+
+- Left sidebar:
+  - compact Notes navigation
+  - active `Notes` section
+  - subtle metadata like note count and the 24-hour posting rule
+  - non-functional visual items such as recently deleted / tags for Notes-like atmosphere
+- Center gallery:
+  - searchable grid of note tiles
+  - newest notes first
+  - selected note visibly highlighted
   - empty state when there are no notes
-  - cooldown state messaging when the local device cannot post yet
+- Right reading pane:
+  - full preview of the selected note
+  - polished header with title, author, and date
+  - empty instructional state only when there is no selectable note
+
+### Interaction Model
+
+- The first available note auto-selects after notes load
+- Clicking a tile updates the reading pane instead of opening a modal
+- Search filters the gallery locally without changing the selected-note behavior unexpectedly
+- After a successful post, the new note is inserted into the gallery and becomes the selected note immediately
+- Cooldown messaging remains visible in the app when the current device cannot post again yet
 
 ### Compose Experience
 
-- `New Note` opens a compose surface inside the app
+- `New Note` opens a dedicated compose surface inside the app
+- Compose does not replace the reading pane permanently
 - Required fields:
   - `displayName`
   - `title`
   - `message`
 - On success:
-  - the note appears immediately in the list
-  - the form resets or closes
+  - the note appears immediately in the gallery
+  - the new note becomes selected in the reading pane
+  - the compose surface closes
   - the UI enters cooldown mode until the 24-hour window expires
 - On failure:
   - the app shows a clear inline message for validation, cooldown, or server errors
@@ -143,6 +158,7 @@ The client should manage:
 - loaded notes
 - loading and error state
 - search query
+- selected note id
 - compose surface open/closed state
 - compose form state
 - submit status
@@ -161,11 +177,13 @@ Search should remain fully local in V1 for responsiveness and simplicity.
 
 ### UI
 
-- notes list rendering
-- empty state rendering
-- local search filtering
-- compose success flow
+- first note auto-selection
+- gallery tile rendering
+- clicking a tile updates the reading pane
+- local search filtering in the gallery
+- compose success inserts and selects the new note
 - cooldown messaging after submission
+- empty state rendering
 - error handling for failed submissions
 
 ## Future Evolution
