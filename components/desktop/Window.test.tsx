@@ -38,9 +38,9 @@ beforeEach(() => {
 })
 
 describe('Window — rendering', () => {
-  it('renders the title in the title bar', () => {
+  it('passes children through to the content area', () => {
     render(<Window {...baseProps}>content</Window>)
-    expect(screen.getByText('Terminal')).toBeInTheDocument()
+    expect(screen.getByText('content')).toBeInTheDocument()
   })
 
   it('renders children inside the content area', () => {

@@ -1,218 +1,223 @@
-# Plan de l'application Notes (Portfolio OS)
+# Notes App Implementation Plan
 
-Ce document transforme la note existante en **plan d'implémentation clair** pour l'application **Notes** du Portfolio OS. Il inclut aussi les **skills à utiliser** pour exécuter le travail dans le bon ordre.
+> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
----
+**Goal:** Refactor the Notes guestbook into a closer macOS Notes-style experience with a 3-column layout, searchable note gallery, dedicated reading pane, separate compose surface, Supabase persistence through a Next.js API route, and a 24-hour submission limit per browser/device.
 
-## 1. Objectif produit
+**Architecture:** The Notes UI lives in a dedicated desktop app component and talks only to `/api/notes`. The API route validates requests, enforces the cooldown with a browser-stored `client_id`, and reads/writes published notes in Supabase. Moderation stays out of the app and is handled directly in Supabase.
 
-Créer une application **Notes** servant de **guestbook public** dans le Portfolio OS, avec une interface inspirée de **Notes sur macOS Tahoe** en mode sombre.
-
-### Attendus UX
-
-- Affichage d'une liste de notes sous forme de cartes.
-- Création d'une note avec `pseudo`, `titre`, `message`.
-- Navigation entre les notes actives et la corbeille.
-- Recherche locale dans les notes.
-- Déplacement d'une note vers la corbeille, puis restauration.
-- Interface fidèle à l'OS Portfolio et cohérente sur desktop et mobile.
+**Tech Stack:** Next.js App Router, React 19, TypeScript, Tailwind CSS v4, Vitest, Testing Library, Supabase JavaScript client.
 
 ---
 
-## 2. Skills à utiliser
+## File Structure
 
-J'ai utilisé la logique de `.agents/skills/find-skills/SKILL.md` pour déterminer les skills pertinents à partir du besoin. Pour ce projet, les skills à utiliser sont ceux déjà disponibles dans le repo.
+### Create
 
-### Skills principaux
+- `components/apps/notes/NotesDetailPane.tsx`
 
-1. **`react-nextjs-development`**
-   - À utiliser pour la structure globale de l'application dans Next.js App Router, les composants React, les routes API, le typage TypeScript et l'intégration au projet.
+### Modify
 
-2. **`senior-frontend`**
-   - À utiliser pour la qualité d'implémentation frontend, l'accessibilité, la structure des composants, la robustesse UI et la revue de code.
+- `components/apps/NotesApp.tsx`
+- `components/apps/NotesApp.test.tsx`
+- `components/apps/notes/NotesSidebar.tsx`
+- `components/apps/notes/NotesToolbar.tsx`
+- `components/apps/notes/NotesList.tsx`
+- `components/apps/notes/NoteCard.tsx`
+- `components/apps/notes/NotesComposer.tsx`
+- `lib/i18n/translations/en.json`
+- `lib/i18n/translations/fr.json`
+- `lib/i18n/translations/de.json`
+- `lib/i18n/translations/es.json`
+- `lib/i18n/translations/it.json`
+- `docs/notes-app-plan.md`
+- `docs/superpowers/specs/2026-03-17-notes-app-design.md`
 
-3. **`tailwind-css-patterns`**
-   - À utiliser pour construire toute l'interface Notes, la sidebar, l'en-tête, la grille de cartes, la modale d'édition et les états responsive.
+## Task 1: Reframe the Layout Around Apple Notes
 
-4. **`vercel-react-best-practices`**
-   - À utiliser pour éviter les patterns React/Next.js coûteux, améliorer les performances perçues, limiter les rerenders inutiles et garder une base saine.
+**Files:**
+- Modify: `components/apps/NotesApp.tsx`
+- Modify: `components/apps/notes/NotesSidebar.tsx`
+- Modify: `components/apps/notes/NotesToolbar.tsx`
+- Create: `components/apps/notes/NotesDetailPane.tsx`
 
-### Skills optionnels selon l'implémentation
+- [ ] **Step 1: Build a true 3-column shell**
 
-5. **`framer-motion`**
-   - À utiliser uniquement si l'app Notes inclut de vraies animations: ouverture de fenêtre, transitions de cartes, apparition de la modale, micro-interactions ou transitions de layout.
+Refactor the app layout into:
 
-6. **`find-skills`**
-   - À réutiliser si une nouvelle partie du scope apparaît et qu'un besoin spécialisé n'est pas couvert par les skills ci-dessus.
+- compact left sidebar
+- center gallery column
+- right reading pane
 
-### Skills non prioritaires pour cette app
+Expected: the app feels structurally closer to Apple Notes than to a generic two-panel guestbook.
 
-- **`backend-dev-guidelines`** : non prioritaire ici, car cette app est un projet Next.js frontend-centric et non un monorepo Langfuse/tRPC/Express.
-- **`skill-creator` / `skill-installer`** : utiles seulement si un skill manque réellement et qu'il faut en installer ou en créer un nouveau.
+- [ ] **Step 2: Slim down the sidebar**
 
----
+Adjust the sidebar to feel denser and more native, including:
 
-## 3. Ordre d'utilisation recommandé des skills
+- active `Notes` item
+- note count context
+- recently deleted / tags atmosphere
+- subtle posting-rule text
 
-### Phase 1 - Architecture et base applicative
+Expected: the left rail looks intentional and no longer feels oversized or empty.
 
-- Utiliser **`react-nextjs-development`**
-- Puis vérifier la qualité de structure avec **`senior-frontend`**
+- [ ] **Step 3: Refresh the toolbar**
 
-### Phase 2 - Construction de l'interface
+Update the toolbar styling to feel calmer and more Notes-like:
 
-- Utiliser **`tailwind-css-patterns`**
-- Compléter avec **`senior-frontend`** pour l'accessibilité, la hiérarchie visuelle et les états UX
+- compact title and count
+- quieter rounded search field
+- restrained control buttons
 
-### Phase 3 - Performance et finition React/Next.js
+Expected: the top chrome reads more like desktop software and less like a web dashboard.
 
-- Utiliser **`vercel-react-best-practices`**
-- Ajouter **`framer-motion`** seulement si des animations réelles sont retenues
+## Task 2: Turn the Notes List into a Gallery
 
-### Phase 4 - Extension éventuelle du scope
+**Files:**
+- Modify: `components/apps/notes/NotesList.tsx`
+- Modify: `components/apps/notes/NoteCard.tsx`
+- Modify: `components/apps/NotesApp.tsx`
 
-- Utiliser **`find-skills`** si un nouveau besoin apparaît, par exemple authentification, persistence avancée, workflow de contenu ou animations complexes
+- [ ] **Step 1: Replace row/list behavior with tile selection**
 
----
+Make note cards selectable buttons that clearly communicate the active note.
 
-## 4. Plan fonctionnel de l'application
+Expected: clicking a tile selects it for the reading pane instead of opening a separate modal flow.
 
-### A. Interface Notes
+- [ ] **Step 2: Style the center column as a gallery**
 
-- Sidebar avec sections:
-  - `iCloud`
-  - `Notes`
-  - `Suppr. récentes`
-  - `Tags`
-- En-tête avec:
-  - bouton `Nouvelle Note`
-  - bouton d'actions secondaires
-  - champ de recherche
-- Zone principale:
-  - grille de notes
-  - état vide si aucune note
-  - filtre local sur le titre et le contenu
+Render notes as evenly spaced rounded tiles with:
 
-### B. Création et édition
+- title
+- short content preview
+- date
+- selected state emphasis
 
-- Ouvrir une interface de composition au clic sur `Nouvelle Note`
-- Champs requis:
-  - `author_name`
-  - `title`
-  - `content`
-- Validation minimale côté client
-- Soumission vers l'API
-- Mise à jour immédiate de l'interface après création
+Expected: the center column matches the gallery feel of the approved reference.
 
-### C. Gestion des dossiers
+- [ ] **Step 3: Keep search local and responsive**
 
-- Dossier principal `notes`
-- Dossier corbeille `bin`
-- Déplacement d'une note vers la corbeille
-- Restauration d'une note depuis la corbeille
+Filter gallery tiles locally and use a deferred query if needed so the UI stays fluid.
 
-### D. Recherche
+Expected: search feels immediate without affecting the API contract.
 
-- Recherche locale instantanée
-- Filtrage par `title` et `content`
-- Conservation d'une UI fluide même avec plusieurs notes
+## Task 3: Add a Dedicated Reading Pane
 
----
+**Files:**
+- Create: `components/apps/notes/NotesDetailPane.tsx`
+- Modify: `components/apps/NotesApp.tsx`
 
-## 5. Plan technique
+- [ ] **Step 1: Track the selected note**
 
-### Frontend
+Add selected-note state to the app and auto-select the first available note after loading.
 
-- Composant principal: `components/apps/NotesApp.tsx`
-- Gestion d'état locale pour:
-  - dossier actif
-  - recherche
-  - notes chargées
-  - état de composition
-  - chargement / erreur
-- Responsive design aligné avec les conventions existantes du Portfolio OS
+Expected: the right pane has meaningful content immediately when notes exist.
 
-### Backend / API
+- [ ] **Step 2: Render a polished note preview**
 
-- Route API: `app/api/notes/route.ts`
-- Endpoints prévus:
-  - `GET /api/notes?folder=notes|bin`
-  - `POST /api/notes`
-  - `PATCH /api/notes`
+The reading pane should show:
 
-### Persistance
+- title
+- author name
+- formatted date
+- full note body
 
-- Connexion Supabase via `lib/supabase.ts`
-- Table `notes` avec les champs:
-  - `id`
-  - `title`
-  - `content`
-  - `author_name`
-  - `folder`
-  - `author_type`
-  - `created_at`
+Expected: the selected note feels editorial and readable, not like an expanded card.
 
----
+- [ ] **Step 3: Handle no-selection and no-notes states**
 
-## 6. Préparation base de données
+Provide a calm empty state when there is no note to preview.
 
-### Variables d'environnement
+Expected: the right pane still feels designed even when content is absent.
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://dwnjrvuhihxokhutqkzg.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_NtRiFK7gvfeowQ6-HwThwA_HBxtPn0K
-```
+## Task 4: Keep Compose Focused but Separate
 
-### Schéma SQL prévu
+**Files:**
+- Modify: `components/apps/notes/NotesComposer.tsx`
+- Modify: `components/apps/NotesApp.tsx`
 
-```sql
-CREATE TABLE notes (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  author_name TEXT NOT NULL,
-  folder TEXT DEFAULT 'notes',
-  author_type TEXT DEFAULT 'guest',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
+- [ ] **Step 1: Refine the compose surface**
 
-ALTER TABLE notes DISABLE ROW LEVEL SECURITY;
-```
+Restyle the composer so it feels consistent with the redesigned Notes UI without replacing the reading pane architecture.
 
-### Point d'attention
+- [ ] **Step 2: Select newly created notes immediately**
 
-- La désactivation de la RLS rend le guestbook 100% public.
-- Si l'application doit évoluer, il faudra revoir cette décision avant mise en production avancée.
+After a successful submission:
 
----
+- insert the new note into state
+- select it in the reading pane
+- close the composer
+- preserve cooldown messaging
 
-## 7. Dépendances prévues
+Expected: writing a note feels integrated into the gallery/preview flow.
+
+## Task 5: Update Copy and Tests
+
+**Files:**
+- Modify: `components/apps/NotesApp.test.tsx`
+- Modify: `lib/i18n/translations/en.json`
+- Modify: `lib/i18n/translations/fr.json`
+- Modify: `lib/i18n/translations/de.json`
+- Modify: `lib/i18n/translations/es.json`
+- Modify: `lib/i18n/translations/it.json`
+
+- [ ] **Step 1: Add translation keys for the redesigned UI**
+
+Add strings for:
+
+- sidebar labels
+- note count label
+- gallery heading
+- reading-pane empty state
+- detail metadata label
+- updated compose subtitle
+
+- [ ] **Step 2: Rewrite the Notes UI tests around the new behavior**
+
+Cover at minimum:
+
+- first note auto-selects
+- clicking a tile updates the reading pane
+- gallery search filters locally
+- composing a note inserts and selects it
+- empty state still renders correctly
+
+Expected: the tests protect the new interaction model rather than the old layout.
+
+## Task 6: Verify the Redesign
+
+**Files:**
+- Modify as needed after verification
+
+- [ ] **Step 1: Run targeted Notes tests**
+
+Run:
 
 ```bash
-npm install @supabase/supabase-js
+npm run test:run -- components/apps/NotesApp.test.tsx
 ```
 
-`framer-motion` est déjà présent dans le projet et ne doit être utilisé que si les animations apportent une vraie valeur.
+Expected: all redesigned Notes UI tests pass.
 
----
+- [ ] **Step 2: Run the broader relevant test set**
 
-## 8. Étapes d'exécution concrètes
+Run:
 
-1. Structurer l'app avec **`react-nextjs-development`**.
-2. Construire l'UI avec **`tailwind-css-patterns`**.
-3. Revoir l'ergonomie et la qualité de code avec **`senior-frontend`**.
-4. Vérifier les performances et patterns React avec **`vercel-react-best-practices`**.
-5. Ajouter **`framer-motion`** uniquement pour les animations nécessaires.
-6. Réutiliser **`find-skills`** si le scope change et nécessite un nouveau skill.
+```bash
+npm run test:run -- app/api/notes/route.test.ts components/apps/NotesApp.test.tsx
+```
 
----
+Expected: Notes API and Notes UI coverage both pass together.
 
-## 9. Résultat final attendu
+- [ ] **Step 3: Sanity-check the live app manually**
 
-Une application **Notes** crédible, stable et intégrée au Portfolio OS, avec:
+Verify:
 
-- une expérience proche de macOS Notes,
-- une persistance des messages visiteurs,
-- une navigation simple entre notes actives et corbeille,
-- un rendu frontend propre, performant et maintenable,
-- un usage de skills cohérent avec le stack réel du projet.
+- first note auto-selects
+- search only filters the gallery
+- clicking a tile swaps the reading pane
+- posting a new note selects it immediately
+- cooldown state remains visible after publishing
+
+Expected: the redesign feels stable and coherent in the running app.

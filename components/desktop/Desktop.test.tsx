@@ -2,6 +2,10 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import { Desktop } from './Desktop'
+import { LocaleProvider } from '@/contexts/LocaleContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
+import { WallpaperProvider } from '@/contexts/WallpaperContext'
+import { AvailabilityProvider } from '@/contexts/AvailabilityContext'
 
 // Keep all heavy deps out of jsdom
 vi.mock('framer-motion', () => ({
@@ -22,6 +26,10 @@ vi.mock('@/components/wallpaper/WallpaperScene', () => ({
   default: () => <div data-testid="wallpaper" />,
 }))
 
+vi.mock('@/components/apps/PreviewApp', () => ({
+  PreviewApp: () => <div>Preview mock</div>,
+}))
+
 // BootScreen uses timers — mock it to avoid act() warnings in tests
 vi.mock('@/components/desktop/BootScreen', () => ({
   BootScreen: ({ onComplete }: { onComplete: () => void }) => {
@@ -36,35 +44,53 @@ vi.mock('next/dynamic', () => ({
   default: () => () => <div data-testid="wallpaper" />,
 }))
 
+function renderDesktop() {
+  return render(
+    <ThemeProvider>
+      <LocaleProvider>
+        <WallpaperProvider>
+          <AvailabilityProvider>
+            <Desktop />
+          </AvailabilityProvider>
+        </WallpaperProvider>
+      </LocaleProvider>
+    </ThemeProvider>,
+  )
+}
+
 describe('Desktop', () => {
+  beforeEach(() => {
+    window.localStorage.setItem('hgrs-locale', 'en')
+  })
+
   it('renders the menu bar', () => {
-    render(<Desktop />)
+    renderDesktop()
     // MenuBar always present — has the Hgrs button
     expect(screen.getByRole('button', { name: /hgrs/i })).toBeInTheDocument()
   })
 
   it('renders the dock', () => {
-    render(<Desktop />)
+    renderDesktop()
     // Dock has at least one app button
     expect(screen.getAllByRole('button').length).toBeGreaterThan(0)
   })
 
   it('renders the wallpaper scene', () => {
-    render(<Desktop />)
+    renderDesktop()
     expect(screen.getByTestId('wallpaper')).toBeInTheDocument()
   })
 
   it('opens a window when a dock icon is clicked', () => {
-    render(<Desktop />)
-    fireEvent.click(screen.getByRole('button', { name: /projects/i }))
-    expect(screen.getByText('Projects.app')).toBeInTheDocument()
+    renderDesktop()
+    fireEvent.click(screen.getByRole('button', { name: /notes/i }))
+    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
   })
 
   it('closes a window when its close button is clicked', () => {
-    render(<Desktop />)
-    fireEvent.click(screen.getByRole('button', { name: /projects/i }))
-    expect(screen.getByText('Projects.app')).toBeInTheDocument()
+    renderDesktop()
+    fireEvent.click(screen.getByRole('button', { name: /notes/i }))
+    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /close/i }))
-    expect(screen.queryByText('Projects.app')).not.toBeInTheDocument()
+    expect(screen.queryByPlaceholderText('Search')).not.toBeInTheDocument()
   })
 })
