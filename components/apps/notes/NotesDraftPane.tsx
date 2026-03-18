@@ -1,6 +1,7 @@
 import { formatNotesEditorTimestamp } from '@/lib/notes/date-format'
 import { useTranslation } from '@/lib/i18n/useTranslation'
 import { NotesEditorFooter } from './NotesEditorFooter'
+import type { NotesCooldown } from './types'
 
 type NotesDraftPaneProps = {
   content: string
@@ -8,7 +9,9 @@ type NotesDraftPaneProps = {
   publishMode: boolean
   createdAt: string
   submitting: boolean
-  error: string
+  alertTitle: string
+  alertDetail: string
+  cooldown: NotesCooldown
   onContentChange: (value: string) => void
   onDisplayNameChange: (value: string) => void
   onPublish: () => void
@@ -21,7 +24,9 @@ export function NotesDraftPane({
   publishMode,
   createdAt,
   submitting,
-  error,
+  alertTitle,
+  alertDetail,
+  cooldown,
   onContentChange,
   onDisplayNameChange,
   onPublish,
@@ -30,6 +35,7 @@ export function NotesDraftPane({
   const { t, locale } = useTranslation()
   const canPublish = content.trim().length > 0
   const canSubmit = canPublish && displayName.trim().length > 0
+  const hasAlert = Boolean(alertTitle || alertDetail)
 
   return (
     <section
@@ -40,6 +46,14 @@ export function NotesDraftPane({
         <p className="text-[12px] font-medium text-foreground/42">
           {formatNotesEditorTimestamp(createdAt, locale)}
         </p>
+        {hasAlert ? (
+          <div className="mx-auto mt-4 max-w-md rounded-2xl border border-red-400/20 bg-red-500/8 px-4 py-3 text-center">
+            {alertTitle ? <p className="text-[12px] font-medium text-red-200">{alertTitle}</p> : null}
+            {alertDetail ? (
+              <p className="mt-1.5 text-[12px] leading-relaxed text-foreground/65">{alertDetail}</p>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="flex-1 overflow-y-auto px-10 py-5">
@@ -51,9 +65,6 @@ export function NotesDraftPane({
           className="h-full min-h-[260px] w-full resize-none bg-transparent text-[14px] leading-[1.8] text-foreground/85 outline-none placeholder:text-foreground/25"
           autoFocus
         />
-        {error ? (
-          <p className="mt-4 text-center text-[12px] text-red-300">{error}</p>
-        ) : null}
       </div>
 
       <NotesEditorFooter

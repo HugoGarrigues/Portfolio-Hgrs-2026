@@ -107,9 +107,48 @@ describe("Notes API route", () => {
     const json = await response.json()
     expect(json).toEqual({
       notes: [data[1], data[0]],
+      cooldown: { nextAllowedAt: null },
     })
 
     expect(supabase.from).toHaveBeenCalledWith("notes")
+  })
+
+  it("returns the active cooldown for a client on notes fetch", async () => {
+    vi.useFakeTimers().setSystemTime(new Date("2026-03-17T00:00:00.000Z"))
+
+    const data = [
+      {
+        id: "note-a",
+        title: "First note",
+        content: "Hello",
+        author_name: "Author",
+        client_id: "client-a",
+        status: "published",
+        created_at: "2026-03-15T08:00:00.000Z",
+        updated_at: "2026-03-15T08:00:00.000Z",
+      },
+    ]
+
+    setupSupabaseMock([
+      { data, error: null },
+      {
+        data: {
+          created_at: "2026-03-16T13:00:00.000Z",
+        },
+        error: null,
+      },
+    ])
+
+    const response = await GET(new Request("http://localhost/api/notes?clientId=client-1"))
+    expect(response.status).toBe(200)
+
+    const json = await response.json()
+    expect(json).toEqual({
+      notes: data,
+      cooldown: {
+        nextAllowedAt: "2026-03-17T13:00:00.000Z",
+      },
+    })
   })
 
   it("rejects invalid payloads", async () => {

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { LocaleProvider } from '@/contexts/LocaleContext'
@@ -20,7 +20,7 @@ describe('NotesApp', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-        if (typeof input === 'string' && input === '/api/notes' && (!init || init.method === 'GET')) {
+        if (typeof input === 'string' && input.startsWith('/api/notes') && (!init || init.method === 'GET')) {
           return new Response(
             JSON.stringify({
               notes: [
@@ -68,6 +68,10 @@ describe('NotesApp', () => {
         throw new Error(`Unhandled request: ${String(input)}`)
       }),
     )
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   function renderNotesApp() {
@@ -133,7 +137,7 @@ describe('NotesApp', () => {
     expect(within(detailPane).getByText('Linus')).toBeInTheDocument()
   })
 
-  it('creates a draft, publishes via the sheet, and shows cooldown', async () => {
+  it('creates a draft, publishes via the sheet, and selects the new note', async () => {
     const user = userEvent.setup()
     renderNotesApp()
 
@@ -152,7 +156,12 @@ describe('NotesApp', () => {
     await user.click(screen.getByRole('button', { name: 'Publish' }))
 
     // 4. Fill name inline in the editor
-    await user.type(screen.getByLabelText('Name'), 'Grace')
+    const nameInput = screen.getByLabelText('Name')
+    expect(nameInput.parentElement?.className).toContain('max-w-[236px]')
+    expect(nameInput.className).toContain('py-2')
+    expect(screen.getByRole('button', { name: 'Cancel' }).className).toContain('rounded-2xl')
+    expect(screen.getByRole('button', { name: 'Publish' }).className).toContain('rounded-2xl')
+    await user.type(nameInput, 'Grace')
 
     // 5. Confirm publish from the editor footer
     await user.click(screen.getByRole('button', { name: 'Publish' }))
@@ -165,7 +174,7 @@ describe('NotesApp', () => {
 
     expect(within(detailPane).getByText('Written from the draft pane')).toBeInTheDocument()
     expect(within(detailPane).getByText('Grace')).toBeInTheDocument()
-    expect(screen.getByText(/You already posted a note/i)).toBeInTheDocument()
+    expect(screen.queryByText(/You already posted a note/i)).not.toBeInTheDocument()
   })
 
   it('shows an empty state when no notes exist', async () => {
@@ -180,6 +189,58 @@ describe('NotesApp', () => {
     expect(screen.getByText('Be the first to leave a note.')).toBeInTheDocument()
   })
 
+  it('shows a clear cooldown message when note creation is rate-limited', async () => {
+    vi.useFakeTimers()
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (typeof input === 'string' && input.startsWith('/api/notes') && (!init || init.method === 'GET')) {
+          return new Response(JSON.stringify({ notes: [], cooldown: { nextAllowedAt: null } }))
+        }
+
+        if (typeof input === 'string' && input === '/api/notes' && init?.method === 'POST') {
+          return new Response(
+            JSON.stringify({
+              error: 'Veuillez patienter avant de publier une nouvelle note',
+              cooldown: { nextAllowedAt: '2026-03-18T18:00:00.000Z' },
+            }),
+            { status: 429 },
+          )
+        }
+
+        throw new Error(`Unhandled request: ${String(input)}`)
+      }),
+    )
+
+    renderNotesApp()
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(screen.getByText('No notes yet')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Create note' }))
+    fireEvent.change(screen.getByLabelText('New note'), { target: { value: 'Blocked note' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Publish' }))
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Grace' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Publish' }))
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(screen.getByText('You already posted a note')).toBeInTheDocument()
+    expect(screen.getByText(/You can publish another note after/i)).toBeInTheDocument()
+    expect(screen.queryByText('Veuillez patienter avant de publier une nouvelle note')).not.toBeInTheDocument()
+
+    await act(async () => {
+      vi.advanceTimersByTime(5000)
+    })
+
+    expect(screen.queryByText('Veuillez patienter avant de publier une nouvelle note')).not.toBeInTheDocument()
+    expect(screen.queryByText('You already posted a note')).not.toBeInTheDocument()
+  })
+
   it('renders load errors inside the detail pane', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => {
       throw new Error('Supabase unavailable')
@@ -188,7 +249,44 @@ describe('NotesApp', () => {
     renderNotesApp()
 
     const detailPane = await screen.findByLabelText('Note detail')
-    expect(within(detailPane).getByText('Supabase unavailable')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(within(detailPane).getByText('Supabase unavailable')).toBeInTheDocument()
+    })
     expect(within(detailPane).getByText('Unable to publish your note right now')).toBeInTheDocument()
+  })
+
+  it('preloads cooldown silently and only shows the alert after a blocked publish attempt', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (typeof input === 'string' && input.startsWith('/api/notes') && (!init || init.method === 'GET')) {
+        return new Response(
+          JSON.stringify({
+            notes: [],
+            cooldown: { nextAllowedAt: '2026-03-18T18:00:00.000Z' },
+          }),
+        )
+      }
+
+      if (typeof input === 'string' && input === '/api/notes' && init?.method === 'POST') {
+        throw new Error('POST should not be called while cooldown is active')
+      }
+
+      throw new Error(`Unhandled request: ${String(input)}`)
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    renderNotesApp()
+
+    expect(await screen.findByText('No notes yet')).toBeInTheDocument()
+    const createButton = screen.getByRole('button', { name: 'Create note' })
+    expect(createButton).not.toBeDisabled()
+    fireEvent.click(createButton)
+    fireEvent.change(screen.getByLabelText('New note'), { target: { value: 'Blocked note' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Publish' }))
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Grace' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Publish' }))
+    expect(screen.getByText('You already posted a note')).toBeInTheDocument()
+    expect(screen.getByText(/You can publish another note after/i)).toBeInTheDocument()
+    expect(fetchMock.mock.calls.some((call) => call[0] === '/api/notes')).toBe(false)
+    expect(String(fetchMock.mock.calls[0]?.[0])).toMatch(/^\/api\/notes\?clientId=/)
   })
 })

@@ -20,6 +20,7 @@ import {
 } from './notes/types'
 
 const EMPTY_COOLDOWN: NotesCooldown = { nextAllowedAt: null }
+const EMPTY_ALERT = { title: '', detail: '' }
 
 export function NotesApp() {
   const { dragControls } = useWindow()
@@ -28,6 +29,7 @@ export function NotesApp() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [alert, setAlert] = useState(EMPTY_ALERT)
   const [submitting, setSubmitting] = useState(false)
   const [cooldown, setCooldown] = useState<NotesCooldown>(EMPTY_COOLDOWN)
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
@@ -41,7 +43,8 @@ export function NotesApp() {
 
     async function loadNotes() {
       try {
-        const response = await fetch('/api/notes')
+        const clientId = getNotesClientId()
+        const response = await fetch(`/api/notes?clientId=${encodeURIComponent(clientId)}`)
         const payload = (await response.json()) as NotesResponse
 
         if (cancelled) {
@@ -103,6 +106,20 @@ export function NotesApp() {
     })
   }, [filteredNotes, notes])
 
+  useEffect(() => {
+    if (!alert.title && !alert.detail) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setAlert(EMPTY_ALERT)
+    }, 5000)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [alert])
+
   const cooldownActive = Boolean(cooldown.nextAllowedAt)
   const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null
   const isDrafting = draft !== null
@@ -113,11 +130,12 @@ export function NotesApp() {
   function handleCreateNote() {
     setDraft({ content: '', displayName: '', publishMode: false, createdAt: new Date().toISOString() })
     setSelectedNoteId(null)
-    setError('')
+    setAlert(EMPTY_ALERT)
   }
 
   function handleCancelDraft() {
     setDraft(null)
+    setAlert(EMPTY_ALERT)
     if (filteredNotes.length > 0) {
       setSelectedNoteId(filteredNotes[0].id)
     }
@@ -130,8 +148,17 @@ export function NotesApp() {
       setDraft((current) => (current ? { ...current, publishMode: true } : current))
       return
     }
+
+    if (cooldownActive) {
+      setAlert({
+        title: t('notes.cooldownTitle'),
+        detail: t('notes.cooldownBody').replace('{date}', new Date(cooldown.nextAllowedAt ?? '').toLocaleString()),
+      })
+      return
+    }
+
     setSubmitting(true)
-    setError('')
+    setAlert(EMPTY_ALERT)
 
     try {
       const response = await fetch('/api/notes', {
@@ -149,7 +176,22 @@ export function NotesApp() {
       const payload = (await response.json()) as CreateNoteResponse & { error?: string }
 
       if (!response.ok) {
-        throw new Error(payload.error ?? t('notes.serverError'))
+        if (payload.cooldown) {
+          setCooldown(payload.cooldown)
+          setAlert({
+            title: t('notes.cooldownTitle'),
+            detail: t('notes.cooldownBody').replace(
+              '{date}',
+              new Date(payload.cooldown.nextAllowedAt ?? '').toLocaleString(),
+            ),
+          })
+          return
+        }
+        setAlert({
+          title: t('notes.serverError'),
+          detail: payload.error ?? t('notes.serverError'),
+        })
+        return
       }
 
       const nextNote = mapNoteRecord(payload.note)
@@ -159,7 +201,10 @@ export function NotesApp() {
       setDraft(null)
       setActiveSection(nextNote.source)
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : t('notes.serverError'))
+      setAlert({
+        title: t('notes.serverError'),
+        detail: submitError instanceof Error ? submitError.message : t('notes.serverError'),
+      })
     } finally {
       setSubmitting(false)
     }
@@ -174,7 +219,9 @@ export function NotesApp() {
           publishMode={draft.publishMode}
           createdAt={draft.createdAt}
           submitting={submitting}
-          error={error}
+          alertTitle={alert.title}
+          alertDetail={alert.detail}
+          cooldown={cooldown}
           onContentChange={(value) =>
             setDraft((current) => (current ? { ...current, content: value } : current))
           }
@@ -214,20 +261,11 @@ export function NotesApp() {
             query={query}
             onQueryChange={setQuery}
             onCreateNote={handleCreateNote}
-            canCreate={!cooldownActive && !isDrafting}
+            canCreate={!isDrafting}
             viewMode={viewMode}
             onToggleViewMode={() => setViewMode((v) => (v === 'gallery' ? 'list' : 'gallery'))}
           />
         </div>
-
-        {cooldownActive ? (
-          <div className="border-b border-border-subtle px-6 py-3">
-            <h3 className="text-[12px] font-semibold text-foreground/90">{t('notes.cooldownTitle')}</h3>
-            <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-foreground/50">
-              {t('notes.cooldownBody').replace('{date}', new Date(cooldown.nextAllowedAt ?? '').toLocaleString())}
-            </p>
-          </div>
-        ) : null}
 
         <div className="notes-split-pane flex flex-1 flex-row overflow-hidden">
           <section className="flex min-h-0 min-w-[320px] max-w-[400px] flex-1 flex-col border-r border-border-subtle">

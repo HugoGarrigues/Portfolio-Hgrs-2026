@@ -28,8 +28,10 @@ function deriveNoteTitle(message: string) {
   return firstMeaningfulLine.slice(0, 80)
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   const supabase = createSupabaseServerClient()
+  const { searchParams } = new URL(req.url)
+  const clientId = searchParams.get("clientId")?.trim() ?? ""
 
   const { data, error } = await supabase
     .from("notes")
@@ -47,7 +49,29 @@ export async function GET() {
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   )
 
-  return NextResponse.json({ notes: sortedNotes })
+  if (!clientId) {
+    return NextResponse.json({ notes: sortedNotes, cooldown: { nextAllowedAt: null } })
+  }
+
+  const { data: latestNote, error: latestError } = await supabase
+    .from("notes")
+    .select("created_at")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (latestError) {
+    console.error("Supabase GET cooldown lookup failed", latestError)
+    return NextResponse.json({ error: "Impossible de vérifier le délai d'attente" }, { status: 500 })
+  }
+
+  const cooldown =
+    latestNote && typeof latestNote.created_at === "string" && isCooldownActive(latestNote.created_at)
+      ? { nextAllowedAt: getNextAllowedAt(latestNote.created_at) }
+      : { nextAllowedAt: null }
+
+  return NextResponse.json({ notes: sortedNotes, cooldown })
 }
 
 export async function POST(req: Request) {
