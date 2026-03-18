@@ -56,7 +56,7 @@ Add coverage for:
 
 - pushing one error notification
 - stacking two error notifications
-- auto-dismiss after 5 seconds
+- auto-dismiss after 3 seconds
 
 Run:
 
@@ -100,7 +100,7 @@ Behavior:
 
 - ids generated in the provider
 - one timer per notification
-- auto-dismiss after 5000 ms
+- auto-dismiss after 3000 ms
 
 - [ ] **Step 4: Add a small app-facing hook**
 
@@ -231,7 +231,7 @@ Add or update coverage showing:
 
 - cooldown-triggered publish attempt produces a global notification
 - notification appears only after a real publish attempt
-- notification auto-dismisses after 5 seconds
+- notification auto-dismisses after 3 seconds
 - Notes no longer depends on its local transient alert UI for these error cases
 
 Run:

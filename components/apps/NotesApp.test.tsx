@@ -240,7 +240,7 @@ describe('NotesApp', () => {
     expect(screen.queryByLabelText('Note editor')?.textContent).not.toContain('You already posted a note')
 
     await act(async () => {
-      vi.advanceTimersByTime(5000)
+      vi.advanceTimersByTime(3000)
     })
 
     expect(screen.queryByText('Veuillez patienter avant de publier une nouvelle note')).not.toBeInTheDocument()

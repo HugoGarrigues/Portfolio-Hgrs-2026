@@ -40,13 +40,15 @@ export function NotesDraftPane({
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-10 py-5">
+      <div className="h-8 shrink-0" aria-hidden="true" />
+
+      <div className="flex-1 overflow-y-auto px-10 pb-5">
         <textarea
           aria-label={t('notes.draftHeading')}
           value={content}
           onChange={(event) => onContentChange(event.target.value)}
           placeholder={t('notes.draftPlaceholder')}
-          className="h-full min-h-[260px] w-full resize-none bg-transparent text-[14px] leading-[1.8] text-foreground/85 outline-none placeholder:text-foreground/25"
+          className="mt-2 h-full min-h-[260px] w-full resize-none bg-transparent text-[14px] leading-[1.8] text-foreground/85 outline-none placeholder:text-foreground/25"
           autoFocus
         />
       </div>

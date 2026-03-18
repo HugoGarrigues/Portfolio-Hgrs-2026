@@ -13,6 +13,7 @@ const NotificationCenterContext = createContext<NotificationCenterContextValue |
 
 export function NotificationCenterProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<AppNotification[]>([])
+  const notificationsRef = useRef<AppNotification[]>([])
   const timersRef = useRef<Map<string, number>>(new Map())
 
   const dismissNotification = useCallback((id: string) => {
@@ -22,27 +23,51 @@ export function NotificationCenterProvider({ children }: { children: ReactNode }
       timersRef.current.delete(id)
     }
 
-    setNotifications((current) => current.filter((notification) => notification.id !== id))
+    setNotifications((current) => {
+      const nextNotifications = current.filter((notification) => notification.id !== id)
+      notificationsRef.current = nextNotifications
+      return nextNotifications
+    })
   }, [])
 
   const pushError = useCallback(
     (input: PushErrorInput) => {
-      const id = window.crypto.randomUUID()
-      const nextNotification: AppNotification = {
-        id,
-        kind: 'error',
-        title: input.title,
-        message: input.message,
-        source: input.source,
+      const existingNotification = notificationsRef.current.find(
+        (notification) =>
+          notification.kind === 'error' &&
+          notification.title === input.title &&
+          notification.message === input.message &&
+          notification.source === input.source,
+      )
+
+      const notificationId = existingNotification?.id ?? window.crypto.randomUUID()
+
+      if (!existingNotification) {
+        const nextNotification: AppNotification = {
+          id: notificationId,
+          kind: 'error',
+          title: input.title,
+          message: input.message,
+          source: input.source,
+        }
+
+        setNotifications((current) => {
+          const nextNotifications = [...current, nextNotification]
+          notificationsRef.current = nextNotifications
+          return nextNotifications
+        })
       }
 
-      setNotifications((current) => [...current, nextNotification])
+      const existingTimeoutId = timersRef.current.get(notificationId)
+      if (existingTimeoutId) {
+        window.clearTimeout(existingTimeoutId)
+      }
 
       const timeoutId = window.setTimeout(() => {
-        dismissNotification(id)
-      }, 5000)
+        dismissNotification(notificationId)
+      }, 3000)
 
-      timersRef.current.set(id, timeoutId)
+      timersRef.current.set(notificationId, timeoutId)
     },
     [dismissNotification],
   )

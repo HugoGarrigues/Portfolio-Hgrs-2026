@@ -12,7 +12,7 @@ Introduce a global macOS-inspired error notification system for Portfolio OS so 
 
 - Global error notifications rendered above app content
 - A single notification shape, size, spacing, and animation style
-- Automatic dismissal after 5 seconds
+- Automatic dismissal after 3 seconds
 - Vertical stacking in the top-right corner
 - First integrations for:
   - `Notes`
@@ -35,7 +35,7 @@ Introduce a global macOS-inspired error notification system for Portfolio OS so 
 - Notifications must appear in the top-right area of the desktop UI.
 - All notifications share the same footprint and visual structure.
 - Notifications are only shown after real user-facing failures or action-triggered errors.
-- A notification disappears automatically after 5 seconds.
+- A notification disappears automatically after 3 seconds.
 - Multiple notifications stack vertically in arrival order.
 - The system must be reusable by any Portfolio OS app through a shared API.
 
@@ -77,7 +77,7 @@ This approach keeps the visual language centralized while letting app code stay 
 1. An app detects an action-triggered or user-relevant failure
 2. The app calls the shared notification API
 3. The global center renders the error in the top-right stack
-4. The notification auto-dismisses after 5 seconds
+4. The notification auto-dismisses after 3 seconds
 
 ### Trigger Rules
 
@@ -151,7 +151,7 @@ Apps should manage only their own failure detection and call into the provider.
 
 - pushing a notification renders it
 - notifications stack correctly
-- a notification disappears after 5 seconds
+- a notification disappears after 3 seconds
 - multiple notifications maintain stable order
 
 ### Notes Integration

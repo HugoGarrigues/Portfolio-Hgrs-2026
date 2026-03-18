@@ -50,7 +50,7 @@ function renderNotificationCenter() {
 }
 
 describe('NotificationCenter', () => {
-  it('renders pushed error notifications in a top-right stack and auto-dismisses them after 5 seconds', async () => {
+  it('renders pushed error notifications in a top-right stack and auto-dismisses them after 3 seconds', async () => {
     vi.useFakeTimers()
 
     renderNotificationCenter()
@@ -59,7 +59,7 @@ describe('NotificationCenter', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Trigger Mail Error' }))
 
     const liveRegion = screen.getByLabelText('Notifications')
-    expect(liveRegion.className).toContain('top-4')
+    expect(liveRegion.className).toContain('top-8')
     expect(liveRegion.className).toContain('right-4')
     expect(screen.getByText('Failed to publish note')).toBeInTheDocument()
     expect(screen.getByText('Failed to send message')).toBeInTheDocument()
@@ -67,11 +67,27 @@ describe('NotificationCenter', () => {
     expect(screen.getByText('Mail')).toBeInTheDocument()
 
     await act(async () => {
-      vi.advanceTimersByTime(5000)
+      vi.runAllTimers()
     })
 
     expect(screen.queryByText('Failed to publish note')).not.toBeInTheDocument()
     expect(screen.queryByText('Failed to send message')).not.toBeInTheDocument()
+
+    vi.useRealTimers()
+  })
+
+  it('deduplicates identical error notifications while keeping one visible notification', () => {
+    vi.useFakeTimers()
+
+    renderNotificationCenter()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger Notes Error' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger Notes Error' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Trigger Notes Error' }))
+
+    expect(screen.getAllByText('Failed to publish note')).toHaveLength(1)
+    expect(screen.getAllByText('Please try again later.')).toHaveLength(1)
+    expect(screen.getAllByText('Notes')).toHaveLength(1)
 
     vi.useRealTimers()
   })
