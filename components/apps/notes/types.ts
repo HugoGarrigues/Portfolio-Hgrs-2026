@@ -35,9 +35,9 @@ export type NotesViewMode = 'gallery' | 'list'
 
 export type DraftNote = {
   content: string
-  title: string
   displayName: string
   publishMode: boolean
+  createdAt: string
 }
 
 export type CreateNoteResponse = {

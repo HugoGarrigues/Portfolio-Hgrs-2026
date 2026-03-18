@@ -11,6 +11,7 @@ type NoteCardProps = {
 
 export function NoteCard({ note, selected, onSelect, viewMode }: NoteCardProps) {
   const { locale } = useTranslation()
+  const preview = note.content.trim() || note.title
 
   if (viewMode === 'list') {
     return (
@@ -18,19 +19,17 @@ export function NoteCard({ note, selected, onSelect, viewMode }: NoteCardProps) 
         type="button"
         aria-label={`Open note ${note.title}`}
         onClick={() => onSelect(note.id)}
-        className={`group flex w-full items-center gap-4 rounded-lg border px-4 py-3 text-left transition duration-150 ${selected
-            ? 'border-[var(--accent-color)]/30 bg-[var(--accent-color)]/10'
+        className={`group flex w-full items-start gap-4 rounded-2xl border px-4 py-3.5 text-left transition duration-150 ${
+          selected
+            ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/8 shadow-[0_0_0_1px_color-mix(in_srgb,var(--accent-color)_40%,transparent)]'
             : 'border-border-subtle bg-black/5 dark:bg-white/[0.03] hover:bg-black/10 dark:hover:bg-white/[0.06]'
           }`}
       >
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-[13px] font-semibold tracking-tight text-foreground/95">
-            {note.title}
-          </h3>
-          <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-foreground/68">
-            {note.content}
+          <p className="line-clamp-2 text-[12px] leading-relaxed text-foreground/72">
+            {preview}
           </p>
-          <div className="mt-2 flex flex-col text-[11px] text-foreground/48">
+          <div className="mt-3 flex items-center justify-between gap-3 text-[11px] text-foreground/48">
             <span>{note.authorName}</span>
             <span>{formatNotesCardDate(note.createdAt, locale)}</span>
           </div>
@@ -44,23 +43,27 @@ export function NoteCard({ note, selected, onSelect, viewMode }: NoteCardProps) 
       type="button"
       aria-label={`Open note ${note.title}`}
       onClick={() => onSelect(note.id)}
-      className={`group flex min-h-[160px] w-full flex-col rounded-xl border p-4 text-left transition duration-150 ${selected
-          ? 'border-[var(--accent-color)]/30 bg-[var(--accent-color)]/10 shadow-[0_0_0_1px_rgba(var(--accent-color),0.1)]'
-          : 'border-border-subtle bg-black/5 dark:bg-white/[0.03] hover:border-border-subtle hover:bg-black/10 dark:hover:bg-white/[0.06]'
+      className={`group flex w-full flex-col rounded-[22px] p-1 text-left transition duration-150 ${
+        selected
+          ? 'border border-[var(--accent-color)] bg-[var(--accent-color)]/5'
+          : 'border border-transparent hover:border-border-subtle/80'
         }`}
     >
-      <div className="rounded-lg border border-white/6 bg-black/[0.06] px-4 py-4 dark:bg-white/[0.03]">
-        <h3 className="truncate text-[13px] font-semibold tracking-tight text-foreground/95">
-          {note.title}
-        </h3>
-        <p className="mt-3 line-clamp-5 text-[12px] leading-relaxed text-foreground/72">
-          {note.content}
+      <div
+        className={`min-h-[168px] rounded-[18px] border px-4 py-4 ${
+          selected
+            ? 'border-[var(--accent-color)] bg-black/[0.03] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--accent-color)_35%,transparent)] dark:bg-white/[0.03]'
+            : 'border-border-subtle bg-black/[0.03] dark:bg-white/[0.03]'
+        }`}
+      >
+        <p className="line-clamp-6 text-[12px] leading-relaxed text-foreground/78">
+          {preview}
         </p>
       </div>
 
-      <div className="mt-3 flex flex-col gap-0.5 px-1 text-[11px] text-foreground/48">
-        <span>{note.authorName}</span>
-        <span>{formatNotesCardDate(note.createdAt, locale)}</span>
+      <div className="mt-3 flex flex-col gap-0.5 px-2 text-center text-[11px]">
+        <span className="truncate font-medium text-foreground/82">{note.authorName}</span>
+        <span className="text-foreground/48">{formatNotesCardDate(note.createdAt, locale)}</span>
       </div>
     </button>
   )

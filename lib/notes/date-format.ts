@@ -32,3 +32,13 @@ export function formatNotesDetailDate(date: string, locale: Locale) {
     year: 'numeric',
   }).format(new Date(date))
 }
+
+export function formatNotesEditorTimestamp(date: string, locale: Locale) {
+  return new Intl.DateTimeFormat(toIntlLocale(locale), {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(date))
+}

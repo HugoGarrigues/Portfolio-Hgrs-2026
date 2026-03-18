@@ -115,7 +115,7 @@ describe("Notes API route", () => {
   it("rejects invalid payloads", async () => {
     setupSupabaseMock([{ data: null, error: null }])
 
-    const response = await POST(createPostRequest({ title: "", message: "Test" }))
+    const response = await POST(createPostRequest({ displayName: "", message: "Test" }))
     expect(response.status).toBe(400)
 
     const json = await response.json()
@@ -127,7 +127,6 @@ describe("Notes API route", () => {
 
     const payload = {
       displayName: "Tester",
-      title: "Hi",
       message: "Cooldown",
       clientId: "client-1",
     }
@@ -158,14 +157,13 @@ describe("Notes API route", () => {
 
     const payload = {
       displayName: "  Trimmed  ",
-      title: "  Title  ",
-      message: "  Message  ",
+      message: "  First line of the note\nSecond line  ",
       clientId: "client-1",
     }
 
     const insertedNote = {
       id: "inserted",
-      title: "Title",
+      title: "First line of the note",
       content: "Message",
       author_name: "Trimmed",
       client_id: "client-1",
@@ -187,8 +185,8 @@ describe("Notes API route", () => {
     expect(json.note).toEqual(insertedNote)
     expect(json.cooldown).toEqual({ nextAllowedAt: "2026-03-18T00:05:00.000Z" })
     expect(supabase._builders[1].insert).toHaveBeenCalledWith({
-      title: "Title",
-      content: "Message",
+      title: "First line of the note",
+      content: "First line of the note\nSecond line",
       author_name: "Trimmed",
       client_id: "client-1",
       status: "published",

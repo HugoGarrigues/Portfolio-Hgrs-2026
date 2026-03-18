@@ -92,7 +92,7 @@ describe('NotesApp', () => {
     expect(splitPane).not.toBeNull()
     expect(sidebar).not.toBeNull()
     await waitFor(() => {
-      expect(within(detailPane).getByRole('heading', { name: 'Newest note' })).toBeInTheDocument()
+      expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
     })
     expect(splitPane?.className.split(' ')).toContain('flex-row')
     expect(splitPane?.className.split(' ')).not.toContain('flex-col')
@@ -106,14 +106,14 @@ describe('NotesApp', () => {
     expect(viewToggle.className).toContain('border')
     expect(viewToggle.className).toContain('rounded-full')
     expect(searchInput.className).toContain('rounded-full')
-    expect(within(gallery).queryByText('Older note')).not.toBeInTheDocument()
+    expect(within(gallery).queryByText('Something thoughtful')).not.toBeInTheDocument()
     expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
     expect(within(detailPane).getByText('Ada')).toBeInTheDocument()
 
     await user.type(screen.getByPlaceholderText('Search'), 'fresh')
 
-    expect(within(gallery).getByText('Newest note')).toBeInTheDocument()
-    expect(within(gallery).queryByText('Older note')).not.toBeInTheDocument()
+    expect(within(gallery).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
+    expect(within(gallery).queryByText('Something thoughtful')).not.toBeInTheDocument()
   })
 
   it('switches the reading pane when a tile is selected', async () => {
@@ -124,7 +124,6 @@ describe('NotesApp', () => {
     const detailPane = await screen.findByLabelText('Note detail')
     await user.click(screen.getByRole('button', { name: /Open note Older note/i }))
 
-    expect(within(detailPane).getByRole('heading', { name: 'Older note' })).toBeInTheDocument()
     expect(within(detailPane).getByText('Something thoughtful')).toBeInTheDocument()
     expect(within(detailPane).getByText('Linus')).toBeInTheDocument()
   })
@@ -133,7 +132,7 @@ describe('NotesApp', () => {
     const user = userEvent.setup()
     renderNotesApp()
 
-    await screen.findByText('Newest note')
+    await screen.findByText('A fresh entry for the guestbook')
 
     // 1. Click the create note button in toolbar
     await user.click(screen.getByRole('button', { name: 'Create note' }))
@@ -142,12 +141,12 @@ describe('NotesApp', () => {
     const draftTextarea = screen.getByLabelText('New note')
     expect(screen.getByLabelText('Note editor').className.split(' ')).not.toContain('hidden')
     await user.type(draftTextarea, 'Written from the draft pane')
+    expect(screen.queryByLabelText('Title')).not.toBeInTheDocument()
 
     // 3. Click Publish in draft pane to reveal inline publish fields
     await user.click(screen.getByRole('button', { name: 'Publish' }))
 
-    // 4. Fill title & name inline in the editor
-    await user.type(screen.getByLabelText('Title'), 'Posted note')
+    // 4. Fill name inline in the editor
     await user.type(screen.getByLabelText('Name'), 'Grace')
 
     // 5. Confirm publish from the editor footer
@@ -156,7 +155,7 @@ describe('NotesApp', () => {
     // 6. Verify the note appears in detail pane
     const detailPane = await screen.findByLabelText('Note detail')
     await waitFor(() => {
-      expect(within(detailPane).getByRole('heading', { name: 'Posted note' })).toBeInTheDocument()
+      expect(within(detailPane).getByText('Written from the draft pane')).toBeInTheDocument()
     })
 
     expect(within(detailPane).getByText('Written from the draft pane')).toBeInTheDocument()

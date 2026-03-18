@@ -83,7 +83,7 @@ export function NotesApp() {
     }
 
     return sectionNotes.filter((note) =>
-      `${note.title} ${note.content}`.toLowerCase().includes(normalizedQuery),
+      `${note.authorName} ${note.content}`.toLowerCase().includes(normalizedQuery),
     )
   }, [activeSection, deferredQuery, notes])
 
@@ -111,7 +111,7 @@ export function NotesApp() {
   const trashedCount = notes.filter((note) => note.status === 'trashed').length
 
   function handleCreateNote() {
-    setDraft({ content: '', title: '', displayName: '', publishMode: false })
+    setDraft({ content: '', displayName: '', publishMode: false, createdAt: new Date().toISOString() })
     setSelectedNoteId(null)
     setError('')
   }
@@ -141,7 +141,6 @@ export function NotesApp() {
         },
         body: JSON.stringify({
           displayName: draft.displayName,
-          title: draft.title,
           message: draft.content,
           clientId: getNotesClientId(),
         }),
@@ -171,16 +170,13 @@ export function NotesApp() {
       return (
         <NotesDraftPane
           content={draft.content}
-          title={draft.title}
           displayName={draft.displayName}
           publishMode={draft.publishMode}
+          createdAt={draft.createdAt}
           submitting={submitting}
           error={error}
           onContentChange={(value) =>
             setDraft((current) => (current ? { ...current, content: value } : current))
-          }
-          onTitleChange={(value) =>
-            setDraft((current) => (current ? { ...current, title: value } : current))
           }
           onDisplayNameChange={(value) =>
             setDraft((current) => (current ? { ...current, displayName: value } : current))

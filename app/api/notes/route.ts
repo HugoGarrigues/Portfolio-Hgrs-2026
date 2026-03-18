@@ -15,6 +15,19 @@ type NoteRecord = {
   updated_at: string
 }
 
+function deriveNoteTitle(message: string) {
+  const firstMeaningfulLine = message
+    .split("\n")
+    .map((line) => line.trim())
+    .find(Boolean)
+
+  if (!firstMeaningfulLine) {
+    return "Note"
+  }
+
+  return firstMeaningfulLine.slice(0, 80)
+}
+
 export async function GET() {
   const supabase = createSupabaseServerClient()
 
@@ -54,7 +67,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: validation.error }, { status: 400 })
   }
 
-  const { clientId, displayName, message, title } = validation.value
+  const { clientId, displayName, message } = validation.value
+  const title = deriveNoteTitle(message)
 
   const { data: latestNote, error: latestError } = await supabase
     .from("notes")
