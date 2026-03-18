@@ -100,15 +100,14 @@ export function NotesApp() {
       if (current && notes.some((note) => note.id === current)) {
         return current
       }
-
-      const firstVisible = filteredNotes[0]
-      return firstVisible?.id ?? notes[0].id
+      return null
     })
   }, [filteredNotes, notes])
 
   const cooldownActive = Boolean(cooldown.nextAllowedAt)
   const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null
   const isDrafting = draft !== null
+  const hasRightPane = isDrafting || selectedNote !== null || Boolean(error)
   const ownerCount = notes.filter((note) => note.source === 'owner' && note.status === 'published').length
   const visitorCount = notes.filter((note) => note.source === 'visitor' && note.status === 'published').length
   const trashedCount = notes.filter((note) => note.status === 'trashed').length
@@ -120,9 +119,6 @@ export function NotesApp() {
 
   function handleCancelDraft() {
     setDraft(null)
-    if (filteredNotes.length > 0) {
-      setSelectedNoteId(filteredNotes[0].id)
-    }
   }
 
   async function handleDraftPublish() {
@@ -218,6 +214,10 @@ export function NotesApp() {
       )
     }
 
+    if (!selectedNote && !error) {
+      return null
+    }
+
     return <NotesDetailPane note={selectedNote} error={error} />
   }
 
@@ -252,7 +252,7 @@ export function NotesApp() {
         </div>
 
         <div className="notes-split-pane flex flex-1 flex-row overflow-hidden">
-          <section className="flex min-h-0 min-w-[320px] max-w-[400px] flex-1 flex-col border-r border-border-subtle">
+          <section className="flex min-h-0 min-w-[320px] basis-[44%] flex-col border-r border-border-subtle">
             {loading ? (
               <div className="flex flex-1 items-center justify-center px-8 text-[13px] text-foreground/35">
                 {t('notes.loading')}
@@ -270,7 +270,9 @@ export function NotesApp() {
             )}
           </section>
 
-          {renderRightPane()}
+          <div className="flex min-h-0 min-w-[360px] basis-[56%] shrink-0">
+            {hasRightPane ? renderRightPane() : <div aria-hidden="true" className="flex-1" />}
+          </div>
         </div>
       </div>
     </div>
