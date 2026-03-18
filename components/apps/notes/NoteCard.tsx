@@ -1,3 +1,5 @@
+import { formatNotesCardDate } from '@/lib/notes/date-format'
+import { useTranslation } from '@/lib/i18n/useTranslation'
 import type { Note, NotesViewMode } from './types'
 
 type NoteCardProps = {
@@ -7,13 +9,9 @@ type NoteCardProps = {
   viewMode: NotesViewMode
 }
 
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat('en-GB', {
-    weekday: 'short',
-  }).format(new Date(date))
-}
-
 export function NoteCard({ note, selected, onSelect, viewMode }: NoteCardProps) {
+  const { locale } = useTranslation()
+
   if (viewMode === 'list') {
     return (
       <button
@@ -29,13 +27,14 @@ export function NoteCard({ note, selected, onSelect, viewMode }: NoteCardProps) 
           <h3 className="truncate text-[13px] font-semibold tracking-tight text-foreground/95">
             {note.title}
           </h3>
-          <p className="mt-0.5 truncate text-[11px] text-foreground/50">
-            {note.authorName} · {note.content}
+          <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-foreground/68">
+            {note.content}
           </p>
+          <div className="mt-2 flex flex-col text-[11px] text-foreground/48">
+            <span>{note.authorName}</span>
+            <span>{formatNotesCardDate(note.createdAt, locale)}</span>
+          </div>
         </div>
-        <p className="shrink-0 text-[10px] uppercase tracking-widest text-foreground/40">
-          {formatDate(note.createdAt)}
-        </p>
       </button>
     )
   }
@@ -50,21 +49,19 @@ export function NoteCard({ note, selected, onSelect, viewMode }: NoteCardProps) 
           : 'border-border-subtle bg-black/5 dark:bg-white/[0.03] hover:border-border-subtle hover:bg-black/10 dark:hover:bg-white/[0.06]'
         }`}
     >
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h3 className="truncate text-[13px] font-semibold tracking-tight text-foreground/95">
-            {note.title}
-          </h3>
-          <p className="mt-1 truncate text-[11px] text-foreground/50">{note.authorName}</p>
-        </div>
-        <p className="shrink-0 pt-0.5 text-[10px] uppercase tracking-widest text-foreground/40">
-          {formatDate(note.createdAt)}
+      <div className="rounded-lg border border-white/6 bg-black/[0.06] px-4 py-4 dark:bg-white/[0.03]">
+        <h3 className="truncate text-[13px] font-semibold tracking-tight text-foreground/95">
+          {note.title}
+        </h3>
+        <p className="mt-3 line-clamp-5 text-[12px] leading-relaxed text-foreground/72">
+          {note.content}
         </p>
       </div>
 
-      <p className="line-clamp-4 text-[12px] leading-relaxed text-foreground/70">
-        {note.content}
-      </p>
+      <div className="mt-3 flex flex-col gap-0.5 px-1 text-[11px] text-foreground/48">
+        <span>{note.authorName}</span>
+        <span>{formatNotesCardDate(note.createdAt, locale)}</span>
+      </div>
     </button>
   )
 }

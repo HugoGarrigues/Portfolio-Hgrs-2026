@@ -10,7 +10,7 @@ type NoteRecord = {
   content: string
   author_name: string
   client_id: string
-  status: string
+  status: "published" | "trashed"
   created_at: string
   updated_at: string
 }
