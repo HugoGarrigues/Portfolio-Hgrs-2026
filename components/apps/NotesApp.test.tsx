@@ -3,6 +3,8 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { LocaleProvider } from '@/contexts/LocaleContext'
+import { NotificationCenterProvider } from '@/contexts/NotificationCenterContext'
+import { NotificationCenter } from '@/components/system/notifications/NotificationCenter'
 import { NotesApp } from './NotesApp'
 
 vi.mock('@/components/desktop/Window', () => ({
@@ -77,7 +79,10 @@ describe('NotesApp', () => {
   function renderNotesApp() {
     return render(
       <LocaleProvider>
-        <NotesApp />
+        <NotificationCenterProvider>
+          <NotesApp />
+          <NotificationCenter />
+        </NotificationCenterProvider>
       </LocaleProvider>,
     )
   }
@@ -232,6 +237,7 @@ describe('NotesApp', () => {
     expect(screen.getByText('You already posted a note')).toBeInTheDocument()
     expect(screen.getByText(/You can publish another note after/i)).toBeInTheDocument()
     expect(screen.queryByText('Veuillez patienter avant de publier une nouvelle note')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Note editor')?.textContent).not.toContain('You already posted a note')
 
     await act(async () => {
       vi.advanceTimersByTime(5000)
@@ -286,6 +292,7 @@ describe('NotesApp', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Publish' }))
     expect(screen.getByText('You already posted a note')).toBeInTheDocument()
     expect(screen.getByText(/You can publish another note after/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText('Note editor')?.textContent).not.toContain('You already posted a note')
     expect(fetchMock.mock.calls.some((call) => call[0] === '/api/notes')).toBe(false)
     expect(String(fetchMock.mock.calls[0]?.[0])).toMatch(/^\/api\/notes\?clientId=/)
   })

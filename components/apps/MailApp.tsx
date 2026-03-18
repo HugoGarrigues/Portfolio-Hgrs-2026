@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useWindow } from '@/components/desktop/Window'
+import { useNotifications } from '@/hooks/useNotifications'
 import { useTranslation } from '@/lib/i18n/useTranslation'
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -126,11 +127,11 @@ type Status = 'idle' | 'sending' | 'sent' | 'error'
 export function MailApp() {
   const { dragControls } = useWindow()
   const { t } = useTranslation()
+  const { pushError } = useNotifications()
   const onDragStart = (e: React.PointerEvent) => dragControls.start(e)
 
   const [form, setForm] = useState({ nom: '', email: '', objet: '', message: '' })
   const [status, setStatus] = useState<Status>('idle')
-  const [errorMsg, setErrorMsg] = useState('')
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
@@ -160,7 +161,6 @@ export function MailApp() {
   async function handleSend() {
     if (!canSend || status === 'sending') return
     setStatus('sending')
-    setErrorMsg('')
 
     try {
       const res = await fetch('/api/contact', {
@@ -183,7 +183,11 @@ export function MailApp() {
       setForm({ nom: '', email: '', objet: '', message: '' })
     } catch (e) {
       setStatus('error')
-      setErrorMsg(e instanceof Error ? e.message : t('mail.genericError'))
+      pushError({
+        title: t('mail.serverError'),
+        message: e instanceof Error ? e.message : t('mail.genericError'),
+        source: 'Mail',
+      })
     }
   }
 
@@ -219,8 +223,7 @@ export function MailApp() {
               disabled={status === 'sending' || status === 'sent' || (status === 'idle' && !canSend)}
               whileTap={canSend && status === 'idle' ? { scale: 0.92 } : undefined}
               className={`flex items-center gap-2 text-[12px] font-semibold px-3.5 py-1.5 rounded-lg transition-colors duration-200 ${btnClass}`}
-              role="status"
-              aria-live="polite"
+              aria-live={status === 'sending' || status === 'sent' || status === 'error' ? 'polite' : undefined}
             >
               <ButtonContent status={status} />
             </motion.button>

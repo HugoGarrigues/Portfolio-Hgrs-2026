@@ -2,6 +2,7 @@
 
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { useWindow } from '@/components/desktop/Window'
+import { useNotifications } from '@/hooks/useNotifications'
 import { getNotesClientId } from '@/lib/notes/client-id'
 import { useTranslation } from '@/lib/i18n/useTranslation'
 import { NotesDetailPane } from './notes/NotesDetailPane'
@@ -20,16 +21,15 @@ import {
 } from './notes/types'
 
 const EMPTY_COOLDOWN: NotesCooldown = { nextAllowedAt: null }
-const EMPTY_ALERT = { title: '', detail: '' }
 
 export function NotesApp() {
   const { dragControls } = useWindow()
+  const { pushError } = useNotifications()
   const { t } = useTranslation()
   const [notes, setNotes] = useState<Note[]>([])
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [alert, setAlert] = useState(EMPTY_ALERT)
   const [submitting, setSubmitting] = useState(false)
   const [cooldown, setCooldown] = useState<NotesCooldown>(EMPTY_COOLDOWN)
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
@@ -106,20 +106,6 @@ export function NotesApp() {
     })
   }, [filteredNotes, notes])
 
-  useEffect(() => {
-    if (!alert.title && !alert.detail) {
-      return
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setAlert(EMPTY_ALERT)
-    }, 5000)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [alert])
-
   const cooldownActive = Boolean(cooldown.nextAllowedAt)
   const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null
   const isDrafting = draft !== null
@@ -130,12 +116,10 @@ export function NotesApp() {
   function handleCreateNote() {
     setDraft({ content: '', displayName: '', publishMode: false, createdAt: new Date().toISOString() })
     setSelectedNoteId(null)
-    setAlert(EMPTY_ALERT)
   }
 
   function handleCancelDraft() {
     setDraft(null)
-    setAlert(EMPTY_ALERT)
     if (filteredNotes.length > 0) {
       setSelectedNoteId(filteredNotes[0].id)
     }
@@ -150,15 +134,15 @@ export function NotesApp() {
     }
 
     if (cooldownActive) {
-      setAlert({
+      pushError({
         title: t('notes.cooldownTitle'),
-        detail: t('notes.cooldownBody').replace('{date}', new Date(cooldown.nextAllowedAt ?? '').toLocaleString()),
+        message: t('notes.cooldownBody').replace('{date}', new Date(cooldown.nextAllowedAt ?? '').toLocaleString()),
+        source: t('notes.title'),
       })
       return
     }
 
     setSubmitting(true)
-    setAlert(EMPTY_ALERT)
 
     try {
       const response = await fetch('/api/notes', {
@@ -178,18 +162,20 @@ export function NotesApp() {
       if (!response.ok) {
         if (payload.cooldown) {
           setCooldown(payload.cooldown)
-          setAlert({
+          pushError({
             title: t('notes.cooldownTitle'),
-            detail: t('notes.cooldownBody').replace(
+            message: t('notes.cooldownBody').replace(
               '{date}',
               new Date(payload.cooldown.nextAllowedAt ?? '').toLocaleString(),
             ),
+            source: t('notes.title'),
           })
           return
         }
-        setAlert({
+        pushError({
           title: t('notes.serverError'),
-          detail: payload.error ?? t('notes.serverError'),
+          message: payload.error ?? t('notes.serverError'),
+          source: t('notes.title'),
         })
         return
       }
@@ -201,9 +187,10 @@ export function NotesApp() {
       setDraft(null)
       setActiveSection(nextNote.source)
     } catch (submitError) {
-      setAlert({
+      pushError({
         title: t('notes.serverError'),
-        detail: submitError instanceof Error ? submitError.message : t('notes.serverError'),
+        message: submitError instanceof Error ? submitError.message : t('notes.serverError'),
+        source: t('notes.title'),
       })
     } finally {
       setSubmitting(false)
@@ -219,9 +206,6 @@ export function NotesApp() {
           publishMode={draft.publishMode}
           createdAt={draft.createdAt}
           submitting={submitting}
-          alertTitle={alert.title}
-          alertDetail={alert.detail}
-          cooldown={cooldown}
           onContentChange={(value) =>
             setDraft((current) => (current ? { ...current, content: value } : current))
           }
