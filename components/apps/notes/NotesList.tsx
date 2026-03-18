@@ -1,14 +1,15 @@
 import { useTranslation } from '@/lib/i18n/useTranslation'
 import { NoteCard } from './NoteCard'
-import type { Note } from './types'
+import type { Note, NotesViewMode } from './types'
 
 type NotesListProps = {
   notes: Note[]
   selectedNoteId: string | null
   onSelectNote: (id: string) => void
+  viewMode: NotesViewMode
 }
 
-export function NotesList({ notes, selectedNoteId, onSelectNote }: NotesListProps) {
+export function NotesList({ notes, selectedNoteId, onSelectNote, viewMode }: NotesListProps) {
   const { t } = useTranslation()
 
   if (notes.length === 0) {
@@ -26,18 +27,27 @@ export function NotesList({ notes, selectedNoteId, onSelectNote }: NotesListProp
     )
   }
 
+  const ariaLabel = viewMode === 'gallery' ? 'Notes gallery' : 'Notes list'
+
   return (
-    <div aria-label="Notes gallery" className="flex-1 overflow-y-auto px-6 py-6">
+    <div aria-label={ariaLabel} className="flex-1 overflow-y-auto px-6 py-6">
       <h3 className="px-1 text-[10px] font-bold text-foreground/30 uppercase tracking-widest">
         {t('notes.galleryHeading')}
       </h3>
-      <div className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2">
+      <div
+        className={
+          viewMode === 'gallery'
+            ? 'mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2'
+            : 'mt-4 flex flex-col gap-2'
+        }
+      >
         {notes.map((note) => (
           <NoteCard
             key={note.id}
             note={note}
             selected={note.id === selectedNoteId}
             onSelect={onSelectNote}
+            viewMode={viewMode}
           />
         ))}
       </div>

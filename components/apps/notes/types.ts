@@ -23,6 +23,12 @@ export type NotesResponse = {
   cooldown?: NotesCooldown
 }
 
+export type NotesViewMode = 'gallery' | 'list'
+
+export type DraftNote = {
+  content: string
+}
+
 export type CreateNoteResponse = {
   note: NoteRecord
   cooldown: NotesCooldown
