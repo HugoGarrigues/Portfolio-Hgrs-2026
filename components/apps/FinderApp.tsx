@@ -122,7 +122,7 @@ function AppIcon({ id, name, iconFile, selected, onSelect, onOpen }: {
         <img
           src={`/icons/${iconFile}.png`}
           alt={name}
-          className={`w-full h-full object-contain ${['settings', 'notes', 'health', 'spotify'].includes(id) ? 'scale-[1.25]' : ''
+          className={`w-full h-full object-contain rounded-[22%] ${['settings', 'notes', 'health', 'spotify'].includes(id) ? 'scale-[1.25]' : ''
             }`}
           draggable={false}
         />
