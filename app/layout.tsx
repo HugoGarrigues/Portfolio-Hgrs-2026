@@ -4,6 +4,8 @@ import { LocaleProvider } from "@/contexts/LocaleContext";
 import { WallpaperProvider } from "@/contexts/WallpaperContext";
 import { AvailabilityProvider } from "@/contexts/AvailabilityContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { NotificationCenterProvider } from "@/contexts/NotificationCenterContext";
+import { NotificationCenter } from "@/components/system/notifications/NotificationCenter";
 
 export const metadata: Metadata = {
   title: "Hugo Garrigues — Portfolio",
@@ -19,13 +21,16 @@ export default function RootLayout({
     <html lang="fr">
       <body className="antialiased">
         <ThemeProvider>
-          <LocaleProvider>
-            <WallpaperProvider>
-              <AvailabilityProvider>
-                {children}
-              </AvailabilityProvider>
-            </WallpaperProvider>
-          </LocaleProvider>
+          <NotificationCenterProvider>
+            <LocaleProvider>
+              <WallpaperProvider>
+                <AvailabilityProvider>
+                  {children}
+                  <NotificationCenter />
+                </AvailabilityProvider>
+              </WallpaperProvider>
+            </LocaleProvider>
+          </NotificationCenterProvider>
         </ThemeProvider>
       </body>
     </html>

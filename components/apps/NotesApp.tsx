@@ -2,12 +2,12 @@
 
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { useWindow } from '@/components/desktop/Window'
+import { useNotifications } from '@/hooks/useNotifications'
 import { getNotesClientId } from '@/lib/notes/client-id'
 import { useTranslation } from '@/lib/i18n/useTranslation'
 import { NotesDetailPane } from './notes/NotesDetailPane'
 import { NotesDraftPane } from './notes/NotesDraftPane'
 import { NotesList } from './notes/NotesList'
-import { NotesPublishSheet } from './notes/NotesPublishSheet'
 import { NotesSidebar } from './notes/NotesSidebar'
 import { NotesToolbar } from './notes/NotesToolbar'
 import {
@@ -24,6 +24,7 @@ const EMPTY_COOLDOWN: NotesCooldown = { nextAllowedAt: null }
 
 export function NotesApp() {
   const { dragControls } = useWindow()
+  const { pushError } = useNotifications()
   const { t } = useTranslation()
   const [notes, setNotes] = useState<Note[]>([])
   const [query, setQuery] = useState('')
@@ -34,7 +35,7 @@ export function NotesApp() {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<NotesViewMode>('gallery')
   const [draft, setDraft] = useState<DraftNote | null>(null)
-  const [publishSheetOpen, setPublishSheetOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState<'owner' | 'visitor' | 'trashed'>('visitor')
   const deferredQuery = useDeferredValue(query)
 
   useEffect(() => {
@@ -42,7 +43,8 @@ export function NotesApp() {
 
     async function loadNotes() {
       try {
-        const response = await fetch('/api/notes')
+        const clientId = getNotesClientId()
+        const response = await fetch(`/api/notes?clientId=${encodeURIComponent(clientId)}`)
         const payload = (await response.json()) as NotesResponse
 
         if (cancelled) {
@@ -71,15 +73,22 @@ export function NotesApp() {
 
   const filteredNotes = useMemo(() => {
     const normalizedQuery = deferredQuery.trim().toLowerCase()
+    const sectionNotes = notes.filter((note) => {
+      if (activeSection === 'trashed') {
+        return note.status === 'trashed'
+      }
+
+      return note.status === 'published' && note.source === activeSection
+    })
 
     if (!normalizedQuery) {
-      return notes
+      return sectionNotes
     }
 
-    return notes.filter((note) =>
-      `${note.title} ${note.content}`.toLowerCase().includes(normalizedQuery),
+    return sectionNotes.filter((note) =>
+      `${note.authorName} ${note.content}`.toLowerCase().includes(normalizedQuery),
     )
-  }, [deferredQuery, notes])
+  }, [activeSection, deferredQuery, notes])
 
   useEffect(() => {
     if (notes.length === 0) {
@@ -92,36 +101,48 @@ export function NotesApp() {
         return current
       }
 
-      return notes[0].id
+      const firstVisible = filteredNotes[0]
+      return firstVisible?.id ?? notes[0].id
     })
-  }, [notes])
+  }, [filteredNotes, notes])
 
   const cooldownActive = Boolean(cooldown.nextAllowedAt)
   const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null
   const isDrafting = draft !== null
+  const ownerCount = notes.filter((note) => note.source === 'owner' && note.status === 'published').length
+  const visitorCount = notes.filter((note) => note.source === 'visitor' && note.status === 'published').length
+  const trashedCount = notes.filter((note) => note.status === 'trashed').length
 
   function handleCreateNote() {
-    setDraft({ content: '' })
+    setDraft({ content: '', displayName: '', publishMode: false, createdAt: new Date().toISOString() })
     setSelectedNoteId(null)
-    setError('')
   }
 
   function handleCancelDraft() {
     setDraft(null)
-    setPublishSheetOpen(false)
-    if (notes.length > 0) {
-      setSelectedNoteId(notes[0].id)
+    if (filteredNotes.length > 0) {
+      setSelectedNoteId(filteredNotes[0].id)
     }
   }
 
-  function handleDraftPublish() {
-    setPublishSheetOpen(true)
-  }
-
-  async function handleConfirmPublish(values: { displayName: string; title: string }) {
+  async function handleDraftPublish() {
     if (!draft) return
+
+    if (!draft.publishMode) {
+      setDraft((current) => (current ? { ...current, publishMode: true } : current))
+      return
+    }
+
+    if (cooldownActive) {
+      pushError({
+        title: t('notes.cooldownTitle'),
+        message: t('notes.cooldownBody').replace('{date}', new Date(cooldown.nextAllowedAt ?? '').toLocaleString()),
+        source: t('notes.title'),
+      })
+      return
+    }
+
     setSubmitting(true)
-    setError('')
 
     try {
       const response = await fetch('/api/notes', {
@@ -130,8 +151,7 @@ export function NotesApp() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          displayName: values.displayName,
-          title: values.title,
+          displayName: draft.displayName,
           message: draft.content,
           clientId: getNotesClientId(),
         }),
@@ -140,7 +160,24 @@ export function NotesApp() {
       const payload = (await response.json()) as CreateNoteResponse & { error?: string }
 
       if (!response.ok) {
-        throw new Error(payload.error ?? t('notes.serverError'))
+        if (payload.cooldown) {
+          setCooldown(payload.cooldown)
+          pushError({
+            title: t('notes.cooldownTitle'),
+            message: t('notes.cooldownBody').replace(
+              '{date}',
+              new Date(payload.cooldown.nextAllowedAt ?? '').toLocaleString(),
+            ),
+            source: t('notes.title'),
+          })
+          return
+        }
+        pushError({
+          title: t('notes.serverError'),
+          message: payload.error ?? t('notes.serverError'),
+          source: t('notes.title'),
+        })
+        return
       }
 
       const nextNote = mapNoteRecord(payload.note)
@@ -148,9 +185,13 @@ export function NotesApp() {
       setSelectedNoteId(nextNote.id)
       setCooldown(payload.cooldown)
       setDraft(null)
-      setPublishSheetOpen(false)
+      setActiveSection(nextNote.source)
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : t('notes.serverError'))
+      pushError({
+        title: t('notes.serverError'),
+        message: submitError instanceof Error ? submitError.message : t('notes.serverError'),
+        source: t('notes.title'),
+      })
     } finally {
       setSubmitting(false)
     }
@@ -161,14 +202,23 @@ export function NotesApp() {
       return (
         <NotesDraftPane
           content={draft.content}
-          onContentChange={(value) => setDraft({ content: value })}
+          displayName={draft.displayName}
+          publishMode={draft.publishMode}
+          createdAt={draft.createdAt}
+          submitting={submitting}
+          onContentChange={(value) =>
+            setDraft((current) => (current ? { ...current, content: value } : current))
+          }
+          onDisplayNameChange={(value) =>
+            setDraft((current) => (current ? { ...current, displayName: value } : current))
+          }
           onPublish={handleDraftPublish}
           onCancel={handleCancelDraft}
         />
       )
     }
 
-    return <NotesDetailPane note={selectedNote} />
+    return <NotesDetailPane note={selectedNote} error={error} />
   }
 
   return (
@@ -177,7 +227,13 @@ export function NotesApp() {
         onPointerDown={(event) => dragControls.start(event)}
         className="cursor-grab active:cursor-grabbing flex shrink-0"
       >
-        <NotesSidebar noteCount={notes.length} />
+        <NotesSidebar
+          ownerCount={ownerCount}
+          visitorCount={visitorCount}
+          trashedCount={trashedCount}
+          activeSection={activeSection}
+          onSelectSection={setActiveSection}
+        />
       </div>
 
       <div className="relative flex-1 flex flex-col bg-black/[0.02] dark:bg-black/[0.03] dark:bg-white/[0.02] rounded-2xl border border-border-subtle overflow-hidden">
@@ -189,28 +245,14 @@ export function NotesApp() {
             query={query}
             onQueryChange={setQuery}
             onCreateNote={handleCreateNote}
-            canCreate={!cooldownActive && !isDrafting}
-            noteCount={notes.length}
+            canCreate={!isDrafting}
             viewMode={viewMode}
             onToggleViewMode={() => setViewMode((v) => (v === 'gallery' ? 'list' : 'gallery'))}
           />
         </div>
 
-        {cooldownActive ? (
-          <div className="border-b border-border-subtle px-6 py-3">
-            <h3 className="text-[12px] font-semibold text-foreground/90">{t('notes.cooldownTitle')}</h3>
-            <p className="mt-1 max-w-3xl text-[12px] leading-relaxed text-foreground/50">
-              {t('notes.cooldownBody').replace('{date}', new Date(cooldown.nextAllowedAt ?? '').toLocaleString())}
-            </p>
-          </div>
-        ) : null}
-
-        {error && !isDrafting ? (
-          <p className="px-8 py-4 text-[13px] text-red-300">{error}</p>
-        ) : null}
-
-        <div className="flex flex-1 overflow-hidden flex-col xl:flex-row">
-          <section className="flex min-h-0 min-w-0 flex-1 flex-col xl:max-w-[400px] xl:border-r border-border-subtle">
+        <div className="notes-split-pane flex flex-1 flex-row overflow-hidden">
+          <section className="flex min-h-0 min-w-[320px] max-w-[400px] flex-1 flex-col border-r border-border-subtle">
             {loading ? (
               <div className="flex flex-1 items-center justify-center px-8 text-[13px] text-foreground/35">
                 {t('notes.loading')}
@@ -221,7 +263,6 @@ export function NotesApp() {
                 selectedNoteId={selectedNoteId}
                 onSelectNote={(id) => {
                   setDraft(null)
-                  setPublishSheetOpen(false)
                   setSelectedNoteId(id)
                 }}
                 viewMode={viewMode}
@@ -231,15 +272,6 @@ export function NotesApp() {
 
           {renderRightPane()}
         </div>
-
-        {publishSheetOpen ? (
-          <NotesPublishSheet
-            submitting={submitting}
-            error={error}
-            onConfirm={handleConfirmPublish}
-            onCancel={() => setPublishSheetOpen(false)}
-          />
-        ) : null}
       </div>
     </div>
   )

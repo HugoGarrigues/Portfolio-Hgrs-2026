@@ -81,6 +81,7 @@ describe("Notes API route", () => {
         content: "Hello",
         author_name: "Author",
         client_id: "client-a",
+        source: "owner",
         status: "published",
         created_at: "2026-03-15T08:00:00.000Z",
         updated_at: "2026-03-15T08:00:00.000Z",
@@ -91,6 +92,7 @@ describe("Notes API route", () => {
         content: "World",
         author_name: "Author B",
         client_id: "client-b",
+        source: "visitor",
         status: "published",
         created_at: "2026-03-17T09:00:00.000Z",
         updated_at: "2026-03-17T09:00:00.000Z",
@@ -105,15 +107,54 @@ describe("Notes API route", () => {
     const json = await response.json()
     expect(json).toEqual({
       notes: [data[1], data[0]],
+      cooldown: { nextAllowedAt: null },
     })
 
     expect(supabase.from).toHaveBeenCalledWith("notes")
   })
 
+  it("returns the active cooldown for a client on notes fetch", async () => {
+    vi.useFakeTimers().setSystemTime(new Date("2026-03-17T00:00:00.000Z"))
+
+    const data = [
+      {
+        id: "note-a",
+        title: "First note",
+        content: "Hello",
+        author_name: "Author",
+        client_id: "client-a",
+        status: "published",
+        created_at: "2026-03-15T08:00:00.000Z",
+        updated_at: "2026-03-15T08:00:00.000Z",
+      },
+    ]
+
+    setupSupabaseMock([
+      { data, error: null },
+      {
+        data: {
+          created_at: "2026-03-16T13:00:00.000Z",
+        },
+        error: null,
+      },
+    ])
+
+    const response = await GET(new Request("http://localhost/api/notes?clientId=client-1"))
+    expect(response.status).toBe(200)
+
+    const json = await response.json()
+    expect(json).toEqual({
+      notes: data,
+      cooldown: {
+        nextAllowedAt: "2026-03-17T13:00:00.000Z",
+      },
+    })
+  })
+
   it("rejects invalid payloads", async () => {
     setupSupabaseMock([{ data: null, error: null }])
 
-    const response = await POST(createPostRequest({ title: "", message: "Test" }))
+    const response = await POST(createPostRequest({ displayName: "", message: "Test" }))
     expect(response.status).toBe(400)
 
     const json = await response.json()
@@ -125,7 +166,6 @@ describe("Notes API route", () => {
 
     const payload = {
       displayName: "Tester",
-      title: "Hi",
       message: "Cooldown",
       clientId: "client-1",
     }
@@ -156,17 +196,17 @@ describe("Notes API route", () => {
 
     const payload = {
       displayName: "  Trimmed  ",
-      title: "  Title  ",
-      message: "  Message  ",
+      message: "  First line of the note\nSecond line  ",
       clientId: "client-1",
     }
 
     const insertedNote = {
       id: "inserted",
-      title: "Title",
+      title: "First line of the note",
       content: "Message",
       author_name: "Trimmed",
       client_id: "client-1",
+      source: "visitor",
       status: "published",
       created_at: "2026-03-17T00:05:00.000Z",
       updated_at: "2026-03-17T00:05:00.000Z",
@@ -184,8 +224,8 @@ describe("Notes API route", () => {
     expect(json.note).toEqual(insertedNote)
     expect(json.cooldown).toEqual({ nextAllowedAt: "2026-03-18T00:05:00.000Z" })
     expect(supabase._builders[1].insert).toHaveBeenCalledWith({
-      title: "Title",
-      content: "Message",
+      title: "First line of the note",
+      content: "First line of the note\nSecond line",
       author_name: "Trimmed",
       client_id: "client-1",
       status: "published",

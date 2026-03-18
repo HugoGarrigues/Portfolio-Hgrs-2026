@@ -10,13 +10,28 @@ type NoteRecord = {
   content: string
   author_name: string
   client_id: string
-  status: string
+  status: "published" | "trashed"
   created_at: string
   updated_at: string
 }
 
-export async function GET() {
+function deriveNoteTitle(message: string) {
+  const firstMeaningfulLine = message
+    .split("\n")
+    .map((line) => line.trim())
+    .find(Boolean)
+
+  if (!firstMeaningfulLine) {
+    return "Note"
+  }
+
+  return firstMeaningfulLine.slice(0, 80)
+}
+
+export async function GET(req: Request) {
   const supabase = createSupabaseServerClient()
+  const { searchParams } = new URL(req.url)
+  const clientId = searchParams.get("clientId")?.trim() ?? ""
 
   const { data, error } = await supabase
     .from("notes")
@@ -34,7 +49,29 @@ export async function GET() {
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   )
 
-  return NextResponse.json({ notes: sortedNotes })
+  if (!clientId) {
+    return NextResponse.json({ notes: sortedNotes, cooldown: { nextAllowedAt: null } })
+  }
+
+  const { data: latestNote, error: latestError } = await supabase
+    .from("notes")
+    .select("created_at")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (latestError) {
+    console.error("Supabase GET cooldown lookup failed", latestError)
+    return NextResponse.json({ error: "Impossible de vérifier le délai d'attente" }, { status: 500 })
+  }
+
+  const cooldown =
+    latestNote && typeof latestNote.created_at === "string" && isCooldownActive(latestNote.created_at)
+      ? { nextAllowedAt: getNextAllowedAt(latestNote.created_at) }
+      : { nextAllowedAt: null }
+
+  return NextResponse.json({ notes: sortedNotes, cooldown })
 }
 
 export async function POST(req: Request) {
@@ -54,7 +91,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: validation.error }, { status: 400 })
   }
 
-  const { clientId, displayName, message, title } = validation.value
+  const { clientId, displayName, message } = validation.value
+  const title = deriveNoteTitle(message)
 
   const { data: latestNote, error: latestError } = await supabase
     .from("notes")

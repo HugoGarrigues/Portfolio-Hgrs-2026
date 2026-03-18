@@ -1,12 +1,10 @@
 export const NOTE_LIMITS = {
   displayName: 60,
-  title: 120,
   message: 1200,
 } as const
 
 export type ValidatedCreateNoteInput = {
   displayName: string
-  title: string
   message: string
   clientId: string
 }
@@ -32,7 +30,6 @@ export function validateCreateNoteInput(payload: unknown): CreateNoteValidationR
 
   const record = payload as Record<string, unknown>
   const displayName = normalize(record.displayName)
-  const title = normalize(record.title)
   const message = normalize(record.message)
   const clientId = normalize(record.clientId)
 
@@ -44,17 +41,6 @@ export function validateCreateNoteInput(payload: unknown): CreateNoteValidationR
     return {
       success: false,
       error: `Le nom doit faire moins de ${NOTE_LIMITS.displayName + 1} caractères`,
-    }
-  }
-
-  if (!title) {
-    return { success: false, error: 'Le titre est requis' }
-  }
-
-  if (title.length > NOTE_LIMITS.title) {
-    return {
-      success: false,
-      error: `Le titre doit faire moins de ${NOTE_LIMITS.title + 1} caractères`,
     }
   }
 
@@ -77,7 +63,6 @@ export function validateCreateNoteInput(payload: unknown): CreateNoteValidationR
     success: true,
     value: {
       displayName,
-      title,
       message,
       clientId,
     },
