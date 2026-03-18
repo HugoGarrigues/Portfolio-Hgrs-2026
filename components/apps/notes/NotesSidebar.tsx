@@ -20,6 +20,9 @@ export function NotesSidebar({
   return (
     <aside className="notes-sidebar flex h-full w-[190px] shrink-0 flex-col overflow-y-auto rounded-2xl border border-border-subtle bg-black/5 pb-3 pt-10 shadow-xl backdrop-blur-3xl dark:bg-black/[0.04] dark:bg-white/[0.04]">
       <div className="mb-4">
+        <p className="mb-2 px-5 text-[10px] font-medium tracking-wide text-foreground/34 select-none">
+          {t('notes.sidebarAccount')}
+        </p>
         <div className="flex flex-col gap-0.5">
           <button
             type="button"

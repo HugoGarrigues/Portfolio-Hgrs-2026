@@ -43,11 +43,7 @@ export function NoteCard({ note, selected, onSelect, viewMode }: NoteCardProps) 
       type="button"
       aria-label={`Open note ${note.title}`}
       onClick={() => onSelect(note.id)}
-      className={`group flex w-full flex-col rounded-[22px] p-1 text-left transition duration-150 ${
-        selected
-          ? 'border border-[var(--accent-color)] bg-[var(--accent-color)]/5'
-          : 'border border-transparent hover:border-border-subtle/80'
-        }`}
+      className="group flex w-full flex-col text-left transition duration-150"
     >
       <div
         className={`min-h-[168px] rounded-[18px] border px-4 py-4 ${

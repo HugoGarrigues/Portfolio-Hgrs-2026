@@ -187,7 +187,7 @@ export function NotesApp() {
       )
     }
 
-    return <NotesDetailPane note={selectedNote} />
+    return <NotesDetailPane note={selectedNote} error={error} />
   }
 
   return (
@@ -215,7 +215,6 @@ export function NotesApp() {
             onQueryChange={setQuery}
             onCreateNote={handleCreateNote}
             canCreate={!cooldownActive && !isDrafting}
-            noteCount={notes.length}
             viewMode={viewMode}
             onToggleViewMode={() => setViewMode((v) => (v === 'gallery' ? 'list' : 'gallery'))}
           />
@@ -228,10 +227,6 @@ export function NotesApp() {
               {t('notes.cooldownBody').replace('{date}', new Date(cooldown.nextAllowedAt ?? '').toLocaleString())}
             </p>
           </div>
-        ) : null}
-
-        {error && !isDrafting ? (
-          <p className="px-8 py-4 text-[13px] text-red-300">{error}</p>
         ) : null}
 
         <div className="notes-split-pane flex flex-1 flex-row overflow-hidden">

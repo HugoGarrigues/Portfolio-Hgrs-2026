@@ -4,10 +4,27 @@ import type { Note } from './types'
 
 type NotesDetailPaneProps = {
   note: Note | null
+  error?: string
 }
 
-export function NotesDetailPane({ note }: NotesDetailPaneProps) {
+export function NotesDetailPane({ note, error = '' }: NotesDetailPaneProps) {
   const { t, locale } = useTranslation()
+
+  if (!note && error) {
+    return (
+      <section
+        aria-label="Note detail"
+        className="flex flex-1 items-center justify-center border-t border-border-subtle bg-black/[0.01] px-8 py-10 dark:bg-white/[0.01] xl:border-t-0 xl:px-12"
+      >
+        <div className="max-w-sm text-center">
+          <h3 className="text-[13px] font-medium tracking-tight text-red-200">
+            {t('notes.serverError')}
+          </h3>
+          <p className="mt-2 text-[12px] leading-relaxed text-red-200/80">{error}</p>
+        </div>
+      </section>
+    )
+  }
 
   if (!note) {
     return (

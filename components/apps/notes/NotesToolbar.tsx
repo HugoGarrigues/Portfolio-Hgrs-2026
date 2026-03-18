@@ -7,7 +7,6 @@ type NotesToolbarProps = {
   onQueryChange: (value: string) => void
   onCreateNote: () => void
   canCreate: boolean
-  noteCount: number
   viewMode: NotesViewMode
   onToggleViewMode: () => void
 }
@@ -17,7 +16,6 @@ export function NotesToolbar({
   onQueryChange,
   onCreateNote,
   canCreate,
-  noteCount,
   viewMode,
   onToggleViewMode,
 }: NotesToolbarProps) {
@@ -31,9 +29,6 @@ export function NotesToolbar({
         <div className="flex items-baseline gap-2">
           <div className="text-[13px] font-bold text-foreground/95 tracking-tight cursor-default">
             {t('notes.title')}
-          </div>
-          <div className="text-[11px] text-foreground/40 cursor-default">
-            {t('notes.countLabel').replace('{count}', String(noteCount))}
           </div>
         </div>
 

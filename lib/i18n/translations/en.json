@@ -48,6 +48,7 @@
   "notes.searchPlaceholder": "Search",
   "notes.mine": "My notes",
   "notes.visitors": "Visitor notes",
+  "notes.sidebarAccount": "iCloud",
   "notes.sidebarTags": "Tags",
   "notes.recentlyDeleted": "Recently Deleted",
   "notes.countLabel": "{count} notes",

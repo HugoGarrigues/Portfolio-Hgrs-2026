@@ -98,6 +98,8 @@ describe('NotesApp', () => {
     expect(splitPane?.className.split(' ')).not.toContain('flex-col')
     expect(sidebar?.className.split(' ')).not.toContain('hidden')
     expect(detailPane.className.split(' ')).not.toContain('hidden')
+    expect(screen.getByText('iCloud')).toBeInTheDocument()
+    expect(screen.queryByText(/2 notes/i)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'My notes' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Visitor notes' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Recently Deleted' })).toBeInTheDocument()
@@ -173,5 +175,17 @@ describe('NotesApp', () => {
 
     expect(await screen.findByText('No notes yet')).toBeInTheDocument()
     expect(screen.getByText('Be the first to leave a note.')).toBeInTheDocument()
+  })
+
+  it('renders load errors inside the detail pane', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => {
+      throw new Error('Supabase unavailable')
+    }))
+
+    renderNotesApp()
+
+    const detailPane = await screen.findByLabelText('Note detail')
+    expect(within(detailPane).getByText('Supabase unavailable')).toBeInTheDocument()
+    expect(within(detailPane).getByText('Unable to publish your note right now')).toBeInTheDocument()
   })
 })
