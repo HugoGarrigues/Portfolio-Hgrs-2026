@@ -113,6 +113,7 @@ describe('NotesApp', () => {
     expect(within(detailPane).getByText('Ada')).toBeInTheDocument()
     const galleryCardSurface = within(gallery).getByTestId('note-card-surface-note-2')
     expect(galleryCardSurface.className).toContain('aspect-[1.6/1]')
+    expect(galleryCardSurface.className).toContain('min-h-[112px]')
 
     await user.type(screen.getByPlaceholderText('Search'), 'fresh')
 
