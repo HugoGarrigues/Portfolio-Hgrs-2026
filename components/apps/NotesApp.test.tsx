@@ -50,7 +50,7 @@ describe('NotesApp', () => {
               note: {
                 id: 'note-3',
                 title: 'Posted note',
-                content: 'Created from the modal',
+                content: 'Written from the draft pane',
                 author_name: 'Grace',
                 created_at: '2026-03-17T10:00:00.000Z',
               },
@@ -78,9 +78,17 @@ describe('NotesApp', () => {
 
     const detailPane = await screen.findByLabelText('Note detail')
     const gallery = screen.getByLabelText('Notes gallery')
+    const createButton = screen.getByRole('button', { name: 'Create note' })
+    const viewToggle = screen.getByRole('button', { name: 'Switch to list view' })
+    const searchInput = screen.getByPlaceholderText('Search')
     await waitFor(() => {
       expect(within(detailPane).getByRole('heading', { name: 'Newest note' })).toBeInTheDocument()
     })
+    expect(createButton.className).toContain('border')
+    expect(createButton.className).toContain('rounded-full')
+    expect(viewToggle.className).toContain('border')
+    expect(viewToggle.className).toContain('rounded-full')
+    expect(searchInput.className).toContain('rounded-full')
     expect(within(gallery).getByText('Older note')).toBeInTheDocument()
     expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
     expect(within(detailPane).getByText('Ada')).toBeInTheDocument()
@@ -103,24 +111,38 @@ describe('NotesApp', () => {
     expect(within(detailPane).getByText('Linus')).toBeInTheDocument()
   })
 
-  it('submits a new note, selects it, and shows cooldown messaging after success', async () => {
+  it('creates a draft, publishes via the sheet, and shows cooldown', async () => {
     const user = userEvent.setup()
     renderNotesApp()
 
     await screen.findByText('Newest note')
 
-    await user.click(screen.getByRole('button', { name: 'New Note' }))
-    await user.type(screen.getByLabelText('Name'), 'Grace')
-    await user.type(screen.getByLabelText('Title'), 'Posted note')
-    await user.type(screen.getByLabelText('Message'), 'Created from the modal')
+    // 1. Click the create note button in toolbar
+    await user.click(screen.getByRole('button', { name: 'Create note' }))
+
+    // 2. Type content in the draft pane
+    const draftTextarea = screen.getByLabelText('New note')
+    await user.type(draftTextarea, 'Written from the draft pane')
+
+    // 3. Click Publish in draft pane to open publish sheet
     await user.click(screen.getByRole('button', { name: 'Publish' }))
 
+    // 4. Fill title & name in publish sheet
+    await user.type(screen.getByLabelText('Title'), 'Posted note')
+    await user.type(screen.getByLabelText('Name'), 'Grace')
+
+    // 5. Submit the sheet
+    const publishButtons = screen.getAllByRole('button', { name: 'Publish' })
+    const sheetPublishButton = publishButtons[publishButtons.length - 1]
+    await user.click(sheetPublishButton)
+
+    // 6. Verify the note appears in detail pane
     const detailPane = await screen.findByLabelText('Note detail')
     await waitFor(() => {
       expect(within(detailPane).getByRole('heading', { name: 'Posted note' })).toBeInTheDocument()
     })
 
-    expect(within(detailPane).getByText('Created from the modal')).toBeInTheDocument()
+    expect(within(detailPane).getByText('Written from the draft pane')).toBeInTheDocument()
     expect(within(detailPane).getByText('Grace')).toBeInTheDocument()
     expect(screen.getByText(/You already posted a note/i)).toBeInTheDocument()
   })

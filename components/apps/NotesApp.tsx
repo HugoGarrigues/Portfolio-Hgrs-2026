@@ -4,17 +4,20 @@ import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { useWindow } from '@/components/desktop/Window'
 import { getNotesClientId } from '@/lib/notes/client-id'
 import { useTranslation } from '@/lib/i18n/useTranslation'
-import { NotesComposer } from './notes/NotesComposer'
 import { NotesDetailPane } from './notes/NotesDetailPane'
+import { NotesDraftPane } from './notes/NotesDraftPane'
 import { NotesList } from './notes/NotesList'
+import { NotesPublishSheet } from './notes/NotesPublishSheet'
 import { NotesSidebar } from './notes/NotesSidebar'
 import { NotesToolbar } from './notes/NotesToolbar'
 import {
   mapNoteRecord,
   type CreateNoteResponse,
+  type DraftNote,
   type Note,
   type NotesCooldown,
   type NotesResponse,
+  type NotesViewMode,
 } from './notes/types'
 
 const EMPTY_COOLDOWN: NotesCooldown = { nextAllowedAt: null }
@@ -26,10 +29,12 @@ export function NotesApp() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [composerOpen, setComposerOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [cooldown, setCooldown] = useState<NotesCooldown>(EMPTY_COOLDOWN)
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<NotesViewMode>('gallery')
+  const [draft, setDraft] = useState<DraftNote | null>(null)
+  const [publishSheetOpen, setPublishSheetOpen] = useState(false)
   const deferredQuery = useDeferredValue(query)
 
   useEffect(() => {
@@ -93,8 +98,28 @@ export function NotesApp() {
 
   const cooldownActive = Boolean(cooldown.nextAllowedAt)
   const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null
+  const isDrafting = draft !== null
 
-  async function handleSubmit(values: { displayName: string; title: string; message: string }) {
+  function handleCreateNote() {
+    setDraft({ content: '' })
+    setSelectedNoteId(null)
+    setError('')
+  }
+
+  function handleCancelDraft() {
+    setDraft(null)
+    setPublishSheetOpen(false)
+    if (notes.length > 0) {
+      setSelectedNoteId(notes[0].id)
+    }
+  }
+
+  function handleDraftPublish() {
+    setPublishSheetOpen(true)
+  }
+
+  async function handleConfirmPublish(values: { displayName: string; title: string }) {
+    if (!draft) return
     setSubmitting(true)
     setError('')
 
@@ -105,7 +130,9 @@ export function NotesApp() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...values,
+          displayName: values.displayName,
+          title: values.title,
+          message: draft.content,
           clientId: getNotesClientId(),
         }),
       })
@@ -120,12 +147,28 @@ export function NotesApp() {
       setNotes((current) => [nextNote, ...current])
       setSelectedNoteId(nextNote.id)
       setCooldown(payload.cooldown)
-      setComposerOpen(false)
+      setDraft(null)
+      setPublishSheetOpen(false)
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : t('notes.serverError'))
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function renderRightPane() {
+    if (isDrafting) {
+      return (
+        <NotesDraftPane
+          content={draft.content}
+          onContentChange={(value) => setDraft({ content: value })}
+          onPublish={handleDraftPublish}
+          onCancel={handleCancelDraft}
+        />
+      )
+    }
+
+    return <NotesDetailPane note={selectedNote} />
   }
 
   return (
@@ -145,9 +188,11 @@ export function NotesApp() {
           <NotesToolbar
             query={query}
             onQueryChange={setQuery}
-            onOpenComposer={() => setComposerOpen(true)}
-            canCreate={!cooldownActive}
+            onCreateNote={handleCreateNote}
+            canCreate={!cooldownActive && !isDrafting}
             noteCount={notes.length}
+            viewMode={viewMode}
+            onToggleViewMode={() => setViewMode((v) => (v === 'gallery' ? 'list' : 'gallery'))}
           />
         </div>
 
@@ -160,7 +205,7 @@ export function NotesApp() {
           </div>
         ) : null}
 
-        {error && !composerOpen ? (
+        {error && !isDrafting ? (
           <p className="px-8 py-4 text-[13px] text-red-300">{error}</p>
         ) : null}
 
@@ -174,21 +219,27 @@ export function NotesApp() {
               <NotesList
                 notes={filteredNotes}
                 selectedNoteId={selectedNoteId}
-                onSelectNote={setSelectedNoteId}
+                onSelectNote={(id) => {
+                  setDraft(null)
+                  setPublishSheetOpen(false)
+                  setSelectedNoteId(id)
+                }}
+                viewMode={viewMode}
               />
             )}
           </section>
 
-          <NotesDetailPane note={selectedNote} />
+          {renderRightPane()}
         </div>
 
-        <NotesComposer
-          open={composerOpen}
-          submitting={submitting}
-          error={error}
-          onClose={() => setComposerOpen(false)}
-          onSubmit={handleSubmit}
-        />
+        {publishSheetOpen ? (
+          <NotesPublishSheet
+            submitting={submitting}
+            error={error}
+            onConfirm={handleConfirmPublish}
+            onCancel={() => setPublishSheetOpen(false)}
+          />
+        ) : null}
       </div>
     </div>
   )
