@@ -46,11 +46,12 @@ export function NoteCard({ note, selected, onSelect, viewMode }: NoteCardProps) 
       className="group flex w-full flex-col text-left transition duration-150"
     >
       <div
+        data-testid={`note-card-surface-${note.id}`}
         className={`min-h-[168px] rounded-[18px] border px-4 py-4 ${
           selected
             ? 'border-[var(--accent-color)] bg-black/[0.03] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--accent-color)_35%,transparent)] dark:bg-white/[0.03]'
             : 'border-border-subtle bg-black/[0.03] dark:bg-white/[0.03]'
-        }`}
+        } aspect-[1.6/1]`}
       >
         <p className="line-clamp-6 text-[12px] leading-relaxed text-foreground/78">
           {preview}

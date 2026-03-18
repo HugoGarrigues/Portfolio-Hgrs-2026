@@ -111,6 +111,8 @@ describe('NotesApp', () => {
     expect(within(gallery).queryByText('Something thoughtful')).not.toBeInTheDocument()
     expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
     expect(within(detailPane).getByText('Ada')).toBeInTheDocument()
+    const galleryCardSurface = within(gallery).getByTestId('note-card-surface-note-2')
+    expect(galleryCardSurface.className).toContain('aspect-[1.6/1]')
 
     await user.type(screen.getByPlaceholderText('Search'), 'fresh')
 
