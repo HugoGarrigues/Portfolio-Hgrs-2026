@@ -136,6 +136,42 @@ describe('NotesApp', () => {
     expect(within(detailPane).getByText('Linus')).toBeInTheDocument()
   })
 
+  it('navigates between opened notes with toolbar back and forward buttons', async () => {
+    const user = userEvent.setup()
+    renderNotesApp()
+
+    await screen.findByLabelText('Notes gallery')
+
+    const backButton = screen.getByRole('button', { name: 'Go back' })
+    const forwardButton = screen.getByRole('button', { name: 'Go forward' })
+    expect(backButton).toBeDisabled()
+    expect(forwardButton).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: /Open note Newest note/i }))
+    let detailPane = await screen.findByLabelText('Note detail')
+    expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
+    expect(backButton).toBeDisabled()
+    expect(forwardButton).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: 'My notes' }))
+    await user.click(screen.getByRole('button', { name: /Open note Older note/i }))
+    detailPane = await screen.findByLabelText('Note detail')
+    expect(within(detailPane).getByText('Something thoughtful')).toBeInTheDocument()
+    expect(backButton).not.toBeDisabled()
+    expect(forwardButton).toBeDisabled()
+
+    await user.click(backButton)
+    detailPane = await screen.findByLabelText('Note detail')
+    expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Visitor notes' })).toHaveClass('font-semibold')
+    expect(forwardButton).not.toBeDisabled()
+
+    await user.click(forwardButton)
+    detailPane = await screen.findByLabelText('Note detail')
+    expect(within(detailPane).getByText('Something thoughtful')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'My notes' })).toHaveClass('font-semibold')
+  })
+
   it('creates a draft, publishes via the sheet, and selects the new note', async () => {
     const user = userEvent.setup()
     renderNotesApp()

@@ -73,6 +73,8 @@
   "notes.close": "Close",
   "notes.switchToList": "Switch to list view",
   "notes.switchToGallery": "Switch to gallery view",
+  "notes.goBack": "Go back",
+  "notes.goForward": "Go forward",
   "notes.createNote": "Create note",
   "notes.draftHeading": "New note",
   "notes.draftPlaceholder": "Write something…",

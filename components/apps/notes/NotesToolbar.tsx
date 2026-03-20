@@ -1,10 +1,14 @@
 import { useTranslation } from '@/lib/i18n/useTranslation'
-import { ComposeIcon, GridViewIcon, ListViewIcon, SearchIcon } from './icons'
+import { ChevronLeftIcon, ChevronRightIcon, ComposeIcon, GridViewIcon, ListViewIcon, SearchIcon } from './icons'
 import type { NotesViewMode } from './types'
 
 type NotesToolbarProps = {
   query: string
   onQueryChange: (value: string) => void
+  canGoBack: boolean
+  canGoForward: boolean
+  onGoBack: () => void
+  onGoForward: () => void
   onCreateNote: () => void
   canCreate: boolean
   viewMode: NotesViewMode
@@ -14,6 +18,10 @@ type NotesToolbarProps = {
 export function NotesToolbar({
   query,
   onQueryChange,
+  canGoBack,
+  canGoForward,
+  onGoBack,
+  onGoForward,
   onCreateNote,
   canCreate,
   viewMode,
@@ -22,13 +30,38 @@ export function NotesToolbar({
   const { t } = useTranslation()
   const iconButtonClass =
     'flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/[0.035] text-foreground/54 shadow-sm shadow-black/5 transition-all active:scale-95 dark:bg-white/[0.04] dark:shadow-black/10 hover:bg-black/[0.055] hover:text-foreground/82 dark:hover:bg-white/[0.08]'
+  const navButtonClass =
+    'p-1 px-2.5 bg-black/[0.05] dark:bg-black/[0.05] dark:bg-white/[0.05] border border-border-subtle rounded-lg transition-all active:scale-95 flex items-center justify-center shadow-lg shadow-black/5 dark:shadow-black/20'
 
   return (
     <nav className="flex h-14 items-center gap-5 border-b border-border-subtle px-6 select-none">
       <div className="flex items-center justify-between w-full h-full pointer-events-auto">
-        <div className="flex items-baseline gap-2">
-          <div className="text-[13px] font-bold text-foreground/95 tracking-tight cursor-default">
-            {t('notes.title')}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 cursor-default">
+            <button
+              type="button"
+              onClick={onGoBack}
+              disabled={!canGoBack}
+              aria-label={t('notes.goBack')}
+              className={`${navButtonClass} ${!canGoBack ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
+            >
+              <ChevronLeftIcon className="h-4 w-4 shrink-0 text-foreground/70" />
+            </button>
+            <button
+              type="button"
+              onClick={onGoForward}
+              disabled={!canGoForward}
+              aria-label={t('notes.goForward')}
+              className={`${navButtonClass} ${!canGoForward ? 'opacity-10 cursor-default' : 'hover:bg-black/[0.08] dark:hover:bg-white/[0.12] active:bg-black/[0.12] dark:active:bg-white/[0.2] cursor-default'}`}
+            >
+              <ChevronRightIcon className="h-4 w-4 shrink-0 text-foreground/70" />
+            </button>
+          </div>
+
+          <div className="flex items-baseline gap-2">
+            <div className="text-[13px] font-bold text-foreground/95 tracking-tight cursor-default">
+              {t('notes.title')}
+            </div>
           </div>
         </div>
 
