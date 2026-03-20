@@ -87,12 +87,11 @@ describe('NotesApp', () => {
     )
   }
 
-  it('auto-selects the first note and filters the gallery locally', async () => {
+  it('keeps the detail pane closed until a note is selected and filters the gallery locally', async () => {
     const user = userEvent.setup()
     const { container } = renderNotesApp()
 
-    const detailPane = await screen.findByLabelText('Note detail')
-    const gallery = screen.getByLabelText('Notes gallery')
+    const gallery = await screen.findByLabelText('Notes gallery')
     const createButton = screen.getByRole('button', { name: 'Create note' })
     const viewToggle = screen.getByRole('button', { name: 'Switch to list view' })
     const searchInput = screen.getByPlaceholderText('Search')
@@ -100,13 +99,10 @@ describe('NotesApp', () => {
     const sidebar = container.querySelector('.notes-sidebar')
     expect(splitPane).not.toBeNull()
     expect(sidebar).not.toBeNull()
-    await waitFor(() => {
-      expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
-    })
     expect(splitPane?.className.split(' ')).toContain('flex-row')
     expect(splitPane?.className.split(' ')).not.toContain('flex-col')
     expect(sidebar?.className.split(' ')).not.toContain('hidden')
-    expect(detailPane.className.split(' ')).not.toContain('hidden')
+    expect(screen.queryByLabelText('Note detail')).not.toBeInTheDocument()
     expect(screen.getByText('iCloud')).toBeInTheDocument()
     expect(screen.queryByText(/2 notes/i)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'My notes' })).toBeInTheDocument()
@@ -118,8 +114,6 @@ describe('NotesApp', () => {
     expect(viewToggle.className).toContain('rounded-full')
     expect(searchInput.className).toContain('rounded-full')
     expect(within(gallery).queryByText('Something thoughtful')).not.toBeInTheDocument()
-    expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
-    expect(within(detailPane).getByText('Ada')).toBeInTheDocument()
     const galleryCardSurface = within(gallery).getByTestId('note-card-surface-note-2')
     expect(galleryCardSurface.className).toContain('aspect-[1.6/1]')
     expect(galleryCardSurface.className).toContain('min-h-[112px]')
@@ -135,11 +129,47 @@ describe('NotesApp', () => {
     renderNotesApp()
 
     await user.click(screen.getByRole('button', { name: 'My notes' }))
-    const detailPane = await screen.findByLabelText('Note detail')
     await user.click(screen.getByRole('button', { name: /Open note Older note/i }))
+    const detailPane = await screen.findByLabelText('Note detail')
 
     expect(within(detailPane).getByText('Something thoughtful')).toBeInTheDocument()
     expect(within(detailPane).getByText('Linus')).toBeInTheDocument()
+  })
+
+  it('navigates between opened notes with toolbar back and forward buttons', async () => {
+    const user = userEvent.setup()
+    renderNotesApp()
+
+    await screen.findByLabelText('Notes gallery')
+
+    const backButton = screen.getByRole('button', { name: 'Go back' })
+    const forwardButton = screen.getByRole('button', { name: 'Go forward' })
+    expect(backButton).toBeDisabled()
+    expect(forwardButton).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: /Open note Newest note/i }))
+    let detailPane = await screen.findByLabelText('Note detail')
+    expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
+    expect(backButton).toBeDisabled()
+    expect(forwardButton).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: 'My notes' }))
+    await user.click(screen.getByRole('button', { name: /Open note Older note/i }))
+    detailPane = await screen.findByLabelText('Note detail')
+    expect(within(detailPane).getByText('Something thoughtful')).toBeInTheDocument()
+    expect(backButton).not.toBeDisabled()
+    expect(forwardButton).toBeDisabled()
+
+    await user.click(backButton)
+    detailPane = await screen.findByLabelText('Note detail')
+    expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Visitor notes' })).toHaveClass('font-semibold')
+    expect(forwardButton).not.toBeDisabled()
+
+    await user.click(forwardButton)
+    detailPane = await screen.findByLabelText('Note detail')
+    expect(within(detailPane).getByText('Something thoughtful')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'My notes' })).toHaveClass('font-semibold')
   })
 
   it('creates a draft, publishes via the sheet, and selects the new note', async () => {

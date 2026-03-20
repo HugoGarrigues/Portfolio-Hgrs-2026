@@ -22,6 +22,14 @@ import {
 
 const EMPTY_COOLDOWN: NotesCooldown = { nextAllowedAt: null }
 
+function getSectionForNote(note: Note): 'owner' | 'visitor' | 'trashed' {
+  if (note.status === 'trashed') {
+    return 'trashed'
+  }
+
+  return note.source
+}
+
 export function NotesApp() {
   const { dragControls } = useWindow()
   const { pushError } = useNotifications()
@@ -33,6 +41,8 @@ export function NotesApp() {
   const [submitting, setSubmitting] = useState(false)
   const [cooldown, setCooldown] = useState<NotesCooldown>(EMPTY_COOLDOWN)
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
+  const [navigationHistory, setNavigationHistory] = useState<string[]>([])
+  const [historyIndex, setHistoryIndex] = useState(-1)
   const [viewMode, setViewMode] = useState<NotesViewMode>('gallery')
   const [draft, setDraft] = useState<DraftNote | null>(null)
   const [activeSection, setActiveSection] = useState<'owner' | 'visitor' | 'trashed'>('visitor')
@@ -100,15 +110,16 @@ export function NotesApp() {
       if (current && notes.some((note) => note.id === current)) {
         return current
       }
-
-      const firstVisible = filteredNotes[0]
-      return firstVisible?.id ?? notes[0].id
+      return null
     })
   }, [filteredNotes, notes])
 
   const cooldownActive = Boolean(cooldown.nextAllowedAt)
   const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null
   const isDrafting = draft !== null
+  const hasRightPane = isDrafting || selectedNote !== null || Boolean(error)
+  const canGoBack = historyIndex > 0
+  const canGoForward = historyIndex >= 0 && historyIndex < navigationHistory.length - 1
   const ownerCount = notes.filter((note) => note.source === 'owner' && note.status === 'published').length
   const visitorCount = notes.filter((note) => note.source === 'visitor' && note.status === 'published').length
   const trashedCount = notes.filter((note) => note.status === 'trashed').length
@@ -118,11 +129,48 @@ export function NotesApp() {
     setSelectedNoteId(null)
   }
 
+  function selectNote(id: string) {
+    setDraft(null)
+    setSelectedNoteId(id)
+    setNavigationHistory((current) => {
+      const trimmedHistory = current.slice(0, historyIndex + 1)
+      if (trimmedHistory[trimmedHistory.length - 1] === id) {
+        return trimmedHistory
+      }
+      const nextHistory = [...trimmedHistory, id]
+      setHistoryIndex(nextHistory.length - 1)
+      return nextHistory
+    })
+  }
+
+  function handleGoBack() {
+    if (!canGoBack) return
+    const nextIndex = historyIndex - 1
+    const nextNoteId = navigationHistory[nextIndex] ?? null
+    const nextNote = notes.find((note) => note.id === nextNoteId)
+    setHistoryIndex(nextIndex)
+    setDraft(null)
+    setSelectedNoteId(nextNoteId)
+    if (nextNote) {
+      setActiveSection(getSectionForNote(nextNote))
+    }
+  }
+
+  function handleGoForward() {
+    if (!canGoForward) return
+    const nextIndex = historyIndex + 1
+    const nextNoteId = navigationHistory[nextIndex] ?? null
+    const nextNote = notes.find((note) => note.id === nextNoteId)
+    setHistoryIndex(nextIndex)
+    setDraft(null)
+    setSelectedNoteId(nextNoteId)
+    if (nextNote) {
+      setActiveSection(getSectionForNote(nextNote))
+    }
+  }
+
   function handleCancelDraft() {
     setDraft(null)
-    if (filteredNotes.length > 0) {
-      setSelectedNoteId(filteredNotes[0].id)
-    }
   }
 
   async function handleDraftPublish() {
@@ -182,10 +230,16 @@ export function NotesApp() {
 
       const nextNote = mapNoteRecord(payload.note)
       setNotes((current) => [nextNote, ...current])
+      setNavigationHistory((current) => {
+        const trimmedHistory = current.slice(0, historyIndex + 1)
+        const nextHistory = [...trimmedHistory, nextNote.id]
+        setHistoryIndex(nextHistory.length - 1)
+        return nextHistory
+      })
       setSelectedNoteId(nextNote.id)
       setCooldown(payload.cooldown)
       setDraft(null)
-      setActiveSection(nextNote.source)
+      setActiveSection(getSectionForNote(nextNote))
     } catch (submitError) {
       pushError({
         title: t('notes.serverError'),
@@ -218,6 +272,10 @@ export function NotesApp() {
       )
     }
 
+    if (!selectedNote && !error) {
+      return null
+    }
+
     return <NotesDetailPane note={selectedNote} error={error} />
   }
 
@@ -244,6 +302,10 @@ export function NotesApp() {
           <NotesToolbar
             query={query}
             onQueryChange={setQuery}
+            canGoBack={canGoBack}
+            canGoForward={canGoForward}
+            onGoBack={handleGoBack}
+            onGoForward={handleGoForward}
             onCreateNote={handleCreateNote}
             canCreate={!isDrafting}
             viewMode={viewMode}
@@ -252,7 +314,7 @@ export function NotesApp() {
         </div>
 
         <div className="notes-split-pane flex flex-1 flex-row overflow-hidden">
-          <section className="flex min-h-0 min-w-[320px] max-w-[400px] flex-1 flex-col border-r border-border-subtle">
+          <section className="flex min-h-0 min-w-[320px] basis-[44%] flex-col border-r border-border-subtle">
             {loading ? (
               <div className="flex flex-1 items-center justify-center px-8 text-[13px] text-foreground/35">
                 {t('notes.loading')}
@@ -261,16 +323,15 @@ export function NotesApp() {
               <NotesList
                 notes={filteredNotes}
                 selectedNoteId={selectedNoteId}
-                onSelectNote={(id) => {
-                  setDraft(null)
-                  setSelectedNoteId(id)
-                }}
+                onSelectNote={selectNote}
                 viewMode={viewMode}
               />
             )}
           </section>
 
-          {renderRightPane()}
+          <div className="flex min-h-0 min-w-[360px] basis-[56%] shrink-0">
+            {hasRightPane ? renderRightPane() : <div aria-hidden="true" className="flex-1" />}
+          </div>
         </div>
       </div>
     </div>

@@ -34,11 +34,13 @@ export function NotesSidebar({
                 : 'text-foreground/60 hover:bg-black/[0.05] hover:text-foreground dark:hover:bg-white/[0.08]'
             }`}
           >
-            <svg className="h-4 w-4 shrink-0" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 1.5h5.5l3 3V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V2a.5.5 0 0 1 .5-.5Zm5.5 0V4.5H12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="flex-1 truncate">{t('notes.mine')}</span>
-            <span className="text-[12px]">{ownerCount}</span>
+            <div className="flex h-4 w-4 shrink-0 items-center justify-center">
+              <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 1.5h5.5l3 3V14a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V2a.5.5 0 0 1 .5-.5Zm5.5 0V4.5H12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <span className="truncate">{t('notes.mine')}</span>
+            <span className="ml-auto shrink-0 text-[12px]">{ownerCount}</span>
           </button>
 
           <button
@@ -51,11 +53,13 @@ export function NotesSidebar({
                 : 'text-foreground/60 hover:bg-black/[0.05] hover:text-foreground dark:hover:bg-white/[0.08]'
             }`}
           >
-            <svg className="h-4 w-4 shrink-0" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 13.5v-1a2.5 2.5 0 0 1 2.5-2.5h5A2.5 2.5 0 0 1 13 12.5v1M8 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="flex-1 truncate">{t('notes.visitors')}</span>
-            <span className="text-[12px]">{visitorCount}</span>
+            <div className="flex h-4 w-4 shrink-0 items-center justify-center">
+              <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 13.5v-1a2.5 2.5 0 0 1 2.5-2.5h5A2.5 2.5 0 0 1 13 12.5v1M8 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <span className="truncate">{t('notes.visitors')}</span>
+            <span className="ml-auto shrink-0 text-[12px]">{visitorCount}</span>
           </button>
 
           <button
@@ -68,11 +72,13 @@ export function NotesSidebar({
                 : 'text-foreground/60 hover:bg-black/[0.05] hover:text-foreground dark:hover:bg-white/[0.08]'
             }`}
           >
-            <svg className="h-4 w-4 shrink-0" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2.5 4h11 M4 4V13.5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4 M6 4V2.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="flex-1 truncate">{t('notes.recentlyDeleted')}</span>
-            <span className="text-[12px]">{trashedCount}</span>
+            <div className="flex h-4 w-4 shrink-0 items-center justify-center">
+              <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.5 4h11 M4 4V13.5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4 M6 4V2.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <span className="truncate">{t('notes.recentlyDeleted')}</span>
+            <span className="ml-auto shrink-0 text-[12px]">{trashedCount}</span>
           </button>
         </div>
       </div>

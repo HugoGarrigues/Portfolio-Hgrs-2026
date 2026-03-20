@@ -69,6 +69,8 @@
   "notes.close": "Chiudi",
   "notes.switchToList": "Passa alla lista",
   "notes.switchToGallery": "Passa alla galleria",
+  "notes.goBack": "Indietro",
+  "notes.goForward": "Avanti",
   "notes.createNote": "Crea nota",
   "notes.draftHeading": "Nuova nota",
   "notes.draftPlaceholder": "Scrivi qualcosa…",
