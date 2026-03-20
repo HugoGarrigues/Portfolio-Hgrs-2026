@@ -1,3 +1,15 @@
+export type NoteTag = {
+  id: string
+  slug: string
+  label: string
+}
+
+export type NoteTranslationRecord = {
+  locale: string
+  title: string
+  content: string
+}
+
 export type NoteRecord = {
   id: string
   title: string
@@ -6,6 +18,7 @@ export type NoteRecord = {
   source?: NoteSource
   status?: NoteStatus
   created_at: string
+  tags?: NoteTag[]
 }
 
 export type NoteSource = 'owner' | 'visitor'
@@ -20,6 +33,7 @@ export type Note = {
   source: NoteSource
   status: NoteStatus
   createdAt: string
+  tags: NoteTag[]
 }
 
 export type NotesCooldown = {
@@ -54,5 +68,6 @@ export function mapNoteRecord(record: NoteRecord): Note {
     source: record.source ?? 'visitor',
     status: record.status ?? 'published',
     createdAt: record.created_at,
+    tags: record.tags ?? [],
   }
 }

@@ -19,32 +19,71 @@ describe('NotesApp', () => {
     vi.restoreAllMocks()
     window.localStorage.clear()
     window.localStorage.setItem('hgrs-locale', 'en')
+
+    const notesBySection = {
+      visitor: [
+        {
+          id: 'note-2',
+          title: 'Newest note',
+          content: 'A fresh entry for the guestbook',
+          author_name: 'Ada',
+          source: 'visitor',
+          status: 'published',
+          created_at: '2026-03-17T09:00:00.000Z',
+          tags: [{ id: 'tag-guestbook', slug: 'guestbook', label: 'Guestbook' }],
+        },
+      ],
+      owner: [
+        {
+          id: 'note-1',
+          title: 'Older note',
+          content: 'Something thoughtful',
+          author_name: 'Linus',
+          source: 'owner',
+          status: 'published',
+          created_at: '2026-03-16T09:00:00.000Z',
+          tags: [{ id: 'tag-projects', slug: 'projects', label: 'Projects' }],
+        },
+        {
+          id: 'note-4',
+          title: 'Skill note',
+          content: 'TypeScript and product thinking',
+          author_name: 'Linus',
+          source: 'owner',
+          status: 'published',
+          created_at: '2026-03-15T09:00:00.000Z',
+          tags: [{ id: 'tag-skills', slug: 'skills', label: 'Skills' }],
+        },
+      ],
+      trashed: [
+        {
+          id: 'note-trashed',
+          title: 'Archived note',
+          content: 'No longer visible publicly',
+          author_name: 'Linus',
+          source: 'owner',
+          status: 'trashed',
+          created_at: '2026-03-14T09:00:00.000Z',
+          tags: [{ id: 'tag-projects', slug: 'projects', label: 'Projects' }],
+        },
+      ],
+    } as const
+
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         if (typeof input === 'string' && input.startsWith('/api/notes') && (!init || init.method === 'GET')) {
+          const url = new URL(input, 'http://localhost')
+          const section = (url.searchParams.get('section') ?? 'visitor') as keyof typeof notesBySection
+          const tag = url.searchParams.get('tag')
+          const sectionNotes = notesBySection[section] ?? []
+          const filteredNotes = tag
+            ? sectionNotes.filter((note) => note.tags.some((noteTag) => noteTag.slug === tag))
+            : sectionNotes
+
           return new Response(
             JSON.stringify({
-              notes: [
-                {
-                  id: 'note-2',
-                  title: 'Newest note',
-                  content: 'A fresh entry for the guestbook',
-                  author_name: 'Ada',
-                  source: 'visitor',
-                  status: 'published',
-                  created_at: '2026-03-17T09:00:00.000Z',
-                },
-                {
-                  id: 'note-1',
-                  title: 'Older note',
-                  content: 'Something thoughtful',
-                  author_name: 'Linus',
-                  source: 'owner',
-                  status: 'published',
-                  created_at: '2026-03-16T09:00:00.000Z',
-                },
-              ],
+              notes: filteredNotes,
               cooldown: { nextAllowedAt: null },
             }),
           )
@@ -108,6 +147,7 @@ describe('NotesApp', () => {
     expect(screen.getByRole('button', { name: 'My notes' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Visitor notes' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Recently Deleted' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Filter by tag Guestbook' })).toBeInTheDocument()
     expect(createButton.className).toContain('border')
     expect(createButton.className).toContain('rounded-full')
     expect(viewToggle.className).toContain('border')
@@ -117,6 +157,8 @@ describe('NotesApp', () => {
     const galleryCardSurface = within(gallery).getByTestId('note-card-surface-note-2')
     expect(galleryCardSurface.className).toContain('aspect-[1.6/1]')
     expect(galleryCardSurface.className).toContain('min-h-[112px]')
+    expect(galleryCardSurface.className).toContain('overflow-hidden')
+    expect(within(gallery).getByText('A fresh entry for the guestbook').className).toContain('break-words')
 
     await user.type(screen.getByPlaceholderText('Search'), 'fresh')
 
@@ -134,6 +176,129 @@ describe('NotesApp', () => {
 
     expect(within(detailPane).getByText('Something thoughtful')).toBeInTheDocument()
     expect(within(detailPane).getByText('Linus')).toBeInTheDocument()
+  })
+
+  it('filters notes by clicking sidebar tags', async () => {
+    const user = userEvent.setup()
+    renderNotesApp()
+
+    await user.click(screen.getByRole('button', { name: 'My notes' }))
+    const gallery = await screen.findByLabelText('Notes gallery')
+
+    expect(within(gallery).getByText('Something thoughtful')).toBeInTheDocument()
+    expect(within(gallery).getByText('TypeScript and product thinking')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Filter by tag Projects' }))
+
+    const filteredGallery = await screen.findByLabelText('Notes gallery')
+    expect(within(filteredGallery).getByText('Something thoughtful')).toBeInTheDocument()
+    expect(within(filteredGallery).queryByText('TypeScript and product thinking')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'All tags' }))
+
+    const resetGallery = await screen.findByLabelText('Notes gallery')
+    expect(within(resetGallery).getByText('Something thoughtful')).toBeInTheDocument()
+    expect(within(resetGallery).getByText('TypeScript and product thinking')).toBeInTheDocument()
+  })
+
+  it('clears the active tag when switching note sections', async () => {
+    const user = userEvent.setup()
+    renderNotesApp()
+
+    await user.click(screen.getByRole('button', { name: 'My notes' }))
+    await screen.findByLabelText('Notes gallery')
+    await user.click(screen.getByRole('button', { name: 'Filter by tag Projects' }))
+
+    const filteredGallery = await screen.findByLabelText('Notes gallery')
+    expect(within(filteredGallery).getByText('Something thoughtful')).toBeInTheDocument()
+    expect(within(filteredGallery).queryByText('TypeScript and product thinking')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Visitor notes' }))
+
+    const visitorGallery = await screen.findByLabelText('Notes gallery')
+    expect(within(visitorGallery).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
+  })
+
+  it('shows a filtered empty state when the active tag has no results', async () => {
+    const user = userEvent.setup()
+    renderNotesApp()
+
+    await user.click(screen.getByRole('button', { name: 'My notes' }))
+    await screen.findByLabelText('Notes gallery')
+    await user.click(screen.getByRole('button', { name: 'Filter by tag Guestbook' }))
+
+    expect(await screen.findByText('No notes for Guestbook')).toBeInTheDocument()
+    expect(screen.getByText('Try another tag or switch note sections.')).toBeInTheDocument()
+  })
+
+  it('uses translated owner note content for the active locale while leaving visitor notes unchanged', async () => {
+    window.localStorage.setItem('hgrs-locale', 'fr')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (typeof input === 'string' && input.startsWith('/api/notes') && (!init || init.method === 'GET')) {
+          const url = new URL(input, 'http://localhost')
+          const section = url.searchParams.get('section')
+          const locale = url.searchParams.get('locale')
+
+          if (section === 'owner') {
+            expect(locale).toBe('fr')
+            return new Response(
+              JSON.stringify({
+                notes: [
+                  {
+                    id: 'note-owner-fr',
+                    title: 'À propos',
+                    content: 'Note owner en français',
+                    author_name: 'Hugo Garrigues',
+                    source: 'owner',
+                    status: 'published',
+                    created_at: '2026-03-20T09:00:00.000Z',
+                    tags: [{ id: 'tag-about', slug: 'about', label: 'About' }],
+                  },
+                ],
+                cooldown: { nextAllowedAt: null },
+              }),
+            )
+          }
+
+          expect(locale).toBe('fr')
+          return new Response(
+            JSON.stringify({
+              notes: [
+                {
+                  id: 'note-visitor-fr',
+                  title: 'Newest note',
+                  content: 'A fresh entry for the guestbook',
+                  author_name: 'Ada',
+                  source: 'visitor',
+                  status: 'published',
+                  created_at: '2026-03-17T09:00:00.000Z',
+                  tags: [{ id: 'tag-guestbook', slug: 'guestbook', label: 'Guestbook' }],
+                },
+              ],
+              cooldown: { nextAllowedAt: null },
+            }),
+          )
+        }
+
+        throw new Error(`Unhandled request: ${String(input)}`)
+      }),
+    )
+
+    const user = userEvent.setup()
+    renderNotesApp()
+
+    const visitorGallery = await screen.findByLabelText('Notes gallery')
+    expect(within(visitorGallery).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Mes notes' }))
+    const ownerGallery = await screen.findByLabelText('Notes gallery')
+    await user.click(screen.getByRole('button', { name: /Open note À propos/i }))
+
+    const detailPane = await screen.findByLabelText('Note detail')
+    expect(within(ownerGallery).getByText('Note owner en français')).toBeInTheDocument()
+    expect(within(detailPane).getByText('Note owner en français')).toBeInTheDocument()
   })
 
   it('navigates between opened notes with toolbar back and forward buttons', async () => {
@@ -163,13 +328,17 @@ describe('NotesApp', () => {
     await user.click(backButton)
     detailPane = await screen.findByLabelText('Note detail')
     expect(within(detailPane).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Visitor notes' })).toHaveClass('font-semibold')
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Visitor notes' })).toHaveClass('font-semibold')
+    })
     expect(forwardButton).not.toBeDisabled()
 
     await user.click(forwardButton)
     detailPane = await screen.findByLabelText('Note detail')
     expect(within(detailPane).getByText('Something thoughtful')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'My notes' })).toHaveClass('font-semibold')
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'My notes' })).toHaveClass('font-semibold')
+    })
   })
 
   it('creates a draft, publishes via the sheet, and selects the new note', async () => {
@@ -324,6 +493,6 @@ describe('NotesApp', () => {
     expect(screen.getByText(/You can publish another note after/i)).toBeInTheDocument()
     expect(screen.queryByLabelText('Note editor')?.textContent).not.toContain('You already posted a note')
     expect(fetchMock.mock.calls.some((call) => call[0] === '/api/notes')).toBe(false)
-    expect(String(fetchMock.mock.calls[0]?.[0])).toMatch(/^\/api\/notes\?clientId=/)
+    expect(String(fetchMock.mock.calls[0]?.[0])).toMatch(/^\/api\/notes\?clientId=.*section=visitor/)
   })
 })

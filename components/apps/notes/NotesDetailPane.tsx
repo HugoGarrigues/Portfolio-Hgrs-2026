@@ -59,6 +59,18 @@ export function NotesDetailPane({ note, error = '' }: NotesDetailPaneProps) {
         <div className="max-w-3xl whitespace-pre-wrap text-[13px] leading-relaxed text-foreground/80">
           {note.content}
         </div>
+        {note.tags.length > 0 ? (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {note.tags.map((tag) => (
+              <span
+                key={tag.id}
+                className="rounded-full border border-border-subtle bg-black/[0.04] px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-foreground/55 dark:bg-white/[0.04]"
+              >
+                {tag.label}
+              </span>
+            ))}
+          </div>
+        ) : null}
         <div className="mt-8 flex items-center gap-2 text-[12px] text-foreground/50">
           <span className="font-medium text-foreground/80">{note.authorName}</span>
           <span className="text-foreground/20">•</span>
