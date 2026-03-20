@@ -85,6 +85,15 @@ describe("Notes API route", () => {
         status: "published",
         created_at: "2026-03-15T08:00:00.000Z",
         updated_at: "2026-03-15T08:00:00.000Z",
+        note_tags: [
+          {
+            tags: {
+              id: "tag-1",
+              slug: "projects",
+              label: "Projects",
+            },
+          },
+        ],
       },
       {
         id: "note-b",
@@ -96,6 +105,15 @@ describe("Notes API route", () => {
         status: "published",
         created_at: "2026-03-17T09:00:00.000Z",
         updated_at: "2026-03-17T09:00:00.000Z",
+        note_tags: [
+          {
+            tags: {
+              id: "tag-2",
+              slug: "guestbook",
+              label: "Guestbook",
+            },
+          },
+        ],
       },
     ]
 
@@ -106,7 +124,28 @@ describe("Notes API route", () => {
 
     const json = await response.json()
     expect(json).toEqual({
-      notes: [data[1], data[0]],
+      notes: [
+        {
+          id: "note-b",
+          title: "Second note",
+          content: "World",
+          author_name: "Author B",
+          source: "visitor",
+          status: "published",
+          created_at: "2026-03-17T09:00:00.000Z",
+          tags: [{ id: "tag-2", slug: "guestbook", label: "Guestbook" }],
+        },
+        {
+          id: "note-a",
+          title: "First note",
+          content: "Hello",
+          author_name: "Author",
+          source: "owner",
+          status: "published",
+          created_at: "2026-03-15T08:00:00.000Z",
+          tags: [{ id: "tag-1", slug: "projects", label: "Projects" }],
+        },
+      ],
       cooldown: { nextAllowedAt: null },
     })
 
@@ -126,6 +165,7 @@ describe("Notes API route", () => {
         status: "published",
         created_at: "2026-03-15T08:00:00.000Z",
         updated_at: "2026-03-15T08:00:00.000Z",
+        note_tags: [],
       },
     ]
 
@@ -144,10 +184,117 @@ describe("Notes API route", () => {
 
     const json = await response.json()
     expect(json).toEqual({
-      notes: data,
+      notes: [
+        {
+          id: "note-a",
+          title: "First note",
+          content: "Hello",
+          author_name: "Author",
+          status: "published",
+          created_at: "2026-03-15T08:00:00.000Z",
+          tags: [],
+        },
+      ],
       cooldown: {
         nextAllowedAt: "2026-03-17T13:00:00.000Z",
       },
+    })
+  })
+
+  it("filters notes by section and tag", async () => {
+    const data = [
+      {
+        id: "note-owner-projects",
+        title: "Projects",
+        content: "Owner projects",
+        author_name: "Hugo",
+        client_id: "owner-client",
+        source: "owner",
+        status: "published",
+        created_at: "2026-03-19T09:00:00.000Z",
+        updated_at: "2026-03-19T09:00:00.000Z",
+        note_tags: [{ tags: { id: "tag-1", slug: "projects", label: "Projects" } }],
+      },
+      {
+        id: "note-owner-skills",
+        title: "Skills",
+        content: "Owner skills",
+        author_name: "Hugo",
+        client_id: "owner-client",
+        source: "owner",
+        status: "published",
+        created_at: "2026-03-18T09:00:00.000Z",
+        updated_at: "2026-03-18T09:00:00.000Z",
+        note_tags: [{ tags: { id: "tag-2", slug: "skills", label: "Skills" } }],
+      },
+    ]
+
+    setupSupabaseMock([{ data, error: null }])
+
+    const response = await GET(new Request("http://localhost/api/notes?section=owner&tag=projects"))
+    expect(response.status).toBe(200)
+
+    const json = await response.json()
+    expect(json).toEqual({
+      notes: [
+        {
+          id: "note-owner-projects",
+          title: "Projects",
+          content: "Owner projects",
+          author_name: "Hugo",
+          source: "owner",
+          status: "published",
+          created_at: "2026-03-19T09:00:00.000Z",
+          tags: [{ id: "tag-1", slug: "projects", label: "Projects" }],
+        },
+      ],
+      cooldown: { nextAllowedAt: null },
+    })
+  })
+
+  it("returns translated owner note content for the requested locale", async () => {
+    const data = [
+      {
+        id: "note-owner-about",
+        title: "About",
+        content: "Base English owner note",
+        author_name: "Hugo Garrigues",
+        client_id: "owner-seeded",
+        source: "owner",
+        status: "published",
+        created_at: "2026-03-20T09:00:00.000Z",
+        updated_at: "2026-03-20T09:00:00.000Z",
+        note_tags: [{ tags: { id: "tag-1", slug: "about", label: "About" } }],
+        owner_note_translations: [
+          {
+            locale: "fr",
+            title: "À propos",
+            content: "Note owner en français",
+          },
+        ],
+      },
+    ]
+
+    setupSupabaseMock([{ data, error: null }])
+
+    const response = await GET(new Request("http://localhost/api/notes?section=owner&locale=fr"))
+    expect(response.status).toBe(200)
+
+    const json = await response.json()
+    expect(json).toEqual({
+      notes: [
+        {
+          id: "note-owner-about",
+          title: "À propos",
+          content: "Note owner en français",
+          author_name: "Hugo Garrigues",
+          source: "owner",
+          status: "published",
+          created_at: "2026-03-20T09:00:00.000Z",
+          tags: [{ id: "tag-1", slug: "about", label: "About" }],
+        },
+      ],
+      cooldown: { nextAllowedAt: null },
     })
   })
 
@@ -210,6 +357,7 @@ describe("Notes API route", () => {
       status: "published",
       created_at: "2026-03-17T00:05:00.000Z",
       updated_at: "2026-03-17T00:05:00.000Z",
+      note_tags: [],
     }
 
     const supabase = setupSupabaseMock([
@@ -221,13 +369,23 @@ describe("Notes API route", () => {
     expect(response.status).toBe(200)
 
     const json = await response.json()
-    expect(json.note).toEqual(insertedNote)
+    expect(json.note).toEqual({
+      id: "inserted",
+      title: "First line of the note",
+      content: "Message",
+      author_name: "Trimmed",
+      source: "visitor",
+      status: "published",
+      created_at: "2026-03-17T00:05:00.000Z",
+      tags: [],
+    })
     expect(json.cooldown).toEqual({ nextAllowedAt: "2026-03-18T00:05:00.000Z" })
     expect(supabase._builders[1].insert).toHaveBeenCalledWith({
       title: "First line of the note",
       content: "First line of the note\nSecond line",
       author_name: "Trimmed",
       client_id: "client-1",
+      source: "visitor",
       status: "published",
     })
   })

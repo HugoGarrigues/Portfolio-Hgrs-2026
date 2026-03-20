@@ -1,19 +1,27 @@
 import { useTranslation } from '@/lib/i18n/useTranslation'
 
+import type { NoteTag } from './types'
+
 type NotesSidebarProps = {
   ownerCount: number
   visitorCount: number
   trashedCount: number
+  tags: NoteTag[]
+  activeTagSlug: string | null
   activeSection: 'owner' | 'visitor' | 'trashed'
   onSelectSection: (section: 'owner' | 'visitor' | 'trashed') => void
+  onSelectTag: (tagSlug: string | null) => void
 }
 
 export function NotesSidebar({
   ownerCount,
   visitorCount,
   trashedCount,
+  tags,
+  activeTagSlug,
   activeSection,
   onSelectSection,
+  onSelectTag,
 }: NotesSidebarProps) {
   const { t } = useTranslation()
 
@@ -88,14 +96,35 @@ export function NotesSidebar({
           {t('notes.sidebarTags')}
         </p>
         <div className="flex flex-col gap-0.5">
-          <div className="w-[calc(100%-16px)] mx-2 flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] text-foreground/60 transition-all hover:bg-black/[0.05] hover:text-foreground dark:hover:bg-white/[0.08]">
+          <button
+            type="button"
+            onClick={() => onSelectTag(null)}
+            aria-label={t('notes.allTags')}
+            className={`w-[calc(100%-16px)] mx-2 flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] transition-all ${
+              activeTagSlug === null
+                ? 'bg-black/5 font-semibold text-[var(--accent-color)] dark:bg-black/10 dark:bg-white/10'
+                : 'text-foreground/60 hover:bg-black/[0.05] hover:text-foreground dark:hover:bg-white/[0.08]'
+            }`}
+          >
             <span className="text-foreground/40">#</span>
-            <span className="truncate flex-1">Portfolio</span>
-          </div>
-          <div className="w-[calc(100%-16px)] mx-2 flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] text-foreground/60 transition-all hover:bg-black/[0.05] hover:text-foreground dark:hover:bg-white/[0.08]">
-            <span className="text-foreground/40">#</span>
-            <span className="truncate flex-1">Guestbook</span>
-          </div>
+            <span className="truncate">{t('notes.allTags')}</span>
+          </button>
+          {tags.map((tag) => (
+            <button
+              key={tag.id}
+              type="button"
+              onClick={() => onSelectTag(tag.slug)}
+              aria-label={`Filter by tag ${tag.label}`}
+              className={`w-[calc(100%-16px)] mx-2 flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] transition-all ${
+                activeTagSlug === tag.slug
+                  ? 'bg-black/5 font-semibold text-[var(--accent-color)] dark:bg-black/10 dark:bg-white/10'
+                  : 'text-foreground/60 hover:bg-black/[0.05] hover:text-foreground dark:hover:bg-white/[0.08]'
+              }`}
+            >
+              <span className="text-foreground/40">#</span>
+              <span className="truncate">{tag.label}</span>
+            </button>
+          ))}
         </div>
       </div>
     </aside>

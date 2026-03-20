@@ -47,13 +47,13 @@ export function NoteCard({ note, selected, onSelect, viewMode }: NoteCardProps) 
     >
       <div
         data-testid={`note-card-surface-${note.id}`}
-        className={`min-h-[112px] rounded-[18px] border px-4 py-3 ${
+        className={`min-h-[112px] overflow-hidden rounded-[18px] border px-4 py-3 ${
           selected
             ? 'border-[var(--accent-color)] bg-black/[0.03] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--accent-color)_35%,transparent)] dark:bg-white/[0.03]'
             : 'border-border-subtle bg-black/[0.03] dark:bg-white/[0.03]'
         } aspect-[1.6/1]`}
       >
-        <p className="line-clamp-6 text-[12px] leading-relaxed text-foreground/78">
+        <p className="line-clamp-6 break-words text-[12px] leading-relaxed text-foreground/78">
           {preview}
         </p>
       </div>

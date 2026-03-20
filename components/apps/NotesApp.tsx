@@ -10,15 +10,7 @@ import { NotesDraftPane } from './notes/NotesDraftPane'
 import { NotesList } from './notes/NotesList'
 import { NotesSidebar } from './notes/NotesSidebar'
 import { NotesToolbar } from './notes/NotesToolbar'
-import {
-  mapNoteRecord,
-  type CreateNoteResponse,
-  type DraftNote,
-  type Note,
-  type NotesCooldown,
-  type NotesResponse,
-  type NotesViewMode,
-} from './notes/types'
+import { mapNoteRecord, type CreateNoteResponse, type DraftNote, type Note, type NoteTag, type NotesCooldown, type NotesResponse, type NotesViewMode } from './notes/types'
 
 const EMPTY_COOLDOWN: NotesCooldown = { nextAllowedAt: null }
 
@@ -33,8 +25,14 @@ function getSectionForNote(note: Note): 'owner' | 'visitor' | 'trashed' {
 export function NotesApp() {
   const { dragControls } = useWindow()
   const { pushError } = useNotifications()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const [notes, setNotes] = useState<Note[]>([])
+  const [noteCache, setNoteCache] = useState<Record<string, Note>>({})
+  const [sectionCounts, setSectionCounts] = useState<Record<'owner' | 'visitor' | 'trashed', number>>({
+    owner: 0,
+    visitor: 0,
+    trashed: 0,
+  })
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -46,6 +44,7 @@ export function NotesApp() {
   const [viewMode, setViewMode] = useState<NotesViewMode>('gallery')
   const [draft, setDraft] = useState<DraftNote | null>(null)
   const [activeSection, setActiveSection] = useState<'owner' | 'visitor' | 'trashed'>('visitor')
+  const [activeTagSlug, setActiveTagSlug] = useState<string | null>(null)
   const deferredQuery = useDeferredValue(query)
 
   useEffect(() => {
@@ -54,14 +53,35 @@ export function NotesApp() {
     async function loadNotes() {
       try {
         const clientId = getNotesClientId()
-        const response = await fetch(`/api/notes?clientId=${encodeURIComponent(clientId)}`)
+        const searchParams = new URLSearchParams({
+          clientId,
+          section: activeSection,
+          locale,
+        })
+        if (activeTagSlug) {
+          searchParams.set('tag', activeTagSlug)
+        }
+
+        const response = await fetch(`/api/notes?${searchParams.toString()}`)
         const payload = (await response.json()) as NotesResponse
 
         if (cancelled) {
           return
         }
 
-        setNotes(payload.notes.map(mapNoteRecord))
+        const mappedNotes = payload.notes.map(mapNoteRecord)
+        setNotes(mappedNotes)
+        setNoteCache((current) => {
+          const nextCache = { ...current }
+          for (const note of mappedNotes) {
+            nextCache[note.id] = note
+          }
+          return nextCache
+        })
+        setSectionCounts((current) => ({
+          ...current,
+          [activeSection]: mappedNotes.length,
+        }))
         setCooldown(payload.cooldown ?? EMPTY_COOLDOWN)
       } catch (loadError) {
         if (!cancelled) {
@@ -79,30 +99,21 @@ export function NotesApp() {
     return () => {
       cancelled = true
     }
-  }, [t])
+  }, [activeSection, activeTagSlug, locale, t])
 
   const filteredNotes = useMemo(() => {
     const normalizedQuery = deferredQuery.trim().toLowerCase()
-    const sectionNotes = notes.filter((note) => {
-      if (activeSection === 'trashed') {
-        return note.status === 'trashed'
-      }
-
-      return note.status === 'published' && note.source === activeSection
-    })
-
     if (!normalizedQuery) {
-      return sectionNotes
+      return notes
     }
 
-    return sectionNotes.filter((note) =>
+    return notes.filter((note) =>
       `${note.authorName} ${note.content}`.toLowerCase().includes(normalizedQuery),
     )
-  }, [activeSection, deferredQuery, notes])
+  }, [deferredQuery, notes])
 
   useEffect(() => {
     if (notes.length === 0) {
-      setSelectedNoteId(null)
       return
     }
 
@@ -115,14 +126,26 @@ export function NotesApp() {
   }, [filteredNotes, notes])
 
   const cooldownActive = Boolean(cooldown.nextAllowedAt)
-  const selectedNote = notes.find((note) => note.id === selectedNoteId) ?? null
+  const selectedNote = (selectedNoteId ? noteCache[selectedNoteId] : null) ?? null
   const isDrafting = draft !== null
   const hasRightPane = isDrafting || selectedNote !== null || Boolean(error)
   const canGoBack = historyIndex > 0
   const canGoForward = historyIndex >= 0 && historyIndex < navigationHistory.length - 1
-  const ownerCount = notes.filter((note) => note.source === 'owner' && note.status === 'published').length
-  const visitorCount = notes.filter((note) => note.source === 'visitor' && note.status === 'published').length
-  const trashedCount = notes.filter((note) => note.status === 'trashed').length
+  const ownerCount = sectionCounts.owner
+  const visitorCount = sectionCounts.visitor
+  const trashedCount = sectionCounts.trashed
+  const visibleTags = useMemo(() => {
+    const seen = new Map<string, NoteTag>()
+    for (const note of Object.values(noteCache)) {
+      for (const tag of note.tags) {
+        if (!seen.has(tag.slug)) {
+          seen.set(tag.slug, tag)
+        }
+      }
+    }
+    return [...seen.values()]
+  }, [noteCache])
+  const activeTagLabel = visibleTags.find((tag) => tag.slug === activeTagSlug)?.label ?? activeTagSlug
 
   function handleCreateNote() {
     setDraft({ content: '', displayName: '', publishMode: false, createdAt: new Date().toISOString() })
@@ -147,7 +170,7 @@ export function NotesApp() {
     if (!canGoBack) return
     const nextIndex = historyIndex - 1
     const nextNoteId = navigationHistory[nextIndex] ?? null
-    const nextNote = notes.find((note) => note.id === nextNoteId)
+    const nextNote = nextNoteId ? noteCache[nextNoteId] : null
     setHistoryIndex(nextIndex)
     setDraft(null)
     setSelectedNoteId(nextNoteId)
@@ -160,7 +183,7 @@ export function NotesApp() {
     if (!canGoForward) return
     const nextIndex = historyIndex + 1
     const nextNoteId = navigationHistory[nextIndex] ?? null
-    const nextNote = notes.find((note) => note.id === nextNoteId)
+    const nextNote = nextNoteId ? noteCache[nextNoteId] : null
     setHistoryIndex(nextIndex)
     setDraft(null)
     setSelectedNoteId(nextNoteId)
@@ -230,6 +253,7 @@ export function NotesApp() {
 
       const nextNote = mapNoteRecord(payload.note)
       setNotes((current) => [nextNote, ...current])
+      setNoteCache((current) => ({ ...current, [nextNote.id]: nextNote }))
       setNavigationHistory((current) => {
         const trimmedHistory = current.slice(0, historyIndex + 1)
         const nextHistory = [...trimmedHistory, nextNote.id]
@@ -240,6 +264,10 @@ export function NotesApp() {
       setCooldown(payload.cooldown)
       setDraft(null)
       setActiveSection(getSectionForNote(nextNote))
+      setSectionCounts((current) => ({
+        ...current,
+        [getSectionForNote(nextNote)]: current[getSectionForNote(nextNote)] + 1,
+      }))
     } catch (submitError) {
       pushError({
         title: t('notes.serverError'),
@@ -289,8 +317,18 @@ export function NotesApp() {
           ownerCount={ownerCount}
           visitorCount={visitorCount}
           trashedCount={trashedCount}
+          tags={visibleTags}
+          activeTagSlug={activeTagSlug}
           activeSection={activeSection}
-          onSelectSection={setActiveSection}
+          onSelectSection={(section) => {
+            setActiveSection(section)
+            setActiveTagSlug(null)
+            setSelectedNoteId(null)
+          }}
+          onSelectTag={(tagSlug) => {
+            setActiveTagSlug(tagSlug)
+            setSelectedNoteId(null)
+          }}
         />
       </div>
 
@@ -325,6 +363,8 @@ export function NotesApp() {
                 selectedNoteId={selectedNoteId}
                 onSelectNote={selectNote}
                 viewMode={viewMode}
+                activeSection={activeSection}
+                activeTagLabel={activeTagLabel}
               />
             )}
           </section>
