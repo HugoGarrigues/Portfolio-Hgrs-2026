@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+import { readStorage, writeStorage } from '@/lib/browser-storage'
 
 export type WallpaperId = 'default' | 'void' | 'gradient' | 'monterey_dark' | 'sierra_sunset' | 'tahoe' | 'sierra_evening' | 'monterey_wwdc'
 
@@ -55,19 +56,18 @@ const STORAGE_KEY = 'hgrs-wallpaper'
 const VALID_WALLPAPERS = WALLPAPERS.map(w => w.id)
 
 export function WallpaperProvider({ children }: { children: ReactNode }) {
-  const [wallpaper, setWallpaperState] = useState<WallpaperId>('default')
-
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as WallpaperId | null
-    if (stored && VALID_WALLPAPERS.includes(stored as WallpaperId)) {
-      setWallpaperState(stored as WallpaperId)
-    }
-  }, [])
+  const [wallpaper, setWallpaperState] = useState<WallpaperId>(() => {
+    const stored = readStorage(STORAGE_KEY) as WallpaperId | null
+    return stored && VALID_WALLPAPERS.includes(stored) ? stored : 'default'
+  })
 
   const setWallpaper = useCallback((id: WallpaperId) => {
     setWallpaperState(id)
-    localStorage.setItem(STORAGE_KEY, id)
   }, [])
+
+  useEffect(() => {
+    writeStorage(STORAGE_KEY, wallpaper)
+  }, [wallpaper])
 
   const currentStyle = WALLPAPERS.find((w) => w.id === wallpaper)?.style ?? WALLPAPERS[0].style
 

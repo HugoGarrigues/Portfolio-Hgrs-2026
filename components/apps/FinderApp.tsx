@@ -1,7 +1,8 @@
 'use client'
 
+import Image from 'next/image'
 import { useState, useRef } from 'react'
-import { useWindowManager } from '@/contexts/WindowManagerContext'
+import { useWindowManager, type AppId } from '@/contexts/WindowManagerContext'
 import { APPS } from '@/lib/apps'
 import { useWindow } from '@/components/desktop/Window'
 import { useTranslation } from '@/lib/i18n/useTranslation'
@@ -120,9 +121,11 @@ function AppIcon({ id, name, iconFile, selected, onSelect, onOpen }: {
       className="w-full flex flex-col items-center gap-1.5 group cursor-default select-none transition-transform active:scale-95"
     >
       <div className={`relative w-[50px] h-[50px] flex items-center justify-center rounded-[22%] overflow-visible ${selected ? 'after:content-[""] after:absolute after:inset-[-4px] after:bg-black/10 dark:bg-white/10 after:rounded-xl' : ''}`}>
-        <img
+        <Image
           src={`/icons/${iconFile}.png`}
           alt={name}
+          width={50}
+          height={50}
           className={`w-full h-full object-contain rounded-[22%] ${['settings', 'notes', 'health', 'spotify'].includes(id) ? 'scale-[1.25]' : ''
             }`}
           draggable={false}
@@ -288,7 +291,7 @@ export function FinderApp() {
                   iconFile={app.iconFile}
                   selected={selected === app.id}
                   onSelect={setSelected}
-                  onOpen={(id) => openWindow(id as any)}
+                  onOpen={(id) => openWindow(id as AppId)}
                 />
               ))}
             </div>
@@ -307,7 +310,7 @@ export function FinderApp() {
                         iconFile={app.iconFile}
                         selected={selected === recent.id}
                         onSelect={setSelected}
-                        onOpen={(id) => openWindow(id as any)}
+                        onOpen={(id) => openWindow(id as AppId)}
                       />
                     )
                   })}
@@ -457,11 +460,12 @@ function ProjectDetail({ project }: { project: Project }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {project.images.map((img, idx) => (
               <div key={idx} className="group relative aspect-video rounded-xl overflow-hidden border border-border-subtle bg-black/5 dark:bg-white/5 shadow-sm">
-                <img
+                <Image
                   src={img}
                   alt={`${project.name} screenshot ${idx + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
+                  fill
+                  sizes="(min-width: 640px) 320px, 100vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
               </div>
@@ -503,6 +507,17 @@ function ProjectDetail({ project }: { project: Project }) {
                 >
                   <Ico d={ICONS.github} className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">GitHub Repo</span>
+                </a>
+              )}
+              {project.slug && (
+                <a
+                  href={`/projects/${project.slug}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-1.5 text-[12px] text-foreground/80 hover:text-[var(--accent-color)] transition-colors truncate"
+                  title={`/projects/${project.slug}`}
+                >
+                  <Ico d={ICONS.link} className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">Page publique</span>
                 </a>
               )}
               {project.links.live && (

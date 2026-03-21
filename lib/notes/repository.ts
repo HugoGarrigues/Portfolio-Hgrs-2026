@@ -20,25 +20,29 @@ export async function listNotes(section: NoteSection = 'visitor') {
     query = query.eq('status', 'published').eq('source', section)
   }
 
-  return query as Promise<{ data: NotesRow[] | null; error: unknown }>
+  const { data, error } = await query
+
+  return { data: data as NotesRow[] | null, error }
 }
 
 export async function getLatestNoteForClient(clientId: string) {
   const supabase = createSupabaseServerClient()
 
-  return supabase
+  const { data, error } = await supabase
     .from('notes')
     .select('created_at')
     .eq('client_id', clientId)
     .order('created_at', { ascending: false })
     .limit(1)
-    .maybeSingle() as Promise<{ data: { created_at: string } | null; error: unknown }>
+    .maybeSingle()
+
+  return { data: data as { created_at: string } | null, error }
 }
 
 export async function createVisitorNote(input: ValidatedCreateNoteInput & { title: string }) {
   const supabase = createSupabaseServerClient()
 
-  return supabase
+  const { data, error } = await supabase
     .from('notes')
     .insert({
       title: input.title,
@@ -49,5 +53,7 @@ export async function createVisitorNote(input: ValidatedCreateNoteInput & { titl
       status: 'published' satisfies NoteStatus,
     })
     .select(NOTE_SELECT)
-    .maybeSingle() as Promise<{ data: NotesRow | null; error: unknown }>
+    .maybeSingle()
+
+  return { data: data as NotesRow | null, error }
 }

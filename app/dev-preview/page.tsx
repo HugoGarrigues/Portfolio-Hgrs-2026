@@ -1,12 +1,15 @@
-'use client'
+import type { Metadata } from 'next'
+import { DesktopPageClient } from '@/components/desktop/DesktopPageClient'
+import { buildMetadata } from '@/lib/seo'
 
-import dynamic from 'next/dynamic'
-
-const Desktop = dynamic(
-  () => import('@/components/desktop/Desktop').then((m) => ({ default: m.Desktop })),
-  { ssr: false },
-)
+export const metadata: Metadata = buildMetadata({
+  title: 'Aperçu de développement',
+  description: "Route interne de prévisualisation desktop, non destinée à l'indexation.",
+  pathname: '/dev-preview',
+  index: false,
+  follow: false,
+})
 
 export default function DevPreviewPage() {
-  return <Desktop />
+  return <DesktopPageClient />
 }

@@ -3,7 +3,6 @@
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLocale } from '@/contexts/LocaleContext'
 import { Locale } from '@/lib/i18n/locales'
-import { useTranslation } from '@/lib/i18n/useTranslation'
 
 const LOCALES: { id: Locale; label: string }[] = [
     { id: 'en', label: 'English' },
@@ -16,7 +15,6 @@ const LOCALES: { id: Locale; label: string }[] = [
 export function GeneralSettings() {
     const { clockFormat, setThemeState } = useTheme()
     const { locale, setLocale } = useLocale()
-    const { t } = useTranslation()
 
     return (
         <div className="flex flex-col gap-6 w-full">

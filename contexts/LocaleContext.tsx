@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import { type Locale, DEFAULT_LOCALE } from '@/lib/i18n/locales'
+import { readStorage, writeStorage } from '@/lib/browser-storage'
+import { isLocale } from '@/lib/i18n/is-locale'
 
 type LocaleContextType = {
   locale: Locale
@@ -13,21 +15,19 @@ const LocaleContext = createContext<LocaleContextType | null>(null)
 const STORAGE_KEY = 'hgrs-locale'
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE)
-
-  // Hydrate from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Locale | null
-    if (stored && ['fr', 'en', 'de', 'es', 'it'].includes(stored)) {
-      setLocaleState(stored)
-    }
-  }, [])
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    const stored = readStorage(STORAGE_KEY)
+    return isLocale(stored) ? stored : DEFAULT_LOCALE
+  })
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next)
-    localStorage.setItem(STORAGE_KEY, next)
-    document.documentElement.lang = next
   }, [])
+
+  useEffect(() => {
+    writeStorage(STORAGE_KEY, locale)
+    document.documentElement.lang = locale
+  }, [locale])
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>

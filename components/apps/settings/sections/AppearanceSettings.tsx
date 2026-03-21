@@ -22,7 +22,7 @@ export function AppearanceSettings() {
         <div className="flex flex-col gap-6 w-full">
             {/* Mode */}
             <div className="flex flex-col p-4 bg-black/[0.03] dark:bg-white/[0.02] border border-border-subtle rounded-xl">
-                <span className="text-[14px] font-medium text-foreground/90 mb-4 tracking-tight">Mode d'apparence</span>
+                <span className="text-[14px] font-medium text-foreground/90 mb-4 tracking-tight">{"Mode d'apparence"}</span>
                 <div className="flex gap-2 p-1 bg-black/5 dark:bg-white/[0.03] rounded-lg border border-border-subtle">
                     {(['light', 'dark', 'auto'] as AppearanceMode[]).map((mode) => (
                         <button
@@ -39,7 +39,7 @@ export function AppearanceSettings() {
 
             {/* Accent Color */}
             <div className="flex flex-col p-4 bg-black/[0.03] dark:bg-white/[0.02] border border-border-subtle rounded-xl">
-                <span className="text-[14px] font-medium text-foreground/90 mb-4 tracking-tight">Couleur d'accentuation</span>
+                <span className="text-[14px] font-medium text-foreground/90 mb-4 tracking-tight">{"Couleur d'accentuation"}</span>
                 <div className="flex flex-wrap gap-3">
                     {ACCENT_COLORS.map((c) => {
                         const isSelected = accentColor === c.id

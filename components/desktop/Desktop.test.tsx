@@ -6,20 +6,17 @@ import { LocaleProvider } from '@/contexts/LocaleContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { WallpaperProvider } from '@/contexts/WallpaperContext'
 import { AvailabilityProvider } from '@/contexts/AvailabilityContext'
+import { NotificationCenterProvider } from '@/contexts/NotificationCenterContext'
 
 // Keep all heavy deps out of jsdom
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-      ({ children, ...props }, ref) => <div ref={ref} {...props}>{children}</div>,
-    ),
-  },
-  useMotionValue: () => ({ get: () => 0, set: vi.fn() }),
-  useSpring: () => ({ get: () => 1, set: vi.fn() }),
-  useTransform: () => ({ get: () => 1 }),
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useDragControls: () => ({ start: vi.fn() }),
-}))
+vi.mock('framer-motion', async () => {
+  const { mockFramerMotion } = await import('./test-utils/mockFramerMotion')
+  return mockFramerMotion({
+    useMotionValue: () => ({ get: () => 0, set: vi.fn() }),
+    useSpring: () => ({ get: () => 1, set: vi.fn() }),
+    useTransform: () => ({ get: () => 1 }),
+  })
+})
 
 // Wallpaper is an R3F scene — always SSR-unsafe, mock it
 vi.mock('@/components/wallpaper/WallpaperScene', () => ({
@@ -28,6 +25,10 @@ vi.mock('@/components/wallpaper/WallpaperScene', () => ({
 
 vi.mock('@/components/apps/PreviewApp', () => ({
   PreviewApp: () => <div>Preview mock</div>,
+}))
+
+vi.mock('@/components/apps/NotesApp', () => ({
+  NotesApp: () => <input placeholder="Search" aria-label="Search" />,
 }))
 
 // BootScreen uses timers — mock it to avoid act() warnings in tests
@@ -50,7 +51,9 @@ function renderDesktop() {
       <LocaleProvider>
         <WallpaperProvider>
           <AvailabilityProvider>
-            <Desktop />
+            <NotificationCenterProvider>
+              <Desktop />
+            </NotificationCenterProvider>
           </AvailabilityProvider>
         </WallpaperProvider>
       </LocaleProvider>
