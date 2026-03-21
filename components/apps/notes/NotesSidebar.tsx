@@ -1,4 +1,5 @@
 import { useTranslation } from '@/lib/i18n/useTranslation'
+import { useScrollbarActivity } from '@/hooks/useScrollbarActivity'
 
 import type { NoteTag } from './types'
 
@@ -26,9 +27,10 @@ export function NotesSidebar({
   onSelectTag,
 }: NotesSidebarProps) {
   const { t } = useTranslation()
+  const scrollbarRef = useScrollbarActivity<HTMLElement>()
 
   return (
-    <aside className="notes-sidebar flex h-full w-[190px] shrink-0 flex-col overflow-y-auto rounded-2xl border border-border-subtle bg-black/5 pb-3 pt-10 shadow-xl backdrop-blur-3xl dark:bg-black/[0.04] dark:bg-white/[0.04]">
+    <aside ref={scrollbarRef} className="notes-sidebar app-scrollbar app-scrollbar-stable notes-scrollbar flex h-full w-[190px] shrink-0 flex-col overflow-y-scroll overscroll-contain rounded-2xl border border-border-subtle bg-black/5 pb-3 pt-10 shadow-xl backdrop-blur-3xl dark:bg-black/[0.04] dark:bg-white/[0.04]">
       <div className="mb-4">
         <p className="mb-2 px-5 text-[10px] font-medium tracking-wide text-foreground/34 select-none">
           {t('notes.sidebarAccount')}

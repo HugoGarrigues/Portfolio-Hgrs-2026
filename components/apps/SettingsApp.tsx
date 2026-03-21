@@ -5,6 +5,7 @@ import { useWindow } from '@/components/desktop/Window'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useTranslation } from '@/lib/i18n/useTranslation'
+import { useScrollbarActivity } from '@/hooks/useScrollbarActivity'
 
 import { GeneralSettings } from './settings/sections/GeneralSettings'
 import { AppearanceSettings } from './settings/sections/AppearanceSettings'
@@ -92,6 +93,8 @@ export function SettingsApp() {
     const { dragControls } = useWindow()
     const { reduceMotion } = useTheme()
     const { t } = useTranslation()
+    const sidebarScrollbarRef = useScrollbarActivity<HTMLElement>()
+    const contentScrollbarRef = useScrollbarActivity<HTMLElement>()
     const [history, setHistory] = useState<SectionId[]>(['appearance'])
     const [historyIdx, setHistoryIdx] = useState(0)
 
@@ -128,8 +131,9 @@ export function SettingsApp() {
         <div className="h-full flex p-2 gap-2 overflow-hidden text-foreground font-sans bg-background">
             {/* ── Sidebar ── */}
             <aside
+                ref={sidebarScrollbarRef}
                 onPointerDown={onDragStart}
-                className="w-[190px] shrink-0 flex flex-col pt-10 pb-3 overflow-y-auto bg-black/5 dark:bg-black/[0.04] dark:bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-border-subtle shadow-xl cursor-grab active:cursor-grabbing"
+                className="app-scrollbar w-[190px] shrink-0 flex flex-col pt-10 pb-3 overflow-y-auto overscroll-contain bg-black/5 dark:bg-black/[0.04] dark:bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-border-subtle shadow-xl cursor-grab active:cursor-grabbing"
             >
                 {SIDEBAR_SECTIONS.map((section, idx) => (
                     <div key={idx} className="mb-4 pointer-events-none">
@@ -189,7 +193,7 @@ export function SettingsApp() {
                 </nav>
 
                 {/* Content Area */}
-                <main className="flex-1 overflow-y-auto p-4 sm:p-8 cursor-default flex flex-col items-center">
+                <main ref={contentScrollbarRef} className="app-scrollbar flex-1 overflow-y-auto overscroll-contain p-4 sm:p-8 cursor-default flex flex-col items-center">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}

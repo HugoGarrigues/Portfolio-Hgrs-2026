@@ -1,5 +1,6 @@
 import { formatNotesDetailDate } from '@/lib/notes/date-format'
 import { useTranslation } from '@/lib/i18n/useTranslation'
+import { useScrollbarActivity } from '@/hooks/useScrollbarActivity'
 import type { Note } from './types'
 
 type NotesDetailPaneProps = {
@@ -9,6 +10,7 @@ type NotesDetailPaneProps = {
 
 export function NotesDetailPane({ note, error = '' }: NotesDetailPaneProps) {
   const { t, locale } = useTranslation()
+  const scrollbarRef = useScrollbarActivity<HTMLDivElement>()
 
   if (!note && error) {
     return (
@@ -55,7 +57,7 @@ export function NotesDetailPane({ note, error = '' }: NotesDetailPaneProps) {
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-10 pb-6 pt-8">
+      <div ref={scrollbarRef} className="app-scrollbar app-scrollbar-stable notes-scrollbar flex-1 overflow-y-scroll overscroll-contain px-10 pb-6 pt-8">
         <div className="max-w-3xl whitespace-pre-wrap text-[13px] leading-relaxed text-foreground/80">
           {note.content}
         </div>

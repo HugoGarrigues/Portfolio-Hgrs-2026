@@ -1,5 +1,6 @@
 import { formatNotesEditorTimestamp } from '@/lib/notes/date-format'
 import { useTranslation } from '@/lib/i18n/useTranslation'
+import { useScrollbarActivity } from '@/hooks/useScrollbarActivity'
 import { NotesEditorFooter } from './NotesEditorFooter'
 
 type NotesDraftPaneProps = {
@@ -26,6 +27,7 @@ export function NotesDraftPane({
   onCancel,
 }: NotesDraftPaneProps) {
   const { t, locale } = useTranslation()
+  const scrollbarRef = useScrollbarActivity<HTMLDivElement>()
   const canPublish = content.trim().length > 0
   const canSubmit = canPublish && displayName.trim().length > 0
 
@@ -42,7 +44,7 @@ export function NotesDraftPane({
 
       <div className="h-8 shrink-0" aria-hidden="true" />
 
-      <div className="flex-1 overflow-y-auto px-10 pb-5">
+      <div ref={scrollbarRef} className="app-scrollbar app-scrollbar-stable notes-scrollbar flex-1 overflow-y-scroll overscroll-contain px-10 pb-5">
         <textarea
           aria-label={t('notes.draftHeading')}
           value={content}

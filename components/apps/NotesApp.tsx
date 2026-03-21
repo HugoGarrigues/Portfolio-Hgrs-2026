@@ -359,7 +359,7 @@ export function NotesApp() {
   }
 
   return (
-    <div className="h-full flex p-2 gap-2 overflow-hidden text-foreground font-sans bg-background">
+    <div className="h-full min-h-0 flex p-2 gap-2 overflow-hidden text-foreground font-sans bg-background">
       <div
         onPointerDown={(event) => dragControls.start(event)}
         className="cursor-grab active:cursor-grabbing flex shrink-0"
@@ -386,7 +386,7 @@ export function NotesApp() {
         />
       </div>
 
-      <div className="relative flex-1 flex flex-col bg-black/[0.02] dark:bg-black/[0.03] dark:bg-white/[0.02] rounded-2xl border border-border-subtle overflow-hidden">
+      <div className="notes-main-island relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-black/[0.02] dark:bg-black/[0.03] dark:bg-white/[0.02]">
         <div
           onPointerDown={(event) => dragControls.start(event)}
           className="cursor-grab active:cursor-grabbing"
@@ -405,7 +405,7 @@ export function NotesApp() {
           />
         </div>
 
-        <div className="notes-split-pane flex flex-1 flex-row overflow-hidden">
+        <div className="notes-split-pane flex min-h-0 flex-1 flex-row overflow-hidden">
           <section className="flex min-h-0 min-w-[320px] basis-[44%] flex-col border-r border-border-subtle">
             {loading ? (
               <div className="flex flex-1 items-center justify-center px-8 text-[13px] text-foreground/35">

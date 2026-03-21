@@ -34,3 +34,36 @@ body {
   color: var(--foreground);
   font-family: var(--font-sf);
 }
+
+.app-scrollbar-stable,
+.notes-scrollbar {
+  scrollbar-gutter: stable;
+}
+
+.app-scrollbar::-webkit-scrollbar,
+.notes-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.app-scrollbar::-webkit-scrollbar-track,
+.notes-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb,
+.notes-scrollbar::-webkit-scrollbar-thumb {
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+  background-color: transparent;
+}
+
+.app-scrollbar.app-scrollbar-active::-webkit-scrollbar-thumb,
+.notes-scrollbar.app-scrollbar-active::-webkit-scrollbar-thumb {
+  background-color: rgba(127, 127, 127, 0.34);
+}
+
+.app-scrollbar.app-scrollbar-active::-webkit-scrollbar-thumb:hover,
+.notes-scrollbar.app-scrollbar-active::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(127, 127, 127, 0.48);
+}

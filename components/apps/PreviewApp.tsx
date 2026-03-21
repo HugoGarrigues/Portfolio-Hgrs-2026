@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useWindow } from '@/components/desktop/Window'
 import { useTranslation } from '@/lib/i18n/useTranslation'
+import { useScrollbarActivity } from '@/hooks/useScrollbarActivity'
 import * as pdfjsLib from 'pdfjs-dist'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
@@ -67,6 +68,7 @@ function PdfPage({ page }: { page: pdfjsLib.PDFPageProxy }) {
 export function PreviewApp() {
   const { dragControls } = useWindow()
   const { t } = useTranslation()
+  const scrollbarRef = useScrollbarActivity<HTMLDivElement>()
   const onDragStart = (e: React.PointerEvent) => dragControls.start(e)
 
   const [pages, setPages] = useState<pdfjsLib.PDFPageProxy[]>([])
@@ -133,7 +135,7 @@ export function PreviewApp() {
         </nav>
 
         {/* ── Content ── */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={scrollbarRef} className="app-scrollbar flex-1 overflow-y-scroll overscroll-contain">
           {error ? (
             <div className="h-full flex flex-col items-center justify-center gap-4 text-foreground/40 text-sm px-8 text-center">
               <Ico d={ICONS.warn} className="w-6 h-6 text-red-400/60" />

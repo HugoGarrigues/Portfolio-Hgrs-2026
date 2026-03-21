@@ -6,6 +6,7 @@ import { APPS } from '@/lib/apps'
 import { useWindow } from '@/components/desktop/Window'
 import { useTranslation } from '@/lib/i18n/useTranslation'
 import { getProjects, getProjectsByCategory, type Project, type ProjectStatus } from '@/lib/projects'
+import { useScrollbarActivity } from '@/hooks/useScrollbarActivity'
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -140,6 +141,8 @@ export function FinderApp() {
   const { openWindow, recentApps } = useWindowManager()
   const { dragControls } = useWindow()
   const { t } = useTranslation()
+  const sidebarScrollbarRef = useScrollbarActivity<HTMLElement>()
+  const contentScrollbarRef = useScrollbarActivity<HTMLElement>()
 
   const [active, setActive] = useState<SectionId>('applications')
   const [selected, setSelected] = useState<string | null>(null)
@@ -198,8 +201,9 @@ export function FinderApp() {
 
       {/* ── Sidebar ── */}
       <aside
+        ref={sidebarScrollbarRef}
         onPointerDown={onDragStart}
-        className="w-[190px] shrink-0 flex flex-col pt-10 pb-3 overflow-y-auto bg-black/5 dark:bg-black/[0.04] dark:bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-border-subtle shadow-xl cursor-grab active:cursor-grabbing"
+        className="app-scrollbar w-[190px] shrink-0 flex flex-col pt-10 pb-3 overflow-y-auto overscroll-contain bg-black/5 dark:bg-black/[0.04] dark:bg-white/[0.04] backdrop-blur-3xl rounded-2xl border border-border-subtle shadow-xl cursor-grab active:cursor-grabbing"
       >
         {SIDEBAR_SECTIONS.map((section, idx) => (
           <div key={idx} className="mb-4 pointer-events-none">
@@ -259,7 +263,8 @@ export function FinderApp() {
 
         {/* Content */}
         <main
-          className="flex-1 overflow-y-auto cursor-default"
+          ref={contentScrollbarRef}
+          className="app-scrollbar flex-1 overflow-y-auto overscroll-contain cursor-default"
           onClick={() => setSelected(null)}
         >
           {isProjectSection(active) ? (

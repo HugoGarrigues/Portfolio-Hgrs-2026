@@ -171,14 +171,30 @@ describe('NotesApp', () => {
 
   it('switches the reading pane when a tile is selected', async () => {
     const user = userEvent.setup()
-    renderNotesApp()
+    const { container } = renderNotesApp()
 
     await user.click(screen.getByRole('button', { name: 'My notes' }))
     await user.click(screen.getByRole('button', { name: /Open note Older note/i }))
     const detailPane = await screen.findByLabelText('Note detail')
+    const sidebar = container.querySelector('.notes-sidebar')
+    const listPane = screen.getByLabelText('Notes gallery')
+    const detailScrollArea = detailPane.querySelector('.notes-scrollbar')
+    const mainIsland = container.querySelector('.notes-main-island')
+    const splitPane = container.querySelector('.notes-split-pane')
 
     expect(within(detailPane).getByText('Something thoughtful')).toBeInTheDocument()
     expect(within(detailPane).getByText('Linus')).toBeInTheDocument()
+    expect(sidebar?.className).toContain('notes-scrollbar')
+    expect(sidebar?.className).toContain('overscroll-contain')
+    expect(sidebar?.className).toContain('overflow-y-scroll')
+    expect(listPane.className).toContain('notes-scrollbar')
+    expect(listPane.className).toContain('overscroll-contain')
+    expect(listPane.className).toContain('overflow-y-scroll')
+    expect(detailScrollArea?.className).toContain('notes-scrollbar')
+    expect(detailScrollArea?.className).toContain('overscroll-contain')
+    expect(detailScrollArea?.className).toContain('overflow-y-scroll')
+    expect(mainIsland?.className).toContain('min-h-0')
+    expect(splitPane?.className).toContain('min-h-0')
   })
 
   it('filters notes by clicking sidebar tags', async () => {
