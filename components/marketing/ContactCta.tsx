@@ -1,7 +1,11 @@
 import Link from 'next/link'
 import { siteConfig } from '@/lib/site'
 
-export function ContactCta() {
+type ContactCtaProps = {
+  showDesktopCta?: boolean
+}
+
+export function ContactCta({ showDesktopCta = true }: ContactCtaProps) {
   return (
     <section className="rounded-[2rem] border border-slate-200 bg-slate-950 px-6 py-8 text-white shadow-[0_30px_90px_rgba(15,23,42,0.18)] sm:px-8 sm:py-10">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -22,12 +26,14 @@ export function ContactCta() {
           >
             Aller à la page contact
           </Link>
-          <Link
-            href="/desktop"
-            className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-          >
-            Lancer l’expérience desktop
-          </Link>
+          {showDesktopCta ? (
+            <Link
+              href="/desktop"
+              className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+            >
+              Lancer l’expérience desktop
+            </Link>
+          ) : null}
         </div>
       </div>
     </section>
