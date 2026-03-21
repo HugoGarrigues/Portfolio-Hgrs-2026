@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import { useWindow } from '@/components/desktop/Window'
 import { useTranslation } from '@/lib/i18n/useTranslation'
+import { useScrollbarActivity } from '@/hooks/useScrollbarActivity'
 
 // ─── About This Mac — portfolio style ──────────────────────────────────────
 
 export function AboutApp() {
   const { dragControls } = useWindow()
   const { t } = useTranslation()
+  const scrollbarRef = useScrollbarActivity<HTMLDivElement>()
   const [imgError, setImgError] = useState(false)
 
   return (
@@ -24,7 +26,7 @@ export function AboutApp() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center px-8 pt-8 pb-6 overflow-y-auto">
+      <div ref={scrollbarRef} className="app-scrollbar flex-1 flex flex-col items-center overflow-y-scroll overscroll-contain px-8 pt-8 pb-6">
 
         {/* Profile picture */}
         <div className="w-28 h-28 rounded-full overflow-hidden shadow-2xl shadow-black/30 ring-2 ring-white/10 mb-6 shrink-0">

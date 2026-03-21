@@ -147,7 +147,10 @@ describe('NotesApp', () => {
     expect(screen.getByRole('button', { name: 'My notes' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Visitor notes' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Recently Deleted' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Filter by tag Guestbook' })).toBeInTheDocument()
+    expect(await screen.findByText('Tags')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Filter by tag Projects' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Filter by tag Skills' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Filter by tag Guestbook' })).not.toBeInTheDocument()
     expect(createButton.className).toContain('border')
     expect(createButton.className).toContain('rounded-full')
     expect(viewToggle.className).toContain('border')
@@ -168,14 +171,30 @@ describe('NotesApp', () => {
 
   it('switches the reading pane when a tile is selected', async () => {
     const user = userEvent.setup()
-    renderNotesApp()
+    const { container } = renderNotesApp()
 
     await user.click(screen.getByRole('button', { name: 'My notes' }))
     await user.click(screen.getByRole('button', { name: /Open note Older note/i }))
     const detailPane = await screen.findByLabelText('Note detail')
+    const sidebar = container.querySelector('.notes-sidebar')
+    const listPane = screen.getByLabelText('Notes gallery')
+    const detailScrollArea = detailPane.querySelector('.notes-scrollbar')
+    const mainIsland = container.querySelector('.notes-main-island')
+    const splitPane = container.querySelector('.notes-split-pane')
 
     expect(within(detailPane).getByText('Something thoughtful')).toBeInTheDocument()
     expect(within(detailPane).getByText('Linus')).toBeInTheDocument()
+    expect(sidebar?.className).toContain('notes-scrollbar')
+    expect(sidebar?.className).toContain('overscroll-contain')
+    expect(sidebar?.className).toContain('overflow-y-scroll')
+    expect(listPane.className).toContain('notes-scrollbar')
+    expect(listPane.className).toContain('overscroll-contain')
+    expect(listPane.className).toContain('overflow-y-scroll')
+    expect(detailScrollArea?.className).toContain('notes-scrollbar')
+    expect(detailScrollArea?.className).toContain('overscroll-contain')
+    expect(detailScrollArea?.className).toContain('overflow-y-scroll')
+    expect(mainIsland?.className).toContain('min-h-0')
+    expect(splitPane?.className).toContain('min-h-0')
   })
 
   it('filters notes by clicking sidebar tags', async () => {
@@ -201,6 +220,29 @@ describe('NotesApp', () => {
     expect(within(resetGallery).getByText('TypeScript and product thinking')).toBeInTheDocument()
   })
 
+  it('shows owner tags across sections and routes tag clicks back to My notes', async () => {
+    const user = userEvent.setup()
+    renderNotesApp()
+
+    expect(await screen.findByText('Tags')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'All tags' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Filter by tag Projects' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Filter by tag Skills' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Filter by tag Guestbook' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Recently Deleted' }))
+
+    expect(await screen.findByText('Tags')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Recently Deleted' })).toHaveClass('font-semibold')
+
+    await user.click(screen.getByRole('button', { name: 'Filter by tag Projects' }))
+
+    const filteredGallery = await screen.findByLabelText('Notes gallery')
+    expect(screen.getByRole('button', { name: 'My notes' })).toHaveClass('font-semibold')
+    expect(within(filteredGallery).getByText('Something thoughtful')).toBeInTheDocument()
+    expect(within(filteredGallery).queryByText('TypeScript and product thinking')).not.toBeInTheDocument()
+  })
+
   it('clears the active tag when switching note sections', async () => {
     const user = userEvent.setup()
     renderNotesApp()
@@ -220,14 +262,63 @@ describe('NotesApp', () => {
   })
 
   it('shows a filtered empty state when the active tag has no results', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (typeof input === 'string' && input.startsWith('/api/notes') && (!init || init.method === 'GET')) {
+          const url = new URL(input, 'http://localhost')
+          const section = url.searchParams.get('section')
+          const tag = url.searchParams.get('tag')
+
+          if (section === 'owner' && tag === 'projects') {
+            return new Response(JSON.stringify({ notes: [], cooldown: { nextAllowedAt: null } }))
+          }
+
+          if (section === 'owner') {
+            return new Response(
+              JSON.stringify({
+                notes: [
+                  {
+                    id: 'note-1',
+                    title: 'Older note',
+                    content: 'Something thoughtful',
+                    author_name: 'Linus',
+                    source: 'owner',
+                    status: 'published',
+                    created_at: '2026-03-16T09:00:00.000Z',
+                    tags: [{ id: 'tag-projects', slug: 'projects', label: 'Projects' }],
+                  },
+                  {
+                    id: 'note-4',
+                    title: 'Skill note',
+                    content: 'TypeScript and product thinking',
+                    author_name: 'Linus',
+                    source: 'owner',
+                    status: 'published',
+                    created_at: '2026-03-15T09:00:00.000Z',
+                    tags: [{ id: 'tag-skills', slug: 'skills', label: 'Skills' }],
+                  },
+                ],
+                cooldown: { nextAllowedAt: null },
+              }),
+            )
+          }
+
+          return new Response(JSON.stringify({ notes: [], cooldown: { nextAllowedAt: null } }))
+        }
+
+        throw new Error(`Unhandled request: ${String(input)}`)
+      }),
+    )
+
     const user = userEvent.setup()
     renderNotesApp()
 
     await user.click(screen.getByRole('button', { name: 'My notes' }))
     await screen.findByLabelText('Notes gallery')
-    await user.click(screen.getByRole('button', { name: 'Filter by tag Guestbook' }))
+    await user.click(screen.getByRole('button', { name: 'Filter by tag Projects' }))
 
-    expect(await screen.findByText('No notes for Guestbook')).toBeInTheDocument()
+    expect(await screen.findByText('No notes for Projects')).toBeInTheDocument()
     expect(screen.getByText('Try another tag or switch note sections.')).toBeInTheDocument()
   })
 

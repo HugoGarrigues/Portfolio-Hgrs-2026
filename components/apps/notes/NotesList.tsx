@@ -1,4 +1,5 @@
 import { useTranslation } from '@/lib/i18n/useTranslation'
+import { useScrollbarActivity } from '@/hooks/useScrollbarActivity'
 import { NoteCard } from './NoteCard'
 import type { Note, NotesViewMode } from './types'
 
@@ -13,6 +14,7 @@ type NotesListProps = {
 
 export function NotesList({ notes, selectedNoteId, onSelectNote, viewMode, activeSection, activeTagLabel = null }: NotesListProps) {
   const { t } = useTranslation()
+  const scrollbarRef = useScrollbarActivity<HTMLDivElement>()
 
   if (notes.length === 0) {
     const emptyTitle =
@@ -45,7 +47,7 @@ export function NotesList({ notes, selectedNoteId, onSelectNote, viewMode, activ
   const ariaLabel = viewMode === 'gallery' ? 'Notes gallery' : 'Notes list'
 
   return (
-    <div aria-label={ariaLabel} className="flex-1 overflow-y-auto px-6 py-6">
+    <div ref={scrollbarRef} aria-label={ariaLabel} className="app-scrollbar app-scrollbar-stable notes-scrollbar flex-1 overflow-y-scroll overscroll-contain px-6 py-6">
       <h3 className="px-1 text-[10px] font-bold text-foreground/30 uppercase tracking-widest">
         {t('notes.galleryHeading')}
       </h3>
