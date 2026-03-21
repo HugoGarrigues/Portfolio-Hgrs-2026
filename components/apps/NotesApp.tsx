@@ -101,6 +101,53 @@ export function NotesApp() {
     }
   }, [activeSection, activeTagSlug, locale, t])
 
+  useEffect(() => {
+    let cancelled = false
+
+    async function preloadOwnerNotes() {
+      if (activeSection === 'owner') {
+        return
+      }
+
+      try {
+        const clientId = getNotesClientId()
+        const searchParams = new URLSearchParams({
+          clientId,
+          section: 'owner',
+          locale,
+        })
+
+        const response = await fetch(`/api/notes?${searchParams.toString()}`)
+        const payload = (await response.json()) as NotesResponse
+
+        if (cancelled) {
+          return
+        }
+
+        const mappedNotes = payload.notes.map(mapNoteRecord)
+        setNoteCache((current) => {
+          const nextCache = { ...current }
+          for (const note of mappedNotes) {
+            nextCache[note.id] = note
+          }
+          return nextCache
+        })
+        setSectionCounts((current) => ({
+          ...current,
+          owner: mappedNotes.length,
+        }))
+      } catch {
+        // Tags are a convenience layer here, so we preload owner notes silently.
+      }
+    }
+
+    void preloadOwnerNotes()
+
+    return () => {
+      cancelled = true
+    }
+  }, [activeSection, locale])
+
   const filteredNotes = useMemo(() => {
     const normalizedQuery = deferredQuery.trim().toLowerCase()
     if (!normalizedQuery) {
@@ -137,6 +184,9 @@ export function NotesApp() {
   const visibleTags = useMemo(() => {
     const seen = new Map<string, NoteTag>()
     for (const note of Object.values(noteCache)) {
+      if (note.source !== 'owner' || note.status !== 'published') {
+        continue
+      }
       for (const tag of note.tags) {
         if (!seen.has(tag.slug)) {
           seen.set(tag.slug, tag)
@@ -146,6 +196,7 @@ export function NotesApp() {
     return [...seen.values()]
   }, [noteCache])
   const activeTagLabel = visibleTags.find((tag) => tag.slug === activeTagSlug)?.label ?? activeTagSlug
+  const showTags = visibleTags.length > 0
 
   function handleCreateNote() {
     setDraft({ content: '', displayName: '', publishMode: false, createdAt: new Date().toISOString() })
@@ -318,6 +369,7 @@ export function NotesApp() {
           visitorCount={visitorCount}
           trashedCount={trashedCount}
           tags={visibleTags}
+          showTags={showTags}
           activeTagSlug={activeTagSlug}
           activeSection={activeSection}
           onSelectSection={(section) => {
@@ -326,6 +378,8 @@ export function NotesApp() {
             setSelectedNoteId(null)
           }}
           onSelectTag={(tagSlug) => {
+            setDraft(null)
+            setActiveSection('owner')
             setActiveTagSlug(tagSlug)
             setSelectedNoteId(null)
           }}

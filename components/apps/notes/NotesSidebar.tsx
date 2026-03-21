@@ -7,6 +7,7 @@ type NotesSidebarProps = {
   visitorCount: number
   trashedCount: number
   tags: NoteTag[]
+  showTags: boolean
   activeTagSlug: string | null
   activeSection: 'owner' | 'visitor' | 'trashed'
   onSelectSection: (section: 'owner' | 'visitor' | 'trashed') => void
@@ -18,6 +19,7 @@ export function NotesSidebar({
   visitorCount,
   trashedCount,
   tags,
+  showTags,
   activeTagSlug,
   activeSection,
   onSelectSection,
@@ -91,42 +93,44 @@ export function NotesSidebar({
         </div>
       </div>
 
-      <div className="mb-4">
-        <p className="mb-2 px-5 text-[10px] font-bold uppercase tracking-widest text-foreground/30 select-none">
-          {t('notes.sidebarTags')}
-        </p>
-        <div className="flex flex-col gap-0.5">
-          <button
-            type="button"
-            onClick={() => onSelectTag(null)}
-            aria-label={t('notes.allTags')}
-            className={`w-[calc(100%-16px)] mx-2 flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] transition-all ${
-              activeTagSlug === null
-                ? 'bg-black/5 font-semibold text-[var(--accent-color)] dark:bg-black/10 dark:bg-white/10'
-                : 'text-foreground/60 hover:bg-black/[0.05] hover:text-foreground dark:hover:bg-white/[0.08]'
-            }`}
-          >
-            <span className="text-foreground/40">#</span>
-            <span className="truncate">{t('notes.allTags')}</span>
-          </button>
-          {tags.map((tag) => (
+      {showTags ? (
+        <div className="mb-4">
+          <p className="mb-2 px-5 text-[10px] font-bold uppercase tracking-widest text-foreground/30 select-none">
+            {t('notes.sidebarTags')}
+          </p>
+          <div className="flex flex-col gap-0.5">
             <button
-              key={tag.id}
               type="button"
-              onClick={() => onSelectTag(tag.slug)}
-              aria-label={`Filter by tag ${tag.label}`}
+              onClick={() => onSelectTag(null)}
+              aria-label={t('notes.allTags')}
               className={`w-[calc(100%-16px)] mx-2 flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] transition-all ${
-                activeTagSlug === tag.slug
+                activeTagSlug === null
                   ? 'bg-black/5 font-semibold text-[var(--accent-color)] dark:bg-black/10 dark:bg-white/10'
                   : 'text-foreground/60 hover:bg-black/[0.05] hover:text-foreground dark:hover:bg-white/[0.08]'
               }`}
             >
               <span className="text-foreground/40">#</span>
-              <span className="truncate">{tag.label}</span>
+              <span className="truncate">{t('notes.allTags')}</span>
             </button>
-          ))}
+            {tags.map((tag) => (
+              <button
+                key={tag.id}
+                type="button"
+                onClick={() => onSelectTag(tag.slug)}
+                aria-label={`Filter by tag ${tag.label}`}
+                className={`w-[calc(100%-16px)] mx-2 flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] transition-all ${
+                  activeTagSlug === tag.slug
+                    ? 'bg-black/5 font-semibold text-[var(--accent-color)] dark:bg-black/10 dark:bg-white/10'
+                    : 'text-foreground/60 hover:bg-black/[0.05] hover:text-foreground dark:hover:bg-white/[0.08]'
+                }`}
+              >
+                <span className="text-foreground/40">#</span>
+                <span className="truncate">{tag.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
     </aside>
   )
 }
