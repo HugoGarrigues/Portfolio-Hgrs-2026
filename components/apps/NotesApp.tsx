@@ -5,6 +5,7 @@ import { useWindow } from '@/components/desktop/Window'
 import { useNotifications } from '@/hooks/useNotifications'
 import { getNotesClientId } from '@/lib/notes/client-id'
 import { useTranslation } from '@/lib/i18n/useTranslation'
+import { localizeNoteTag } from '@/lib/notes/tag-labels'
 import { NotesDetailPane } from './notes/NotesDetailPane'
 import { NotesDraftPane } from './notes/NotesDraftPane'
 import { NotesList } from './notes/NotesList'
@@ -193,10 +194,20 @@ export function NotesApp() {
         }
       }
     }
-    return [...seen.values()]
-  }, [noteCache])
+    return [...seen.values()].map((tag) => localizeNoteTag(tag, t))
+  }, [noteCache, t])
   const activeTagLabel = visibleTags.find((tag) => tag.slug === activeTagSlug)?.label ?? activeTagSlug
   const showTags = visibleTags.length > 0
+  const localizedSelectedNote = useMemo(() => {
+    if (!selectedNote) {
+      return null
+    }
+
+    return {
+      ...selectedNote,
+      tags: selectedNote.tags.map((tag) => localizeNoteTag(tag, t)),
+    }
+  }, [selectedNote, t])
 
   function handleCreateNote() {
     setDraft({ content: '', displayName: '', publishMode: false, createdAt: new Date().toISOString() })
@@ -355,7 +366,7 @@ export function NotesApp() {
       return null
     }
 
-    return <NotesDetailPane note={selectedNote} error={error} />
+    return <NotesDetailPane note={localizedSelectedNote} error={error} />
   }
 
   return (

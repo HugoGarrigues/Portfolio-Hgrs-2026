@@ -382,6 +382,7 @@ describe('NotesApp', () => {
 
     const visitorGallery = await screen.findByLabelText('Notes gallery')
     expect(within(visitorGallery).getByText('A fresh entry for the guestbook')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Filter by tag À propos' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Mes notes' }))
     const ownerGallery = await screen.findByLabelText('Notes gallery')
@@ -390,6 +391,7 @@ describe('NotesApp', () => {
     const detailPane = await screen.findByLabelText('Note detail')
     expect(within(ownerGallery).getByText('Note owner en français')).toBeInTheDocument()
     expect(within(detailPane).getByText('Note owner en français')).toBeInTheDocument()
+    expect(within(detailPane).getByText('À propos')).toBeInTheDocument()
   })
 
   it('navigates between opened notes with toolbar back and forward buttons', async () => {
