@@ -1,23 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import React from 'react'
 import { Window } from './Window'
 
 // Framer Motion's drag requires PointerEvent APIs; jsdom doesn't ship them.
 // We mock the module so `motion.div` renders as a plain div in tests.
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-      ({ children, ...props }, ref) => (
-        <div ref={ref} {...props}>
-          {children}
-        </div>
-      ),
-    ),
-  },
-  useDragControls: () => ({ start: vi.fn() }),
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}))
+vi.mock('framer-motion', async () => {
+  const { mockFramerMotion } = await import('./test-utils/mockFramerMotion')
+  return mockFramerMotion()
+})
 
 const baseProps = {
   id: 'win-1',
@@ -50,10 +40,7 @@ describe('Window — rendering', () => {
 
   it('is not visible when minimized', () => {
     const { container } = render(<Window {...baseProps} minimized>content</Window>)
-    // The outer wrapper should have visibility:hidden or display:none
     const windowEl = container.firstChild as HTMLElement
-    const style = windowEl.getAttribute('style') ?? ''
-    // We check that the component communicates hidden state somehow
     expect(windowEl).toHaveAttribute('data-minimized', 'true')
   })
 

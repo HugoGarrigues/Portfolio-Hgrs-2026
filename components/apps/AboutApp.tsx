@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
 import { useWindow } from '@/components/desktop/Window'
 import { useTranslation } from '@/lib/i18n/useTranslation'
@@ -29,12 +30,14 @@ export function AboutApp() {
       <div ref={scrollbarRef} className="app-scrollbar flex-1 flex flex-col items-center overflow-y-scroll overscroll-contain px-8 pt-8 pb-6">
 
         {/* Profile picture */}
-        <div className="w-28 h-28 rounded-full overflow-hidden shadow-2xl shadow-black/30 ring-2 ring-white/10 mb-6 shrink-0">
+        <div className="relative w-28 h-28 rounded-full overflow-hidden shadow-2xl shadow-black/30 ring-2 ring-white/10 mb-6 shrink-0">
           {!imgError ? (
-            <img
+            <Image
               src="/profile_picture.avif"
               alt="Hugo Garrigues"
-              className="w-full h-full object-cover"
+              fill
+              sizes="112px"
+              className="object-cover"
               onError={() => setImgError(true)}
               draggable={false}
             />

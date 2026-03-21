@@ -1,12 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { WindowManagerProvider, useWindowManager } from '@/contexts/WindowManagerContext'
 import { Window } from '@/components/desktop/Window'
 
 function Demo() {
-  const { windows, openWindow, closeWindow, minimizeWindow, maximizeWindow, focusWindow, moveWindow } =
-    useWindowManager()
+  const { windows, openWindow, closeWindow, minimizeWindow, maximizeWindow, focusWindow } = useWindowManager()
 
   return (
     <div className="relative w-full h-screen bg-[#0d1117] overflow-hidden font-mono">

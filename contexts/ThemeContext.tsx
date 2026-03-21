@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
+import { readStorage, writeStorage } from '@/lib/browser-storage'
 
 export type AccentColor = 'blue' | 'purple' | 'pink' | 'red' | 'orange' | 'yellow' | 'green' | 'gray'
 export type AppearanceMode = 'light' | 'dark' | 'auto'
@@ -48,27 +49,24 @@ const ACCENT_COLORS: Record<AccentColor, string> = {
 const ThemeContext = createContext<ThemeContextType | null>(null)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-    const [state, setState] = useState<ThemeState>(DEFAULT_STATE)
-    const [mounted, setMounted] = useState(false)
+    const [state, setState] = useState<ThemeState>(() => {
+        const stored = readStorage(THEME_STORAGE_KEY)
 
-    // 1. Hydrate from localStorage
-    useEffect(() => {
-        const stored = localStorage.getItem(THEME_STORAGE_KEY)
-        if (stored) {
-            try {
-                const parsed = JSON.parse(stored)
-                setState((prev) => ({ ...prev, ...parsed }))
-            } catch (e) {
-                // ignore parse error
-            }
+        if (!stored) {
+            return DEFAULT_STATE
         }
-        setMounted(true)
-    }, [])
+
+        try {
+            const parsed = JSON.parse(stored) as Partial<ThemeState>
+            return { ...DEFAULT_STATE, ...parsed }
+        } catch {
+            return DEFAULT_STATE
+        }
+    })
 
     // 2. Persist changes & apply side-effects
     useEffect(() => {
-        if (!mounted) return
-        localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(state))
+        writeStorage(THEME_STORAGE_KEY, JSON.stringify(state))
 
         const root = document.documentElement
 
@@ -94,7 +92,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         } else {
             root.classList.remove('add-borders')
         }
-    }, [state, mounted])
+    }, [state])
 
     const setThemeState = useCallback((updates: Partial<ThemeState>) => {
         setState((prev) => ({ ...prev, ...updates }))

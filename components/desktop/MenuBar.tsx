@@ -28,17 +28,13 @@ export function MenuBar({ onOpenAbout }: MenuBarProps) {
   const { t } = useTranslation()
   const { clockFormat, doNotDisturb } = useTheme()
   const dateLocale = t('menubar.dateLocale')
-
-  const [dateTime, setDateTime] = useState(() => formatDateTime(new Date(), dateLocale, clockFormat === '12h'))
+  const [now, setNow] = useState(() => new Date())
+  const dateTime = formatDateTime(now, dateLocale, clockFormat === '12h')
 
   useEffect(() => {
-    // Instant update
-    setDateTime(formatDateTime(new Date(), dateLocale, clockFormat === '12h'))
-
-    // Interval 
-    const id = setInterval(() => setDateTime(formatDateTime(new Date(), dateLocale, clockFormat === '12h')), 1000)
+    const id = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(id)
-  }, [dateLocale, clockFormat])
+  }, [])
 
   return (
     <div className="fixed top-0 inset-x-0 z-[9000] h-7 flex items-center px-3 select-none">

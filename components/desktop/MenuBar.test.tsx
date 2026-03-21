@@ -1,17 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act, fireEvent } from '@testing-library/react'
-import React from 'react'
 import { MenuBar } from './MenuBar'
 import { LocaleProvider } from '@/contexts/LocaleContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-      ({ children, ...props }, ref) => <div ref={ref} {...props}>{children}</div>,
-    ),
-  },
-}))
+vi.mock('framer-motion', async () => {
+  const { mockFramerMotion } = await import('./test-utils/mockFramerMotion')
+  return mockFramerMotion()
+})
 
 function renderMenuBar(props: React.ComponentProps<typeof MenuBar> = {}) {
   return render(

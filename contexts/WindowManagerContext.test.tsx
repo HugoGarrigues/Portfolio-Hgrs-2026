@@ -160,7 +160,6 @@ describe('windowManagerReducer — MOVE', () => {
     const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
     const s2 = windowManagerReducer(s1, { type: 'OPEN', app: 'notes' })
     const finderId = s1.windows[0].id
-    const finderOriginalPosition = { ...s2.windows.find((w) => w.app === 'finder')!.position }
 
     const s3 = windowManagerReducer(s2, {
       type: 'MOVE',

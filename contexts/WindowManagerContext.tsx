@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react'
+import { readStorage, writeStorage } from '@/lib/browser-storage'
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -32,6 +33,8 @@ export type WindowManagerState = {
   windows: WindowState[]
   recentApps: RecentApp[]
 }
+
+const RECENTS_STORAGE_KEY = 'hg_recent_apps'
 
 type Action =
   | { type: 'OPEN'; app: AppId; position?: { x: number; y: number } }
@@ -170,26 +173,27 @@ type WindowManagerContextValue = {
 
 const WindowManagerContext = createContext<WindowManagerContextValue | null>(null)
 
+function getInitialWindowManagerState(): WindowManagerState {
+  const saved = readStorage(RECENTS_STORAGE_KEY)
+
+  if (!saved) {
+    return { windows: [], recentApps: [] }
+  }
+
+  try {
+    const parsed = JSON.parse(saved) as RecentApp[]
+    return { windows: [], recentApps: parsed }
+  } catch (error) {
+    console.error('Failed to load recents', error)
+    return { windows: [], recentApps: [] }
+  }
+}
+
 export function WindowManagerProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(windowManagerReducer, { windows: [], recentApps: [] })
-
-  // Persistence
-  useEffect(() => {
-    const saved = localStorage.getItem('hg_recent_apps')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        dispatch({ type: 'SET_RECENTS', recents: parsed })
-      } catch (e) {
-        console.error('Failed to load recents', e)
-      }
-    }
-  }, [])
+  const [state, dispatch] = useReducer(windowManagerReducer, undefined, getInitialWindowManagerState)
 
   useEffect(() => {
-    if (state.recentApps.length > 0) {
-      localStorage.setItem('hg_recent_apps', JSON.stringify(state.recentApps))
-    }
+    writeStorage(RECENTS_STORAGE_KEY, JSON.stringify(state.recentApps))
   }, [state.recentApps])
 
   const value: WindowManagerContextValue = {

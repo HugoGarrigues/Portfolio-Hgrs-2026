@@ -2,9 +2,15 @@
   "projects": [
     {
       "id": "portfolio-2026",
+      "slug": "portfolio-2026",
       "name": "Portfolio-2026",
       "tagline": "Expérience web immersive façon macOS",
+      "excerpt": "Un portfolio immersif inspiré de macOS qui transforme la navigation portfolio en expérience produit.",
       "description": "Mon portfolio interactif conçu comme un véritable système d'exploitation web. Développé avec Next.js, React, Tailwind CSS et Framer Motion. Il intègre un système de fenêtrage complexe, un Finder, et des applications simulées pour présenter mes compétences et projets de manière originale.",
+      "seoTitle": "Portfolio macOS interactif en Next.js",
+      "seoDescription": "Découvrez Portfolio-2026, une expérience web immersive inspirée de macOS, conçue avec Next.js, React, TypeScript, Framer Motion et Three.js.",
+      "published": true,
+      "featured": true,
       "categories": [
         "personal"
       ],
@@ -23,7 +29,43 @@
         "github": "https://github.com/HugoGarrigues/Portfolio-Hgrs-2026",
         "live": null
       },
-      "thumbnail": null,
+      "thumbnail": "/background/macos-monterey-stock-black-dark-mode-layers-5k-3840x2160-5889.jpg",
+      "coverImage": "/background/macos-monterey-stock-black-dark-mode-layers-5k-3840x2160-5889.jpg",
+      "keywords": [
+        "portfolio next.js",
+        "portfolio interactif",
+        "macOS web experience",
+        "framer motion portfolio",
+        "three.js portfolio"
+      ],
+      "results": [
+        "Interface immersive inspirée d’un desktop macOS complet",
+        "Architecture de fenêtres, Finder et apps simulées pilotées en React",
+        "Base idéale pour démontrer front-end, full-stack et product craft"
+      ],
+      "contentSections": [
+        {
+          "title": "Le défi produit",
+          "body": [
+            "Un portfolio classique montre des projets, mais il ne raconte pas toujours une posture produit. L’objectif de Portfolio-2026 était de créer une expérience qui démontre immédiatement le niveau de finition, la sensibilité design et la capacité à sortir des interfaces interchangeables.",
+            "Le risque principal était de conserver une navigation lisible et une hiérarchie claire malgré une surface d’interface volontairement atypique."
+          ]
+        },
+        {
+          "title": "L’approche technique",
+          "body": [
+            "L’interface repose sur Next.js, React et TypeScript, avec un système de fenêtrage maison, des transitions Framer Motion et des scènes visuelles chargées côté client lorsque cela fait sens pour l’expérience.",
+            "Le projet a été conçu pour séparer la couche d’expérience et la couche de contenu public, afin d’améliorer la publication SEO sans renoncer au concept initial."
+          ]
+        },
+        {
+          "title": "Ce que le projet démontre",
+          "body": [
+            "Portfolio-2026 montre une capacité à articuler UI system, narration produit, engineering frontend et contraintes réelles de performance, d’indexation et de maintenance.",
+            "Il sert aussi de terrain d’expérimentation pour des patterns d’agents, de tooling local et d’itération assistée par IA."
+          ]
+        }
+      ],
       "images": [
         "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=2072&ixlib=rb-4.0.3",
         "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=2070&ixlib=rb-4.0.3"

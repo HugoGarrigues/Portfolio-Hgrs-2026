@@ -1,7 +1,5 @@
 'use client'
 
-import { useTheme } from '@/contexts/ThemeContext'
-
 interface SettingsToggleProps {
     label: string
     description?: string
@@ -10,8 +8,6 @@ interface SettingsToggleProps {
 }
 
 export function SettingsToggle({ label, description, checked, onChange }: SettingsToggleProps) {
-    const { accentColor } = useTheme()
-
     return (
         <div className="flex items-center justify-between p-4 bg-black/[0.03] dark:bg-white/[0.02] border border-border-subtle rounded-xl hover:bg-black/5 dark:bg-white/[0.03] transition-colors min-h-[44px]">
             <div className="flex flex-col">

@@ -5,7 +5,6 @@ import { SettingsToggle } from '../SettingsToggle'
 import { SettingsSlider } from '../SettingsSlider'
 import { useWallpaper, WALLPAPERS } from '@/contexts/WallpaperContext'
 import { useTranslation } from '@/lib/i18n/useTranslation'
-import Image from 'next/image'
 
 export function DesktopSettings() {
     const { dockSize, autoHideDock, setThemeState } = useTheme()
@@ -16,7 +15,7 @@ export function DesktopSettings() {
         <div className="flex flex-col gap-6 w-full">
             {/* Wallpapers */}
             <div className="flex flex-col p-4 bg-black/[0.03] dark:bg-white/[0.02] border border-border-subtle rounded-xl">
-                <span className="text-[14px] font-medium text-foreground/90 mb-4 tracking-tight">Fonds d'écran</span>
+                <span className="text-[14px] font-medium text-foreground/90 mb-4 tracking-tight">{"Fonds d'écran"}</span>
                 <div className="grid grid-cols-3 gap-3">
                     {WALLPAPERS.map(w => (
                         <button

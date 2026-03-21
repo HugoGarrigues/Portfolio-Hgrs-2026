@@ -41,9 +41,6 @@ export async function GET(req: Request) {
   const filteredNotes = activeTag
     ? notes.filter((note) => note.tags?.some((tag) => tag.slug.toLowerCase() === activeTag))
     : notes
-  const sortedNotes = [...notes].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-  )
   const sortedFilteredNotes = [...filteredNotes].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   )
