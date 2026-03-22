@@ -68,7 +68,7 @@ function DockItem({ config, isOpen, onClick, size }: DockItemProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.15 }}
         >
-          <div className="bg-gray-900/60 backdrop-blur-sm text-foreground text-xs px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
+          <div className="bg-gray-900/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
             {config.label}
           </div>
         </motion.div>

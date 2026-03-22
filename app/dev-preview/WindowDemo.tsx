@@ -5,7 +5,7 @@ import { WindowManagerProvider, useWindowManager } from '@/contexts/WindowManage
 import { Window } from '@/components/desktop/Window'
 
 function Demo() {
-  const { windows, openWindow, closeWindow, minimizeWindow, maximizeWindow, focusWindow } = useWindowManager()
+  const { windows, openWindow, closeWindow, minimizeWindow, maximizeWindow, moveWindow, focusWindow } = useWindowManager()
 
   return (
     <div className="relative w-full h-screen bg-[#0d1117] overflow-hidden font-mono">
@@ -42,6 +42,7 @@ function Demo() {
           onMinimize={minimizeWindow}
           onMaximize={maximizeWindow}
           size={win.size}
+          onMove={moveWindow}
           onFocus={focusWindow}
         >
           <div className="p-6 text-white/70 text-sm space-y-2">

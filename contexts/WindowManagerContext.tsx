@@ -19,6 +19,11 @@ export type RecentApp = {
   openedAt: number // timestamp
 }
 
+export type WindowBounds = {
+  position: { x: number; y: number }
+  size: { width: number; height: number }
+}
+
 export type WindowState = {
   id: string
   app: AppId
@@ -27,6 +32,7 @@ export type WindowState = {
   size: { width: number; height: number }
   minimized: boolean
   maximized: boolean
+  restoreBounds?: WindowBounds
 }
 
 export type WindowManagerState = {
@@ -41,7 +47,7 @@ type Action =
   | { type: 'CLOSE'; id: string }
   | { type: 'FOCUS'; id: string }
   | { type: 'MINIMIZE'; id: string }
-  | { type: 'MAXIMIZE'; id: string }
+  | { type: 'MAXIMIZE'; id: string; viewport: { width: number; height: number } }
   | { type: 'MOVE'; id: string; position: { x: number; y: number } }
   | { type: 'SET_RECENTS'; recents: RecentApp[] }
 
@@ -70,6 +76,23 @@ function maxZIndex(windows: WindowState[]) {
 
 function generateId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+function getMaximizedSize(viewport: { width: number; height: number }) {
+  return {
+    width: Math.round(viewport.width * 0.96),
+    height: Math.round(viewport.height * 0.9),
+  }
+}
+
+function getCenteredPosition(
+  size: { width: number; height: number },
+  viewport: { width: number; height: number },
+) {
+  return {
+    x: Math.round((viewport.width - size.width) / 2),
+    y: Math.round((viewport.height - size.height) / 2),
+  }
 }
 
 // ─── Reducer ───────────────────────────────────────────────────────────────────
@@ -138,7 +161,36 @@ export function windowManagerReducer(
       return {
         ...state,
         windows: state.windows.map((w) =>
-          w.id === action.id ? { ...w, maximized: !w.maximized } : w,
+          w.id === action.id
+            ? (() => {
+              if (w.maximized && w.restoreBounds) {
+                return {
+                  ...w,
+                  maximized: false,
+                  position: w.restoreBounds.position,
+                  size: w.restoreBounds.size,
+                  restoreBounds: undefined,
+                }
+              }
+
+              if (w.maximized) {
+                return { ...w, maximized: false }
+              }
+
+              const maximizedSize = getMaximizedSize(action.viewport)
+              return {
+                ...w,
+                minimized: false,
+                maximized: true,
+                position: getCenteredPosition(maximizedSize, action.viewport),
+                size: maximizedSize,
+                restoreBounds: {
+                  position: w.position,
+                  size: w.size,
+                },
+              }
+            })()
+            : w,
         ),
       }
 
@@ -217,7 +269,12 @@ export function WindowManagerProvider({ children }: { children: ReactNode }) {
     closeWindow: (id) => dispatch({ type: 'CLOSE', id }),
     focusWindow: (id) => dispatch({ type: 'FOCUS', id }),
     minimizeWindow: (id) => dispatch({ type: 'MINIMIZE', id }),
-    maximizeWindow: (id) => dispatch({ type: 'MAXIMIZE', id }),
+    maximizeWindow: (id) =>
+      dispatch({
+        type: 'MAXIMIZE',
+        id,
+        viewport: { width: window.innerWidth, height: window.innerHeight },
+      }),
     moveWindow: (id, position) => dispatch({ type: 'MOVE', id, position }),
   }
 

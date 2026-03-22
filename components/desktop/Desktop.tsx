@@ -35,7 +35,7 @@ function AppContent({ appId }: { appId: AppId }) {
     case 'settings': return <SettingsApp />
     default:
       return (
-        <div className="h-full flex items-center justify-center text-foreground/30 text-sm">
+        <div className="h-full flex items-center justify-center text-foreground/65 dark:text-foreground/40 text-sm font-medium tracking-tight">
           {appId} — {t('desktop.comingSoon')}
         </div>
       )
@@ -45,7 +45,7 @@ function AppContent({ appId }: { appId: AppId }) {
 type Rect = { x: number; y: number; w: number; h: number }
 
 function DesktopContent() {
-  const { windows, openWindow, closeWindow, focusWindow, minimizeWindow, maximizeWindow } =
+  const { windows, openWindow, closeWindow, focusWindow, minimizeWindow, maximizeWindow, moveWindow } =
     useWindowManager()
 
   const [sel, setSel] = useState<Rect | null>(null)
@@ -128,6 +128,7 @@ function DesktopContent() {
               onClose={closeWindow}
               onMinimize={minimizeWindow}
               onMaximize={maximizeWindow}
+              onMove={moveWindow}
               onFocus={focusWindow}
             >
               <AppContent appId={win.app} />

@@ -23,6 +23,7 @@ describe('MenuBar', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-03-07T14:35:00'))
+    window.localStorage.clear()
   })
 
   afterEach(() => {
@@ -53,6 +54,29 @@ describe('MenuBar', () => {
     expect(screen.getByRole('timer')).toBeInTheDocument()
     // e.g. "Sam. 7 mars 14:35"
     expect(screen.getByRole('timer').textContent).toMatch(/\w+\.\s+\d{1,2}\s+\w+\s+\d{2}:\d{2}/)
+  })
+
+  it('renders the simple menu bar shell by default', () => {
+    const { container } = renderMenuBar()
+    const menuBar = container.firstChild as HTMLElement
+
+    expect(menuBar.className).not.toContain('backdrop-blur-xl')
+    expect(menuBar.className).not.toContain('bg-white/12')
+    expect(menuBar.className).not.toContain('dark:bg-black/22')
+  })
+
+  it('renders a full-width glassmorphism shell when enabled in theme settings', () => {
+    window.localStorage.setItem('hgrs-theme', JSON.stringify({ glassMenuBar: true }))
+
+    const { container } = renderMenuBar()
+    const menuBar = container.firstChild as HTMLElement
+
+    expect(menuBar.className).toContain('backdrop-blur-lg')
+    expect(menuBar.className).toContain('border-b')
+    expect(menuBar.className).toContain('border-black/8')
+    expect(menuBar.className).toContain('bg-white/8')
+    expect(menuBar.className).toContain('dark:border-white/8')
+    expect(menuBar.className).toContain('dark:bg-black/18')
   })
 
   it('updates the clock every second', () => {
