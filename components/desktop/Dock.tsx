@@ -6,6 +6,7 @@ import { useState } from 'react'
 import type { AppId } from '@/contexts/WindowManagerContext'
 import type { AppConfig } from '@/lib/apps'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useTranslation } from '@/lib/i18n/useTranslation'
 
 // ─── Icon paths ────────────────────────────────────────────────────────────────
 
@@ -49,6 +50,8 @@ type DockItemProps = {
 
 function DockItem({ config, isOpen, onClick, size }: DockItemProps) {
   const [showTooltip, setShowTooltip] = useState(false)
+  const { t } = useTranslation()
+  const label = config.labelKey ? t(config.labelKey) : config.label
 
   return (
     <motion.div
@@ -69,20 +72,20 @@ function DockItem({ config, isOpen, onClick, size }: DockItemProps) {
           transition={{ duration: 0.15 }}
         >
           <div className="bg-gray-900/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
-            {config.label}
+            {label}
           </div>
         </motion.div>
       )}
 
       <button
-        aria-label={config.label}
+        aria-label={label}
         onClick={onClick}
         className="relative flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent rounded-xl"
       >
         <div className="relative flex items-center justify-center">
           <Image
             src={iconSrc(config.id as AppId)}
-            alt={config.label}
+            alt={label}
             width={size}
             height={size}
             style={{ width: `${size}px`, height: `${size}px` }}
@@ -114,16 +117,19 @@ type MinimizedThumbProps = {
 }
 
 function MinimizedThumb({ win, config, onRestore, size }: MinimizedThumbProps) {
+  const { t } = useTranslation()
+  const label = config.labelKey ? t(config.labelKey) : config.label
+
   return (
     <button
-      aria-label={`Restore ${config.label}`}
+      aria-label={`Restore ${label}`}
       onClick={onRestore}
       className="relative flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-xl transition-transform hover:scale-110 active:scale-95"
     >
       <div className="relative flex items-center justify-center">
         <Image
           src={iconSrc(win.app)}
-          alt={config.label}
+          alt={label}
           width={size}
           height={size}
           style={{ width: `${size}px`, height: `${size}px` }}
@@ -145,6 +151,7 @@ function MinimizedThumb({ win, config, onRestore, size }: MinimizedThumbProps) {
 
 export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
   const { dockSize, autoHideDock } = useTheme()
+  const { t } = useTranslation()
 
   function handleIconClick(config: AppConfig) {
     const existing = openWindows.find((w) => w.app === config.id)
@@ -229,7 +236,7 @@ export function Dock({ apps, openWindows, onOpen, onFocus }: DockProps) {
                   <div className="relative flex items-center justify-center">
                     <Image
                       src={iconSrc(app.id as AppId)}
-                      alt={app.label}
+                      alt={app.labelKey ? t(app.labelKey) : app.label}
                       width={44}
                       height={44}
                       className={`w-11 h-11 rounded-xl ${['settings', 'notes', 'health', 'spotify'].includes(app.id) ? 'scale-[1.25]' : ''

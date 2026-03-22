@@ -52,4 +52,12 @@ describe('FinderApp', () => {
     expect(emptyState.className).toContain('text-foreground/55')
     expect(emptyState.className).toContain('dark:text-foreground/35')
   })
+
+  it('translates app labels in the finder when the locale is french', () => {
+    window.localStorage.setItem('hgrs-locale', 'fr')
+    renderFinderApp()
+
+    expect(screen.getByText('Santé')).toBeInTheDocument()
+    expect(screen.queryByText('Health')).not.toBeInTheDocument()
+  })
 })

@@ -287,7 +287,7 @@ export function FinderApp() {
                 <AppIcon
                   key={app.id}
                   id={app.id}
-                  name={app.label}
+                  name={app.labelKey ? t(app.labelKey) : app.label}
                   iconFile={app.iconFile}
                   selected={selected === app.id}
                   onSelect={setSelected}
@@ -306,7 +306,7 @@ export function FinderApp() {
                       <AppIcon
                         key={`${recent.id}-${i}`}
                         id={recent.id}
-                        name={app.label}
+                        name={app.labelKey ? t(app.labelKey) : app.label}
                         iconFile={app.iconFile}
                         selected={selected === recent.id}
                         onSelect={setSelected}
