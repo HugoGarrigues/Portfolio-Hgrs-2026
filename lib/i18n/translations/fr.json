@@ -1,5 +1,13 @@
 {
   "desktop.comingSoon": "bientôt disponible",
+  "app.finder": "Finder",
+  "app.contact": "Mail",
+  "app.preview": "Aperçu",
+  "app.notes": "Notes",
+  "app.health": "Santé",
+  "app.spotify": "Spotify",
+  "app.photos": "Photos",
+  "app.settings": "Réglages",
   "menubar.dateLocale": "fr-FR",
   "finder.recents": "Récents",
   "finder.favorites": "Favoris",

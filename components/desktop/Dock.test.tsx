@@ -6,11 +6,12 @@ import { Dock } from './Dock'
 import type { AppId } from '@/contexts/WindowManagerContext'
 import type { AppConfig } from '@/lib/apps'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { LocaleProvider } from '@/contexts/LocaleContext'
 
 const apps: AppConfig[] = [
-  { id: 'finder', label: 'Finder', iconFile: 'finder' },
-  { id: 'notes', label: 'Notes', iconFile: 'notes' },
-  { id: 'health', label: 'Health', iconFile: 'health' },
+  { id: 'finder', label: 'Finder', labelKey: 'app.finder', iconFile: 'finder' },
+  { id: 'notes', label: 'Notes', labelKey: 'app.notes', iconFile: 'notes' },
+  { id: 'health', label: 'Health', labelKey: 'app.health', iconFile: 'health' },
 ]
 
 
@@ -24,12 +25,19 @@ const baseProps = {
 function renderDock(props: React.ComponentProps<typeof Dock>) {
   return render(
     <ThemeProvider>
-      <Dock {...props} />
+      <LocaleProvider>
+        <Dock {...props} />
+      </LocaleProvider>
     </ThemeProvider>,
   )
 }
 
 describe('Dock — rendering', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+    window.localStorage.setItem('hgrs-locale', 'en')
+  })
+
   it('renders an icon for each app', () => {
     renderDock(baseProps)
     expect(screen.getByRole('button', { name: /finder/i })).toBeInTheDocument()
@@ -58,6 +66,11 @@ describe('Dock — rendering', () => {
 })
 
 describe('Dock — interactions', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+    window.localStorage.setItem('hgrs-locale', 'en')
+  })
+
   it('renders tooltip text in white when hovering a dock icon', async () => {
     const user = userEvent.setup()
     renderDock(baseProps)
@@ -69,6 +82,20 @@ describe('Dock — interactions', () => {
 
     const tooltip = await screen.findByText('Notes')
     expect(tooltip.className).toContain('text-white')
+  })
+
+  it('translates the hover tooltip label in french', async () => {
+    window.localStorage.setItem('hgrs-locale', 'fr')
+    const user = userEvent.setup()
+    renderDock(baseProps)
+
+    const healthItem = screen.getByRole('button', { name: /santé/i }).closest('[data-dock-item]')
+    expect(healthItem).not.toBeNull()
+
+    await user.hover(healthItem as HTMLElement)
+
+    expect(await screen.findByText('Santé')).toBeInTheDocument()
+    expect(screen.queryByText('Health')).not.toBeInTheDocument()
   })
 
   it('calls onOpen with the app id when clicking a dock icon for a closed app', () => {
