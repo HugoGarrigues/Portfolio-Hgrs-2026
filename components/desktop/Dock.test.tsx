@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { Dock } from './Dock'
 import type { AppId } from '@/contexts/WindowManagerContext'
@@ -57,6 +58,19 @@ describe('Dock — rendering', () => {
 })
 
 describe('Dock — interactions', () => {
+  it('renders tooltip text in white when hovering a dock icon', async () => {
+    const user = userEvent.setup()
+    renderDock(baseProps)
+
+    const notesItem = screen.getByRole('button', { name: /notes/i }).closest('[data-dock-item]')
+    expect(notesItem).not.toBeNull()
+
+    await user.hover(notesItem as HTMLElement)
+
+    const tooltip = await screen.findByText('Notes')
+    expect(tooltip.className).toContain('text-white')
+  })
+
   it('calls onOpen with the app id when clicking a dock icon for a closed app', () => {
     const onOpen = vi.fn()
     renderDock({ ...baseProps, onOpen })

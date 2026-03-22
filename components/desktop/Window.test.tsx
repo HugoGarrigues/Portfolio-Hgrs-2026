@@ -20,6 +20,7 @@ const baseProps = {
   onClose: vi.fn(),
   onMinimize: vi.fn(),
   onMaximize: vi.fn(),
+  onMove: vi.fn(),
   onFocus: vi.fn(),
 }
 

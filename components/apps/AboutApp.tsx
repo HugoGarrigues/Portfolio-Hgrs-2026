@@ -65,7 +65,7 @@ export function AboutApp() {
           <span>{t('about.age')}</span>
         </div>
 
-        <p className="mt-6 text-[12px] text-foreground/35 leading-relaxed text-center max-w-[280px]">
+        <p className="mt-6 text-[12px] text-foreground/55 dark:text-foreground/35 leading-relaxed text-center max-w-[280px]">
           {t('about.bio')}
         </p>
 

@@ -63,6 +63,7 @@ function renderDesktop() {
 
 describe('Desktop', () => {
   beforeEach(() => {
+    window.localStorage.clear()
     window.localStorage.setItem('hgrs-locale', 'en')
   })
 
@@ -95,5 +96,16 @@ describe('Desktop', () => {
     expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /close/i }))
     expect(screen.queryByPlaceholderText('Search')).not.toBeInTheDocument()
+  })
+
+  it('renders coming-soon placeholders with stronger contrast in light mode', () => {
+    window.localStorage.setItem('hgrs-theme', JSON.stringify({ appearance: 'light' }))
+
+    renderDesktop()
+    fireEvent.click(screen.getByRole('button', { name: /health/i }))
+
+    const placeholder = screen.getByText(/health — coming soon/i)
+    expect(placeholder.className).toContain('text-foreground/65')
+    expect(placeholder.className).toContain('dark:text-foreground/40')
   })
 })

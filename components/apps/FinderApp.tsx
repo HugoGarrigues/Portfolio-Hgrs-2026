@@ -40,7 +40,7 @@ const ICONS = {
 const STATUS_STYLE: Record<ProjectStatus, string> = {
   'Deployed': 'bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/20',
   'In Progress': 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20',
-  'Concept': 'bg-black/5 dark:bg-black/10 dark:bg-white/10 text-black/40 dark:text-foreground/35 border border-black/10 dark:border-border-subtle',
+  'Concept': 'bg-black/5 dark:bg-black/10 dark:bg-white/10 text-black/60 dark:text-foreground/35 border border-black/10 dark:border-border-subtle',
 }
 
 // ─── Sidebar data ─────────────────────────────────────────────────────────────
@@ -131,7 +131,7 @@ function AppIcon({ id, name, iconFile, selected, onSelect, onOpen }: {
           draggable={false}
         />
       </div>
-      <span className={`text-[11px] leading-tight text-center px-1.5 py-0.5 rounded-[4px] break-words w-full transition-colors ${selected ? 'bg-[var(--accent-color)] text-foreground' : 'text-foreground/90 font-medium'}`}>
+      <span className={`text-[11px] leading-tight text-center px-1.5 py-0.5 rounded-[4px] break-words w-full transition-colors ${selected ? 'bg-[var(--accent-color)] text-white' : 'text-white font-medium group-hover:bg-black/45'}`}>
         {name}
       </span>
     </div>
@@ -316,13 +316,13 @@ export function FinderApp() {
                   })}
                 </div>
               ) : (
-                <div className="h-full flex items-center justify-center text-foreground/30 text-[13px] font-medium tracking-tight uppercase">
+                <div className="h-full flex items-center justify-center text-foreground/55 dark:text-foreground/35 text-[13px] font-medium tracking-tight uppercase">
                   {t('finder.noRecentItems')}
                 </div>
               )}
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center text-foreground/30 text-[13px] font-medium tracking-tight uppercase">
+            <div className="h-full flex items-center justify-center text-foreground/55 dark:text-foreground/35 text-[13px] font-medium tracking-tight uppercase">
               {t('finder.noItems')}
             </div>
           )}
@@ -344,7 +344,7 @@ function ProjectList({ projects, selected, onSelect, onOpen }: {
 
   if (projects.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center text-foreground/30 text-[13px] font-medium tracking-tight uppercase">
+      <div className="h-full flex items-center justify-center text-foreground/55 dark:text-foreground/35 text-[13px] font-medium tracking-tight uppercase">
         {t('finder.noProjects')}
       </div>
     )

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, type ReactNode } from 'react'
-import { motion, useDragControls, DragControls } from 'framer-motion'
+import { motion, useDragControls, DragControls, type PanInfo } from 'framer-motion'
 
 // ─── Window Context ──────────────────────────────────────────────────────────
 
@@ -32,6 +32,7 @@ export type WindowProps = {
   onClose: (id: string) => void
   onMinimize: (id: string) => void
   onMaximize: (id: string) => void
+  onMove: (id: string, position: { x: number; y: number }) => void
   onFocus: (id: string) => void
 }
 
@@ -95,13 +96,17 @@ export function Window({
   onClose,
   onMinimize,
   onMaximize,
+  onMove,
   onFocus,
 }: WindowProps) {
   const dragControls = useDragControls()
 
-  const maximizedStyles: React.CSSProperties = maximized
-    ? { width: '96vw', height: '90vh' }
-    : { width: size.width, height: size.height }
+  function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
+    onMove(id, {
+      x: Math.round(position.x + info.offset.x),
+      y: Math.round(position.y + info.offset.y),
+    })
+  }
 
   return (
     <WindowContext.Provider value={{ dragControls, maximized }}>
@@ -113,8 +118,10 @@ export function Window({
         dragListener={false} // Disable default listener to avoid stealing events
         dragMomentum={false}
         dragElastic={0}
+        onDragEnd={handleDragEnd}
         initial={{ x: position.x, opacity: 0, scale: 0.65, y: position.y + 40 }}
         animate={{
+          x: position.x,
           opacity: minimized ? 0 : 1,
           scale: minimized ? 0.6 : 1,
           y: minimized ? position.y + 60 : position.y,
@@ -134,7 +141,8 @@ export function Window({
           maxWidth: '100vw',
           maxHeight: '100dvh',
           backgroundColor: '#161616',
-          ...maximizedStyles,
+          width: size.width,
+          height: size.height,
         }}
         className="flex flex-col rounded-2xl overflow-hidden shadow-2xl shadow-black/60 isolate"
       >

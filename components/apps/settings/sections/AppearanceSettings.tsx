@@ -2,6 +2,7 @@
 
 import { useTheme, AccentColor, AppearanceMode } from '@/contexts/ThemeContext'
 import { useTranslation } from '@/lib/i18n/useTranslation'
+import { SettingsToggle } from '../SettingsToggle'
 
 const ACCENT_COLORS: { id: AccentColor; color: string; labelKey: string }[] = [
     { id: 'blue', color: '#007AFF', labelKey: 'settings.accent.blue' },
@@ -15,7 +16,7 @@ const ACCENT_COLORS: { id: AccentColor; color: string; labelKey: string }[] = [
 ]
 
 export function AppearanceSettings() {
-    const { accentColor, appearance, setThemeState } = useTheme()
+    const { accentColor, appearance, glassMenuBar, setThemeState } = useTheme()
     const { t } = useTranslation()
 
     return (
@@ -62,6 +63,13 @@ export function AppearanceSettings() {
                     })}
                 </div>
             </div>
+
+            <SettingsToggle
+                label={t('settings.menubarGlass')}
+                description={t('settings.menubarGlassDescription')}
+                checked={glassMenuBar}
+                onChange={(checked) => setThemeState({ glassMenuBar: checked })}
+            />
         </div>
     )
 }

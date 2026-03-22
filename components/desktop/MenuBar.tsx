@@ -26,7 +26,7 @@ function formatDateTime(date: Date, dateLocale: string, format12h: boolean) {
 
 export function MenuBar({ onOpenAbout }: MenuBarProps) {
   const { t } = useTranslation()
-  const { clockFormat, doNotDisturb } = useTheme()
+  const { clockFormat, doNotDisturb, glassMenuBar } = useTheme()
   const dateLocale = t('menubar.dateLocale')
   const [now, setNow] = useState(() => new Date())
   const dateTime = formatDateTime(now, dateLocale, clockFormat === '12h')
@@ -37,24 +37,37 @@ export function MenuBar({ onOpenAbout }: MenuBarProps) {
   }, [])
 
   return (
-    <div className="fixed top-0 inset-x-0 z-[9000] h-7 flex items-center px-3 select-none">
-      {/* Left — Hgrs pseudo */}
-      <div className="flex items-center">
-        <button
-          onClick={onOpenAbout}
-          aria-label="Hgrs — open about"
-          className="text-white drop-shadow-md text-[13px] font-semibold transition-opacity hover:opacity-70 focus:outline-none"
-        >
-          Hgrs
-        </button>
-      </div>
+    <div
+      className={`fixed top-0 inset-x-0 z-[9000] select-none ${glassMenuBar
+        ? 'h-8 border-b border-black/8 bg-white/8 shadow-[0_6px_18px_rgba(7,12,20,0.08)] backdrop-blur-lg dark:border-white/8 dark:bg-black/18 dark:shadow-[0_8px_22px_rgba(0,0,0,0.24)]'
+        : 'h-7 flex items-center px-3'
+        }`}
+    >
+      {glassMenuBar && (
+        <>
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/30 dark:bg-white/14" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-full bg-gradient-to-b from-white/12 via-white/[0.035] to-transparent dark:from-white/[0.07] dark:via-white/[0.02] dark:to-transparent" />
+        </>
+      )}
+      <div className={`relative ${glassMenuBar ? 'flex h-full items-center px-3' : 'flex items-center w-full'}`}>
+        {/* Left — Hgrs pseudo */}
+        <div className="flex items-center">
+          <button
+            onClick={onOpenAbout}
+            aria-label="Hgrs — open about"
+            className="text-white drop-shadow-md text-[13px] font-semibold transition-opacity hover:opacity-70 focus:outline-none"
+          >
+            Hgrs
+          </button>
+        </div>
 
-      {/* Right — date + time */}
-      <div className="ml-auto flex items-center gap-3">
-        {doNotDisturb && <MoonIcon />}
-        <time role="timer" className="text-white drop-shadow-md text-[13px] font-semibold">
-          {dateTime}
-        </time>
+        {/* Right — date + time */}
+        <div className="ml-auto flex items-center gap-3">
+          {doNotDisturb && <MoonIcon />}
+          <time role="timer" className="text-white drop-shadow-md text-[13px] font-semibold">
+            {dateTime}
+          </time>
+        </div>
       </div>
     </div>
   )

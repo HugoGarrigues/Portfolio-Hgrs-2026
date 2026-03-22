@@ -129,21 +129,52 @@ describe('windowManagerReducer — MINIMIZE', () => {
 })
 
 describe('windowManagerReducer — MAXIMIZE', () => {
-  it('toggles maximized on', () => {
-    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
+  it('stores restore bounds and recenters the window when maximizing', () => {
+    const s1 = windowManagerReducer(emptyState, {
+      type: 'OPEN',
+      app: 'finder',
+      position: { x: 100, y: 80 },
+    })
     const id = s1.windows[0].id
-    const s2 = windowManagerReducer(s1, { type: 'MAXIMIZE', id })
+    const s2 = windowManagerReducer(s1, {
+      type: 'MAXIMIZE',
+      id,
+      viewport: { width: 1200, height: 800 },
+    })
 
-    expect(s2.windows.find((w) => w.id === id)!.maximized).toBe(true)
+    const win = s2.windows.find((w) => w.id === id)!
+
+    expect(win.maximized).toBe(true)
+    expect(win.restoreBounds).toEqual({
+      position: { x: 100, y: 80 },
+      size: { width: 860, height: 560 },
+    })
+    expect(win.position).toEqual({ x: 24, y: 40 })
+    expect(win.size).toEqual({ width: 1152, height: 720 })
   })
 
-  it('toggles maximized off when already maximized', () => {
-    const s1 = windowManagerReducer(emptyState, { type: 'OPEN', app: 'finder' })
+  it('restores the previous bounds when unmaximizing', () => {
+    const s1 = windowManagerReducer(emptyState, {
+      type: 'OPEN',
+      app: 'finder',
+      position: { x: 140, y: 90 },
+    })
     const id = s1.windows[0].id
-    const s2 = windowManagerReducer(s1, { type: 'MAXIMIZE', id })
-    const s3 = windowManagerReducer(s2, { type: 'MAXIMIZE', id })
+    const s2 = windowManagerReducer(s1, {
+      type: 'MAXIMIZE',
+      id,
+      viewport: { width: 1200, height: 800 },
+    })
+    const s3 = windowManagerReducer(s2, {
+      type: 'MAXIMIZE',
+      id,
+      viewport: { width: 1200, height: 800 },
+    })
 
-    expect(s3.windows.find((w) => w.id === id)!.maximized).toBe(false)
+    const win = s3.windows.find((w) => w.id === id)!
+    expect(win.maximized).toBe(false)
+    expect(win.position).toEqual({ x: 140, y: 90 })
+    expect(win.size).toEqual({ width: 860, height: 560 })
   })
 })
 
@@ -169,6 +200,31 @@ describe('windowManagerReducer — MOVE', () => {
 
     expect(s3.windows.find((w) => w.app === 'notes')!.position).toEqual(s2.windows.find((w) => w.app === 'notes')!.position)
     expect(s3.windows.find((w) => w.app === 'finder')!.position).toEqual({ x: 999, y: 999 })
+  })
+
+  it('still updates the position when the window is maximized', () => {
+    const s1 = windowManagerReducer(emptyState, {
+      type: 'OPEN',
+      app: 'finder',
+      position: { x: 120, y: 80 },
+    })
+    const id = s1.windows[0].id
+    const s2 = windowManagerReducer(s1, {
+      type: 'MAXIMIZE',
+      id,
+      viewport: { width: 1200, height: 800 },
+    })
+    const s3 = windowManagerReducer(s2, {
+      type: 'MOVE',
+      id,
+      position: { x: 90, y: 55 },
+    })
+
+    expect(s3.windows.find((w) => w.id === id)!.position).toEqual({ x: 90, y: 55 })
+    expect(s3.windows.find((w) => w.id === id)!.restoreBounds).toEqual({
+      position: { x: 120, y: 80 },
+      size: { width: 860, height: 560 },
+    })
   })
 })
 

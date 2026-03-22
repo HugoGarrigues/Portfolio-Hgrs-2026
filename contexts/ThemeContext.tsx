@@ -10,6 +10,7 @@ export type ClockFormat = '12h' | '24h'
 interface ThemeState {
     accentColor: AccentColor
     appearance: AppearanceMode
+    glassMenuBar: boolean
     reduceMotion: boolean
     addBorders: boolean
     clockFormat: ClockFormat
@@ -25,6 +26,7 @@ interface ThemeContextType extends ThemeState {
 const DEFAULT_STATE: ThemeState = {
     accentColor: 'blue',
     appearance: 'dark',
+    glassMenuBar: false,
     reduceMotion: false,
     addBorders: false,
     clockFormat: '24h',
