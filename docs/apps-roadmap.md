@@ -55,14 +55,14 @@
 ---
 
 ### 6. Notes — Sticky Notes
-**Status:** To build
+**Status:** Done
 **Priority:** MEDIUM
 
 | Field | Value |
 |---|---|
-| Window size | 400 × 500 |
-| Content | Yellow notepad-style interface. Acts as a guestbook / message board for visitors to leave public notes. |
-| Interactions | Type messages, save to database, view messages left by other visitors. |
+| Window size | 940 × 620 |
+| Content | Apple Notes-inspired editorial library and guestbook with sidebar sections, note gallery, reading pane, and publish flow. |
+| Interactions | Browse owner and visitor notes, search locally, filter by tags, open a detail pane, and publish a guestbook note through the Notes API. |
 
 ---
 
@@ -72,9 +72,9 @@
 
 | Field | Value |
 |---|---|
-| Window size | 760 × 540 |
-| Content | Dashboard displaying daily bodybuilding stats, integrated with an OpenClaw agent. |
-| Interactions | View lean bulk progress, PRs, and daily workout insights synced from agent. |
+| Window size | 720 × 520 |
+| Content | Next planned app. Apple Health-inspired summary dashboard for bodybuilding metrics, adapted to the portfolio desktop with a profile header, sidebar, and pinned card grid. |
+| Interactions | Read-only mock-data dashboard for weight trend, calories/macros, workouts, sleep, activity, and lean-bulk progress. Live agent sync is deferred to a later phase. |
 
 ---
 
@@ -136,7 +136,7 @@
 | HIGH | Mail | ✅ Done |
 | HIGH | Preview (CV) | ✅ Done |
 | HIGH | Projects (in Finder) | ✅ Done |
-| MEDIUM | Notes | ⏳ To build |
+| MEDIUM | Notes | ✅ Done |
 | MEDIUM | Health | ⏳ To build |
 | MEDIUM | Spotify | ⏳ To build |
 | MEDIUM | Photos | ⏳ To build |

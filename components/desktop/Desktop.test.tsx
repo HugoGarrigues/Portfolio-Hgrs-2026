@@ -104,8 +104,7 @@ describe('Desktop', () => {
     renderDesktop()
     fireEvent.click(screen.getByRole('button', { name: /health/i }))
 
-    const placeholder = screen.getByText(/health — coming soon/i)
-    expect(placeholder.className).toContain('text-foreground/65')
-    expect(placeholder.className).toContain('dark:text-foreground/40')
+    expect(screen.getByRole('heading', { name: 'Danny' })).toBeInTheDocument()
+    expect(screen.getByText('Weight trend')).toBeInTheDocument()
   })
 })

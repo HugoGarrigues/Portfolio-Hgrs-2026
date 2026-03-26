@@ -17,6 +17,7 @@ import { MailApp } from '@/components/apps/MailApp'
 import { NotesApp } from '@/components/apps/NotesApp'
 import { PreviewApp } from '@/components/apps/PreviewApp'
 import { SettingsApp } from '@/components/apps/SettingsApp'
+import { HealthApp } from '@/components/apps/HealthApp'
 import { useTranslation } from '@/lib/i18n/useTranslation'
 
 const WallpaperScene = dynamic(() => import('@/components/wallpaper/WallpaperScene'), {
@@ -31,6 +32,7 @@ function AppContent({ appId }: { appId: AppId }) {
     case 'finder': return <FinderApp />
     case 'contact': return <MailApp />
     case 'notes': return <NotesApp />
+    case 'health': return <HealthApp />
     case 'preview': return <PreviewApp />
     case 'settings': return <SettingsApp />
     default:
