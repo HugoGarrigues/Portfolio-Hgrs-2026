@@ -6,8 +6,10 @@ export type HealthMetricCardData = {
   id: string
   titleKey: string
   value: string
-  detail: string
+  valueKey?: string
+  detailKey: string
   delta?: string
+  deltaKey?: string
   tone: HealthMetricTone
 }
 
