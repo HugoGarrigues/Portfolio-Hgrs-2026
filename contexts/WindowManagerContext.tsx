@@ -61,7 +61,7 @@ const DEFAULT_SIZES: Partial<Record<AppId, { width: number; height: number }>> =
   preview: { width: 680, height: 860 },
   settings: { width: 640, height: 480 },
   notes: { width: 940, height: 620 },
-  health: { width: 720, height: 520 },
+  health: { width: 760, height: 540 },
   spotify: { width: 560, height: 480 },
   photos: { width: 860, height: 600 },
 }

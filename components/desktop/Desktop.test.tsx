@@ -31,6 +31,10 @@ vi.mock('@/components/apps/NotesApp', () => ({
   NotesApp: () => <input placeholder="Search" aria-label="Search" />,
 }))
 
+vi.mock('@/components/apps/HealthApp', () => ({
+  HealthApp: () => <div>Health mock</div>,
+}))
+
 // BootScreen uses timers — mock it to avoid act() warnings in tests
 vi.mock('@/components/desktop/BootScreen', () => ({
   BootScreen: ({ onComplete }: { onComplete: () => void }) => {
@@ -98,13 +102,21 @@ describe('Desktop', () => {
     expect(screen.queryByPlaceholderText('Search')).not.toBeInTheDocument()
   })
 
+  it('opens Health as a real app window instead of the default placeholder', () => {
+    renderDesktop()
+    fireEvent.click(screen.getByRole('button', { name: /health/i }))
+
+    expect(screen.getByText('Health mock')).toBeInTheDocument()
+    expect(screen.queryByText(/health — coming soon/i)).not.toBeInTheDocument()
+  })
+
   it('renders coming-soon placeholders with stronger contrast in light mode', () => {
     window.localStorage.setItem('hgrs-theme', JSON.stringify({ appearance: 'light' }))
 
     renderDesktop()
-    fireEvent.click(screen.getByRole('button', { name: /health/i }))
+    fireEvent.click(screen.getByRole('button', { name: /spotify/i }))
 
-    const placeholder = screen.getByText(/health — coming soon/i)
+    const placeholder = screen.getByText(/spotify — coming soon/i)
     expect(placeholder.className).toContain('text-foreground/65')
     expect(placeholder.className).toContain('dark:text-foreground/40')
   })
