@@ -61,9 +61,9 @@ export function Hero() {
           </Link>
           <Link
             href={siteConfig.hero.tertiaryCta.href}
-            className="inline-flex items-center justify-center rounded-full border border-transparent px-5 py-3 text-sm font-semibold text-cyan-200 transition hover:text-cyan-100"
+            className="inline-flex items-center justify-center rounded-full border border-cyan-400/30 bg-cyan-400/10 px-5 py-3 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-400/20 hover:text-white"
           >
-            {siteConfig.hero.tertiaryCta.label}
+            💻 {siteConfig.hero.tertiaryCta.label}
           </Link>
         </div>
       </div>
