@@ -5,7 +5,9 @@ export const siteConfig = {
   title: 'Développeur full-stack et agentic engineer à Aix-en-Provence',
   description:
     "Portfolio de Hugo Garrigues, développeur full-stack spécialisé en Next.js, TypeScript et expériences web immersives. Découvrez ses projets, son approche produit et son expérience desktop inspirée de macOS.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://hgrs.studio-saas.com',
+  url:
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://hgrs.studio-saas.com'),
   locale: 'fr',
   email: 'garrigues.hug@gmail.com',
   github: 'https://github.com/HugoGarrigues',
